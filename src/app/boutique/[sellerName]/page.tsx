@@ -128,12 +128,12 @@ export default function SellerShopPage() {
         </div>
 
         {/* Shop Info Card */}
-        <div className="p-6 sm:p-8 relative bg-white">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="px-6 pb-6 sm:px-8 sm:pb-8 pt-0 relative bg-white">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-1">
             {/* Left: Avatar & Shop Identity */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-              {/* Avatar protruding neatly over cover */}
-              <div className="relative shrink-0 -mt-16 sm:-mt-20">
+            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-5">
+              {/* Avatar protruding neatly over cover banner */}
+              <div className="relative shrink-0 -mt-12 sm:-mt-16">
                 <img
                   src={avatarUrl}
                   alt={shopName}
@@ -144,10 +144,10 @@ export default function SellerShopPage() {
                 </span>
               </div>
 
-              {/* Title & Metadata */}
-              <div className="flex flex-col gap-2">
+              {/* Title & Metadata anchored cleanly on white background */}
+              <div className="flex flex-col gap-1.5 pt-3 sm:pt-0 sm:pb-1">
                 <div className="flex items-center flex-wrap gap-2.5">
-                  <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[#573721]">
+                  <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[#573721] leading-tight">
                     {shopName}
                   </h1>
                   {isVerified && (
@@ -177,12 +177,12 @@ export default function SellerShopPage() {
             </div>
 
             {/* Right: Action Buttons (WhatsApp, Appeler, Messagerie) */}
-            <div className="flex flex-wrap items-center gap-2.5 pt-2 lg:pt-0">
+            <div className="flex flex-wrap items-center gap-2.5 sm:pb-1">
               <a
                 href={`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent(`Bonjour ${shopName}, j'ai vu votre vitrine sur NovaSen !`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-10 px-4 rounded-[10px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all cursor-pointer"
+                className="h-10 px-4 rounded-[10px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all cursor-pointer shrink-0"
               >
                 <span>💬 WhatsApp direct</span>
                 <span className="text-[11px] opacity-85">({whatsapp})</span>
@@ -190,7 +190,7 @@ export default function SellerShopPage() {
 
               <a
                 href={`tel:${phone.replace(/\s+/g, '')}`}
-                className="h-10 px-4 rounded-[10px] bg-[#1C3049] hover:bg-[#13223A] text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all cursor-pointer"
+                className="h-10 px-4 rounded-[10px] bg-[#1C3049] hover:bg-[#13223A] text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all cursor-pointer shrink-0"
               >
                 <IconPhone className="w-4 h-4 text-[#C9A882]" />
                 <span>Appeler</span>
@@ -199,7 +199,7 @@ export default function SellerShopPage() {
               <button
                 type="button"
                 onClick={() => setChatOpen(true)}
-                className="h-10 px-4 rounded-[10px] bg-[#FAF8F5] hover:bg-[#E8DBC8] text-[#573721] border border-[#DDCDB6] font-bold text-xs flex items-center gap-2 transition-all cursor-pointer"
+                className="h-10 px-4 rounded-[10px] bg-[#FAF8F5] hover:bg-[#E8DBC8] text-[#573721] border border-[#DDCDB6] font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shrink-0"
               >
                 <span>💬 Messagerie interne</span>
               </button>

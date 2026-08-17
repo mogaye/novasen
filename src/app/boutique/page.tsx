@@ -106,9 +106,9 @@ export default function MyBoutiquePage() {
         </div>
 
         {/* Shop Info Card */}
-        <div className="bg-white p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-t border-[#DDCDB6]">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <div className="relative shrink-0 -mt-14 sm:-mt-20">
+        <div className="bg-white px-6 pb-6 sm:px-8 sm:pb-8 pt-0 flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-t border-[#DDCDB6]">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end gap-5">
+            <div className="relative shrink-0 -mt-12 sm:-mt-16">
               <img
                 src={sellerProfile.avatarUrl || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80'}
                 alt="Logo Boutique"
@@ -119,9 +119,9 @@ export default function MyBoutiquePage() {
               </span>
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 pt-3 sm:pt-0 sm:pb-1">
               <div className="flex items-center flex-wrap gap-2">
-                <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[#573721]">
+                <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[#573721] leading-tight">
                   {sellerProfile.shopName || 'Ma Boutique NovaSen'}
                 </h1>
                 <span className="px-2.5 py-0.5 rounded-[4px] bg-[#E8DBC8] text-[#573721] text-xs font-bold uppercase tracking-wider flex items-center gap-1 border border-[#DDCDB6]">
@@ -135,7 +135,7 @@ export default function MyBoutiquePage() {
             </div>
           </div>
 
-          <div className="flex items-center flex-wrap gap-3 pt-2 lg:pt-0">
+          <div className="flex items-center flex-wrap gap-3 sm:pb-1">
             <Link
               href={`/boutique/${encodeURIComponent(sellerProfile.shopName || 'ma-boutique')}`}
               target="_blank"
