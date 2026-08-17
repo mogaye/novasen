@@ -89,9 +89,9 @@ function TransportContent() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-8 animate-page-reveal">
       {/* Page Title & Service Tab switcher */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#DDCDB6]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#DDCDB6] animate-stagger-1">
         <div>
           <span className="text-xs font-bold uppercase tracking-widest text-[#1C3049]">
             Logistique & Déplacements • Tout le Sénégal

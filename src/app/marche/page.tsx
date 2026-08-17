@@ -135,9 +135,9 @@ function MarketContent() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-8 animate-page-reveal">
       {/* Page Title & Search Bar */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#DDCDB6]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#DDCDB6] animate-stagger-1">
         <div>
           <span className="text-xs font-bold uppercase tracking-widest text-[#7A5133]">
             Place de Marché du Sénégal
@@ -193,7 +193,7 @@ function MarketContent() {
       </div>
 
       {/* Horizontal Category Scroll Bar (All Devices) */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none select-none">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none select-none animate-stagger-2">
         <button
           type="button"
           onClick={() => {

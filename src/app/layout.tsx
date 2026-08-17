@@ -1,3 +1,4 @@
+import React, { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { Archivo, Public_Sans } from 'next/font/google';
 import './globals.css';
@@ -7,6 +8,7 @@ import { AuthGate } from '@/components/AuthGate';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { LiveChatWidget } from '@/components/LiveChatWidget';
+import { OnboardingController } from '@/components/OnboardingController';
 
 const archivo = Archivo({
   subsets: ['latin'],
@@ -43,6 +45,9 @@ export default function RootLayout({
               <main className="flex-1">{children}</main>
               <Footer />
               <LiveChatWidget />
+              <Suspense fallback={null}>
+                <OnboardingController />
+              </Suspense>
             </AppProvider>
           </AuthGate>
         </AuthProvider>
