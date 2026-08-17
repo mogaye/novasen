@@ -40,6 +40,10 @@ export function Header() {
 
   const isMarket = activeService === 'market';
 
+  if (pathname === '/connexion') {
+    return null;
+  }
+
   return (
     <header
       className={`sticky top-0 z-40 bg-[#F2E9DC]/95 backdrop-blur-md border-b border-[#DDCDB6] transition-all duration-300 ${

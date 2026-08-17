@@ -17,7 +17,7 @@ function calculatePasswordStrength(pass: string): { score: number; label: string
   if (score <= 1) return { score: 25, label: 'Faible', color: 'bg-red-500' };
   if (score === 2) return { score: 50, label: 'Moyen', color: 'bg-amber-500' };
   if (score === 3) return { score: 75, label: 'Fort', color: 'bg-emerald-500' };
-  return { score: 100, label: 'Très sécurisé 🔒', color: 'bg-emerald-600' };
+  return { score: 100, label: 'Très sécurisé', color: 'bg-emerald-600' };
 }
 
 function ConnexionContent() {
@@ -56,8 +56,8 @@ function ConnexionContent() {
   // Si déjà connecté
   if (user) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-[#FAF7F2]">
-        <div className="max-w-md w-full bg-white rounded-3xl border border-[#DDCDB6] p-8 text-center shadow-xl">
+      <div className="min-h-screen w-full flex items-center justify-center px-4 bg-[#F8F6F0]">
+        <div className="max-w-md w-full bg-white rounded-3xl border border-[#E8DBC8] p-8 text-center shadow-xl">
           <div className="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
             ✓
           </div>
@@ -152,50 +152,51 @@ function ConnexionContent() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-[#FAF8F5]">
+    <div className="min-h-screen w-full flex bg-white font-sans">
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* VOLET GAUCHE : FORMULAIRE ÉPURÉ (INSPIRATION STYLE) */}
+      {/* VOLET GAUCHE (50%) : FORMULAIRE ÉPURÉ INSPIRÉ DE FILLIANTA */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="w-full lg:w-[48%] xl:w-[45%] flex flex-col justify-between p-6 sm:p-10 lg:p-14 xl:p-16 bg-white z-10">
-        <div>
-          {/* Logo NovaSen */}
-          <div className="flex items-center justify-between mb-8">
-            <Link href="/" className="inline-flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#7A5133] to-[#573721] text-white flex items-center justify-center font-black text-xl shadow-md group-hover:scale-105 transition-transform">
-                N
-              </div>
-              <div>
-                <span className="text-2xl font-black text-[#573721] tracking-tight font-heading">
-                  Nova<span className="text-[#7A5133]">Sen</span>
-                </span>
-                <span className="block text-[10px] uppercase font-bold tracking-widest text-[#7A6A5C]">
-                  Sénégal
-                </span>
-              </div>
-            </Link>
+      <div className="w-full lg:w-1/2 min-h-screen flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-16 xl:px-24 py-8 sm:py-12 bg-white z-10">
+        {/* Top bar avec Logo / Bouton retour */}
+        <div className="flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-11 h-11 rounded-2xl bg-[#7A5133] text-white flex items-center justify-center font-black text-xl shadow-md group-hover:scale-105 transition-transform">
+              N
+            </div>
+            <div>
+              <span className="text-2xl font-black text-[#573721] tracking-tight font-heading">
+                Nova<span className="text-[#7A5133]">Sen</span>
+              </span>
+              <span className="block text-[10px] uppercase font-bold tracking-widest text-[#7A6A5C]">
+                Sénégal
+              </span>
+            </div>
+          </Link>
 
-            <Link
-              href="/"
-              className="text-xs text-[#7A6A5C] hover:text-[#573721] font-medium flex items-center gap-1 transition"
-            >
-              <span>← Retour au site</span>
-            </Link>
-          </div>
+          <Link
+            href="/"
+            className="text-xs font-semibold text-[#7A6A5C] hover:text-[#573721] transition"
+          >
+            ← Accueil
+          </Link>
+        </div>
 
+        {/* Corps central du formulaire */}
+        <div className="my-auto py-8 max-w-md w-full mx-auto">
           {/* Titre & Sous-titre */}
           <div className="mb-6">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#2A211A] tracking-tight font-heading">
-              {mode === 'signin' ? 'Bon retour parmi nous' : 'Commencez dès maintenant'}
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#1C1917] tracking-tight font-heading">
+              {mode === 'signin' ? 'Bon retour' : 'Créer un compte'}
             </h1>
-            <p className="text-xs sm:text-sm text-[#7A6A5C] mt-2">
+            <p className="text-sm text-[#78716C] mt-2">
               {mode === 'signin'
-                ? 'Saisissez vos identifiants pour accéder à votre espace.'
-                : 'Rejoignez des milliers de vendeurs, acheteurs et transporteurs au Sénégal.'}
+                ? 'Bienvenue sur NovaSen - Connectez-vous à votre espace'
+                : 'Rejoignez la plateforme n°1 d’achats, ventes et transport au Sénégal'}
             </p>
           </div>
 
-          {/* Mode Switcher Pills */}
-          <div className="flex bg-[#F4EDE2] p-1 rounded-xl border border-[#E8DBC8] mb-6">
+          {/* Toggle minimaliste Se connecter / S'inscrire */}
+          <div className="flex bg-[#F5F2EB] p-1 rounded-xl border border-[#E7E2D6] mb-6">
             <button
               type="button"
               onClick={() => {
@@ -203,10 +204,10 @@ function ConnexionContent() {
                 setErrorMsg(null);
                 setSuccessMsg(null);
               }}
-              className={`flex-1 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition-all cursor-pointer ${
+              className={`flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all cursor-pointer ${
                 mode === 'signin'
                   ? 'bg-white text-[#573721] shadow-xs'
-                  : 'text-[#7A6A5C] hover:text-[#2A211A]'
+                  : 'text-[#78716C] hover:text-[#1C1917]'
               }`}
             >
               Se connecter
@@ -218,52 +219,52 @@ function ConnexionContent() {
                 setErrorMsg(null);
                 setSuccessMsg(null);
               }}
-              className={`flex-1 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition-all cursor-pointer ${
+              className={`flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all cursor-pointer ${
                 mode === 'signup'
                   ? 'bg-white text-[#573721] shadow-xs'
-                  : 'text-[#7A6A5C] hover:text-[#2A211A]'
+                  : 'text-[#78716C] hover:text-[#1C1917]'
               }`}
             >
-              Créer un compte
+              S&apos;inscrire
             </button>
           </div>
 
-          {/* Alert Messages */}
+          {/* Alertes d'état */}
           {errorMsg && (
-            <div className="mb-5 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm rounded-xl flex items-start gap-2.5 animate-fadeIn">
+            <div className="mb-5 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm rounded-xl flex items-start gap-2.5">
               <span className="font-bold text-base leading-none">⚠️</span>
               <span>{errorMsg}</span>
             </div>
           )}
           {successMsg && (
-            <div className="mb-5 p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm rounded-xl flex items-start gap-2.5 animate-fadeIn">
+            <div className="mb-5 p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm rounded-xl flex items-start gap-2.5">
               <span className="font-bold text-base leading-none">✓</span>
               <span>{successMsg}</span>
             </div>
           )}
 
-          {/* Formulaire */}
+          {/* Formulaire Inputs */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Nom complet à l'inscription */}
             {mode === 'signup' && (
               <div>
-                <label className="block text-xs font-bold text-[#573721] mb-1.5">
-                  Nom complet (Prénom & Nom)
+                <label className="block text-xs font-bold text-[#44403C] mb-1.5">
+                  Nom complet
                 </label>
                 <input
                   type="text"
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Ex: Cheikh Ndiaye"
-                  className="w-full px-4 py-3 bg-[#FAF8F5] border border-[#DDCDB6] rounded-xl text-sm text-[#2A211A] placeholder-gray-400 focus:bg-white focus:outline-none focus:border-[#7A5133] focus:ring-2 focus:ring-[#7A5133]/15 transition"
+                  placeholder="Cheikh Ndiaye"
+                  className="w-full px-4 py-3 bg-[#FAF8F5] border border-[#E7E2D6] rounded-xl text-sm text-[#1C1917] placeholder-stone-400 focus:bg-white focus:outline-none focus:border-[#7A5133] focus:ring-2 focus:ring-[#7A5133]/15 transition"
                 />
               </div>
             )}
 
             {/* Email ou Téléphone */}
             <div>
-              <label className="block text-xs font-bold text-[#573721] mb-1.5">
+              <label className="block text-xs font-bold text-[#44403C] mb-1.5">
                 Numéro de téléphone ou Email
               </label>
               <input
@@ -271,21 +272,21 @@ function ConnexionContent() {
                 required
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="Ex: 77 000 12 34 ou contact@exemple.sn"
-                className="w-full px-4 py-3 bg-[#FAF8F5] border border-[#DDCDB6] rounded-xl text-sm text-[#2A211A] placeholder-gray-400 focus:bg-white focus:outline-none focus:border-[#7A5133] focus:ring-2 focus:ring-[#7A5133]/15 transition"
+                placeholder="77 000 12 34 ou contact@novasen.sn"
+                className="w-full px-4 py-3 bg-[#FAF8F5] border border-[#E7E2D6] rounded-xl text-sm text-[#1C1917] placeholder-stone-400 focus:bg-white focus:outline-none focus:border-[#7A5133] focus:ring-2 focus:ring-[#7A5133]/15 transition"
               />
             </div>
 
             {/* Mot de passe */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-bold text-[#573721]">
+                <label className="block text-xs font-bold text-[#44403C]">
                   Mot de passe
                 </label>
                 {mode === 'signin' && (
                   <button
                     type="button"
-                    onClick={() => alert("Pour réinitialiser votre mot de passe, contactez le support NovaSen via WhatsApp ou par email.")}
+                    onClick={() => alert("Pour réinitialiser votre mot de passe, contactez l'assistance NovaSen via WhatsApp ou par email.")}
                     className="text-xs text-[#7A5133] hover:underline font-semibold cursor-pointer"
                   >
                     Mot de passe oublié ?
@@ -299,37 +300,37 @@ function ConnexionContent() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 bg-[#FAF8F5] border border-[#DDCDB6] rounded-xl text-sm text-[#2A211A] placeholder-gray-400 focus:bg-white focus:outline-none focus:border-[#7A5133] focus:ring-2 focus:ring-[#7A5133]/15 pr-14 transition"
+                  className="w-full px-4 py-3 bg-[#FAF8F5] border border-[#E7E2D6] rounded-xl text-sm text-[#1C1917] placeholder-stone-400 focus:bg-white focus:outline-none focus:border-[#7A5133] focus:ring-2 focus:ring-[#7A5133]/15 pr-14 transition"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#7A6A5C] hover:text-[#2A211A] cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#78716C] hover:text-[#1C1917] cursor-pointer"
                 >
                   {showPassword ? 'Masquer' : 'Voir'}
                 </button>
               </div>
 
-              {/* Jauge de mot de passe à l'inscription */}
+              {/* Force du mot de passe à l'inscription */}
               {mode === 'signup' && password && (
                 <div className="mt-2">
-                  <div className="flex justify-between items-center text-[10px] font-bold text-[#7A6A5C] mb-1">
-                    <span>Force du mot de passe :</span>
-                    <span className="text-[#573721]">{passwordStrength.label}</span>
-                  </div>
-                  <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden">
                     <div
                       className={`h-full transition-all duration-300 ${passwordStrength.color}`}
                       style={{ width: `${passwordStrength.score}%` }}
                     />
                   </div>
+                  <div className="flex justify-between items-center text-[10px] text-[#78716C] mt-1">
+                    <span>Sécurité</span>
+                    <span className="font-semibold">{passwordStrength.label}</span>
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Conditions si Inscription */}
+            {/* Conditions d'utilisation à l'inscription */}
             {mode === 'signup' && (
-              <label className="flex items-start gap-2.5 text-xs text-[#7A6A5C] cursor-pointer pt-1">
+              <label className="flex items-start gap-2.5 text-xs text-[#78716C] cursor-pointer pt-1">
                 <input
                   type="checkbox"
                   checked={agreeTerms}
@@ -338,7 +339,7 @@ function ConnexionContent() {
                   className="mt-0.5 rounded border-[#DDCDB6] text-[#7A5133] focus:ring-[#7A5133]"
                 />
                 <span>
-                  J&apos;accepte les <Link href="/contact" className="text-[#7A5133] font-bold hover:underline">Conditions Générales</Link> de NovaSen.
+                  J&apos;accepte les <Link href="/contact" className="text-[#7A5133] font-bold hover:underline">Conditions d&apos;utilisation</Link> de NovaSen.
                 </span>
               </label>
             )}
@@ -352,7 +353,7 @@ function ConnexionContent() {
               {loading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Vérification...</span>
+                  <span>Traitement...</span>
                 </>
               ) : mode === 'signin' ? (
                 'Se connecter'
@@ -362,11 +363,11 @@ function ConnexionContent() {
             </button>
           </form>
 
-          {/* Lien bascule bas de formulaire */}
-          <div className="mt-6 text-center text-xs text-[#7A6A5C]">
+          {/* Lien pour basculer en bas */}
+          <div className="mt-6 text-center text-xs text-[#78716C]">
             {mode === 'signin' ? (
               <p>
-                Vous n&apos;avez pas de compte ?{' '}
+                Vous n&apos;avez pas encore de compte ?{' '}
                 <button
                   type="button"
                   onClick={() => {
@@ -375,7 +376,7 @@ function ConnexionContent() {
                   }}
                   className="font-bold text-[#7A5133] hover:underline cursor-pointer"
                 >
-                  S&apos;inscrire gratuitement
+                  S&apos;inscrire
                 </button>
               </p>
             ) : (
@@ -396,135 +397,99 @@ function ConnexionContent() {
           </div>
         </div>
 
-        {/* Footer Sécurité & Badges */}
-        <div className="pt-6 mt-8 border-t border-[#EFE5D6] flex items-center justify-between text-[11px] text-[#7A6A5C]">
+        {/* Footer bas */}
+        <div className="pt-4 border-t border-stone-100 flex items-center justify-between text-[11px] text-[#A8A29E]">
           <div className="flex items-center gap-1.5">
             <IconShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span>Sécurité SSL 256-bit</span>
+            <span>Sécurité vérifiée SSL</span>
           </div>
           <span>NovaSen Sénégal 🇸🇳</span>
         </div>
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* VOLET DROIT : MOCKUP DASHBOARD DYNAMIQUE (INSPIRATION 2 STYLE) */}
+      {/* VOLET DROIT (50%) : VITRINE HAUT DE GAMME (INSPIRATION 2 & 3) */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="hidden lg:flex lg:w-[52%] xl:w-[55%] relative overflow-hidden bg-gradient-to-br from-[#1C3049] via-[#142336] to-[#0A121C] text-white flex-col justify-between p-10 xl:p-14">
+      <div className="hidden lg:flex lg:w-1/2 min-h-screen relative overflow-hidden bg-gradient-to-br from-[#112338] via-[#162D4A] to-[#0A1726] text-white flex-col justify-between p-12 xl:p-16">
         {/* Glow ambient background effects */}
-        <div className="absolute top-[-10%] right-[-10%] w-[450px] h-[450px] rounded-full bg-[#7A5133]/25 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] rounded-full bg-[#204060]/30 blur-[130px] pointer-events-none" />
+        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[#7A5133]/25 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[450px] h-[450px] rounded-full bg-[#1C3049]/40 blur-[130px] pointer-events-none" />
 
         {/* Top Tag & Status */}
         <div className="relative z-10 flex items-center justify-between">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-semibold text-white/90">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-semibold text-white/90">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Écosystème National Sénégalais</span>
+            <span>14 Régions du Sénégal connectées</span>
           </div>
-          <span className="text-xs text-white/60">14 Régions connectées</span>
+          <span className="text-xs text-white/60">Teranga • Sécurité</span>
         </div>
 
-        {/* Hero Copy & Mockup Container */}
+        {/* Hero Editorial Heading */}
         <div className="relative z-10 my-auto py-6">
-          <h2 className="text-2xl xl:text-3xl 2xl:text-4xl font-black font-heading leading-tight tracking-tight text-white mb-3 max-w-lg">
-            La solution la plus simple pour votre commerce et transport au Sénégal.
+          <h2 className="text-3xl xl:text-4xl 2xl:text-5xl font-black font-heading leading-tight tracking-tight text-white mb-4 max-w-lg">
+            Entrez dans le futur du commerce et de la mobilité, aujourd&apos;hui.
           </h2>
-          <p className="text-white/70 text-xs xl:text-sm leading-relaxed max-w-md mb-6">
-            Gérez vos annonces de vente, suivez vos livraisons express et réservez vos trajets en direct.
+          <p className="text-white/70 text-xs xl:text-sm leading-relaxed max-w-md mb-8">
+            Achetez, vendez et réservez vos transports partout au Sénégal sur une plateforme unifiée et sécurisée.
           </p>
 
-          {/* DASHBOARD MOCKUP (Exact Inspiration 2 Style) */}
-          <div className="relative max-w-lg w-full">
-            {/* Main Mockup Card */}
-            <div className="bg-white rounded-2xl shadow-2xl p-5 text-gray-900 border border-gray-100">
-              {/* Mockup Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-400" />
-                  <div className="w-3 h-3 rounded-full bg-amber-400" />
-                  <div className="w-3 h-3 rounded-full bg-emerald-400" />
-                  <span className="text-[11px] font-bold text-gray-500 ml-2">Aperçu NovaSen Pro</span>
+          {/* MOCKUP FLOTTANT (Inspiration 3 / 2 style) */}
+          <div className="relative max-w-md w-full">
+            {/* Carte Blanche Principale */}
+            <div className="bg-white rounded-2xl shadow-2xl p-6 text-gray-900 border border-white/20">
+              <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#7A5133] text-white flex items-center justify-center font-bold text-sm shadow-md">
+                    N
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-extrabold text-gray-900">Solde & Transactions</h3>
+                    <p className="text-[10px] text-gray-400">Compte NovaSen certifié</p>
+                  </div>
                 </div>
                 <span className="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-full">
-                  En direct • 100% Actif
+                  Actif ✓
                 </span>
               </div>
 
-              {/* Stat Widgets Row */}
-              <div className="grid grid-cols-2 gap-3 my-3.5">
-                <div className="bg-[#FAF7F2] p-3 rounded-xl border border-[#EFE5D6]">
-                  <span className="text-[10px] text-gray-500 font-semibold block">Ventes & Commandes</span>
-                  <div className="flex items-baseline gap-1.5 mt-1">
-                    <span className="text-base font-extrabold text-[#573721]">845 000 F</span>
-                    <span className="text-[10px] text-emerald-600 font-bold">+24%</span>
-                  </div>
-                </div>
-
-                <div className="bg-[#FAF7F2] p-3 rounded-xl border border-[#EFE5D6]">
-                  <span className="text-[10px] text-gray-500 font-semibold block">Courses & Trajets</span>
-                  <div className="flex items-baseline gap-1.5 mt-1">
-                    <span className="text-base font-extrabold text-[#1C3049]">18 Trajets</span>
-                    <span className="text-[10px] text-emerald-600 font-bold">5.0 ⭐</span>
-                  </div>
+              {/* Solde */}
+              <div className="my-4">
+                <span className="text-[11px] text-gray-400 font-medium">Solde disponible</span>
+                <div className="text-2xl font-black text-gray-900 mt-0.5">
+                  1 245 000 <span className="text-sm font-bold text-[#7A5133]">FCFA</span>
                 </div>
               </div>
 
-              {/* Mini Activity Table */}
-              <div className="space-y-2">
-                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                  Dernières Activités
+              {/* Mini Cartes de Services */}
+              <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-gray-100">
+                <div className="p-2.5 bg-gray-50 rounded-xl">
+                  <span className="text-[10px] text-gray-400 block font-semibold">Marché & Ventes</span>
+                  <span className="text-xs font-bold text-emerald-600">+ 850 000 FCFA</span>
                 </div>
-
-                {/* Item 1 */}
-                <div className="flex items-center justify-between p-2 rounded-lg bg-gray-50 hover:bg-gray-100/80 transition text-xs">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-[#7A5133]/15 text-[#7A5133] flex items-center justify-center font-bold text-xs">
-                      🛍️
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-800 text-[11px]">iPhone 15 Pro Max • Dakar</p>
-                      <p className="text-[9px] text-gray-400">Acheteur : Moussa Sow</p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
-                    Payé Wave ✓
-                  </span>
-                </div>
-
-                {/* Item 2 */}
-                <div className="flex items-center justify-between p-2 rounded-lg bg-gray-50 hover:bg-gray-100/80 transition text-xs">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-[#1C3049]/15 text-[#1C3049] flex items-center justify-center font-bold text-xs">
-                      🚗
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-800 text-[11px]">Dakar ➔ Saint-Louis (3 pl.)</p>
-                      <p className="text-[9px] text-gray-400">Chauffeur : Ibrahima Diallo</p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
-                    Confirmé
-                  </span>
+                <div className="p-2.5 bg-gray-50 rounded-xl">
+                  <span className="text-[10px] text-gray-400 block font-semibold">Transport & Trajets</span>
+                  <span className="text-xs font-bold text-[#1C3049]">18 Courses (5.0 ⭐)</span>
                 </div>
               </div>
             </div>
 
-            {/* Overlaid Floating Mini Card (Inspiration 2 popup effect) */}
-            <div className="absolute -bottom-4 -right-4 bg-white/95 backdrop-blur-md rounded-xl p-3.5 shadow-2xl border border-gray-100 flex items-center gap-3 animate-bounce-slow">
+            {/* Carte Flottante Pop-up (Paiement Wave) */}
+            <div className="absolute -bottom-5 -right-4 bg-white/95 backdrop-blur-md rounded-xl p-3.5 shadow-2xl border border-gray-100 flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm shadow-md">
                 ✓
               </div>
               <div>
-                <p className="text-[11px] font-extrabold text-gray-800">Paiement reçu avec succès</p>
-                <p className="text-[10px] text-emerald-600 font-bold">+ 45 000 FCFA • Wave Instantané</p>
+                <p className="text-[11px] font-extrabold text-gray-900">Paiement reçu</p>
+                <p className="text-[10px] text-emerald-600 font-bold">+ 45 000 FCFA • Wave Direct</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Partner Logos (Inspiration 2 footer style) */}
+        {/* Bottom Partners / Badges */}
         <div className="relative z-10 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-white/60">
           <div className="flex items-center gap-4">
-            <span className="text-[11px] text-white/50">Moyens acceptés :</span>
+            <span className="text-[11px] text-white/50">Paiements acceptés :</span>
             <span className="text-[11px] font-extrabold tracking-wide text-white/90">Wave</span>
             <span className="text-[11px] font-extrabold tracking-wide text-white/90">Orange Money</span>
             <span className="text-[11px] font-extrabold tracking-wide text-white/90">Free Money</span>
@@ -540,7 +505,7 @@ export default function ConnexionPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center text-[#7A6A5C]">
+        <div className="min-h-screen bg-white flex items-center justify-center text-[#78716C]">
           Chargement...
         </div>
       }
