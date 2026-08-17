@@ -102,15 +102,11 @@ export function calculateEarnings(inputs: SimulatorInputs): SimulatorResult {
   const maintenanceCharges = monthlyFixedMaintenance + 0.03 * grossRevenue;
 
   // Platform deduction options
-  const commissionFee = 0.18 * grossRevenue;
-  const forfaitFee = 2500 * daysWorkedPerMonth;
+  const passJourneeFee = 1500 * daysWorkedPerMonth;
+  const abonnementMensuelFee = 25000;
 
-  // Threshold: 2 500 / 0.18 = 13 888.89 F daily revenue
-  const switchThresholdDailyRevenue = 2500 / 0.18;
-  const switchThresholdMissions = Math.ceil(switchThresholdDailyRevenue / (averageFare || 1));
-
-  const dailyRevenue = missionsPerDay * averageFare;
-  const recommendedPlan: 'commission' | 'forfait' = dailyRevenue >= switchThresholdDailyRevenue ? 'forfait' : 'commission';
+  // Threshold: 25 000 / 1 500 = 16.67 days
+  const recommendedPlan: 'commission' | 'forfait' = (1500 * daysWorkedPerMonth) >= 25000 ? 'forfait' : 'commission';
 
   let chosenPlan: 'commission' | 'forfait';
   if (pricingPlan === 'recommend') {
@@ -119,19 +115,21 @@ export function calculateEarnings(inputs: SimulatorInputs): SimulatorResult {
     chosenPlan = pricingPlan;
   }
 
-  const platformFee = chosenPlan === 'commission' ? commissionFee : forfaitFee;
+  const platformFee = chosenPlan === 'commission' ? passJourneeFee : abonnementMensuelFee;
   const netIncome = Math.round(grossRevenue - platformFee - fuelCost - maintenanceCharges);
 
   const paybackMonths = netIncome > 0 && vehiclePrice > 0 ? +(vehiclePrice / netIncome).toFixed(1) : null;
 
   // Difference calculation
-  const planGainMonthly = Math.abs(Math.round(commissionFee - forfaitFee));
+  const switchThresholdDailyRevenue = 25000 / 30;
+  const switchThresholdMissions = Math.ceil(25000 / 1500);
+  const planGainMonthly = Math.abs(Math.round(passJourneeFee - abonnementMensuelFee));
 
   let recommendationText = '';
-  if (recommendedPlan === 'forfait') {
-    recommendationText = `À partir de ${switchThresholdMissions} missions par jour, le forfait journalier (2 500 F/jour) vous rapporte ${new Intl.NumberFormat('fr-FR').format(planGainMonthly)} CFA de plus par mois qu'une commission de 18%.`;
+  if (daysWorkedPerMonth >= 17) {
+    recommendationText = `En travaillant ${daysWorkedPerMonth} jours/mois, l'Abonnement Mensuel (25 000 F) vous fait économiser ${new Intl.NumberFormat('fr-FR').format(planGainMonthly)} CFA par rapport au Pass Journée (1 500 F/jour) avec 0% de commission.`;
   } else {
-    recommendationText = `À ${missionsPerDay} missions par jour, la commission à 18% reste la plus avantageuse : vous économisez ${new Intl.NumberFormat('fr-FR').format(planGainMonthly)} CFA par mois sans frais fixes.`;
+    recommendationText = `Pour ${daysWorkedPerMonth} jours d'activité par mois, le Pass Journée (1 500 F/jour) reste le plus économique (${new Intl.NumberFormat('fr-FR').format(passJourneeFee)} CFA/mois) avec 0% de commission.`;
   }
 
   const netPercent = grossRevenue > 0 ? Math.max(0, (netIncome / grossRevenue) * 100) : 0;

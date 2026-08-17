@@ -159,44 +159,44 @@ export default function PricingPage() {
         <div className="flex flex-col gap-2 max-w-3xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[4px] bg-[#C9A882] text-[#13223A] text-xs font-bold uppercase tracking-wider w-fit">
             <IconTrendingUp className="w-4 h-4" />
-            <span>Le Seuil de Rentabilité Mathématique</span>
+            <span>Comparatif Économique Chauffeur</span>
           </div>
           <h3 className="text-2xl sm:text-4xl font-bold font-heading text-white">
-            Le Point de Bascule : Commission vs Forfait
+            Pass Journée vs Abonnement Mensuel (0% Commission)
           </h3>
           <p className="text-sm sm:text-base text-[#E8DBC8]/90 leading-relaxed">
-            Pourquoi imposer un pourcentage arbitraire quand le chauffeur peut maximiser son salaire net ? Voici la formule exacte du point de bascule :
+            Chez NovaSen, <strong>aucun pourcentage n'est prélevé</strong> sur vos courses et livraisons. 100% de vos gains vous reviennent :
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white/10 p-6 rounded-[8px] border border-white/15 flex flex-col gap-2">
-            <span className="text-xs uppercase tracking-wider text-[#C9A882] font-semibold">Formule du seuil</span>
+            <span className="text-xs uppercase tracking-wider text-[#C9A882] font-semibold">Pass Journée (24h)</span>
             <div className="text-2xl font-bold font-heading tabular-nums text-white">
-              2 500 F ÷ 0,18
+              1 500 CFA / jour
             </div>
             <p className="text-xs text-[#E8DBC8]/80">
-              Forfait journalier divisé par le taux de commission standard.
+              Idéal pour rouler ponctuellement ou tester la plateforme sans engagement.
             </p>
           </div>
 
           <div className="bg-white/10 p-6 rounded-[8px] border border-white/15 flex flex-col gap-2">
-            <span className="text-xs uppercase tracking-wider text-[#C9A882] font-semibold">Seuil par jour</span>
+            <span className="text-xs uppercase tracking-wider text-[#C9A882] font-semibold">Abonnement Mensuel</span>
             <div className="text-2xl font-bold font-heading tabular-nums text-[#C9A882]">
-              ≈ 13 900 CFA / jour
+              25 000 CFA / mois
             </div>
             <p className="text-xs text-[#E8DBC8]/80">
-              Au-delà de cette recette journalière, le forfait à 2 500 F/jour devient plus rentable.
+              Revient à seulement ≈ 833 F/jour pour une activité quotidienne à plein temps.
             </p>
           </div>
 
           <div className="bg-white/10 p-6 rounded-[8px] border border-white/15 flex flex-col gap-2">
-            <span className="text-xs uppercase tracking-wider text-[#C9A882] font-semibold">Volume équivalent</span>
-            <div className="text-2xl font-bold font-heading tabular-nums text-white">
-              ≥ 10 colis ou 8 courses
+            <span className="text-xs uppercase tracking-wider text-[#C9A882] font-semibold">Économie Mensuelle</span>
+            <div className="text-2xl font-bold font-heading tabular-nums text-emerald-400">
+              +14 000 CFA net / mois
             </div>
             <p className="text-xs text-[#E8DBC8]/80">
-              Dès 10 livraisons par jour, vous gagnez des dizaines de milliers de CFA en plus chaque mois.
+              Économisés par rapport au pass journalier (39 000 F vs 25 000 F sur 26 jours).
             </p>
           </div>
         </div>
@@ -205,7 +205,7 @@ export default function PricingPage() {
           <div className="flex items-center gap-3">
             <span className="w-3 h-3 rounded-full bg-[#C9A882]" />
             <p className="text-xs sm:text-sm text-[#E8DBC8]">
-              Testez vos propres hypothèses sur notre simulateur interactif pour voir votre gain chiffré en temps réel.
+              Testez vos propres hypothèses sur notre simulateur de rentabilité pour calculer vos bénéfices nets.
             </p>
           </div>
           <Link href="/#simulateur">

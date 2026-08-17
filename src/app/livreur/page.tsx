@@ -83,7 +83,7 @@ export default function DriverOnboardingPage() {
   };
 
   // Selected Plan
-  const [selectedPlanId, setSelectedPlanId] = useState<DriverPlanId>('commission');
+  const [selectedPlanId, setSelectedPlanId] = useState<DriverPlanId>('journalier');
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(true);
 
@@ -527,10 +527,10 @@ export default function DriverOnboardingPage() {
         <div className="flex flex-col gap-8 animate-fade-in">
           <div className="text-center max-w-2xl mx-auto flex flex-col gap-2">
             <h2 className="text-2xl sm:text-3xl font-bold font-heading text-[#1C3049]">
-              Choisissez votre modèle de rémunération
+              Choisissez votre formule de travail
             </h2>
             <p className="text-sm text-[#7A6A5C]">
-              Roulez à la commission ou optez pour l’abonnement mensuel à 0% de commission dès 13 889 F de gains par jour.
+              Pass Journée (1 500 F / jour) ou Abonnement Mensuel (25 000 F / mois) avec 0% de commission sur 100% de vos gains.
             </p>
           </div>
 

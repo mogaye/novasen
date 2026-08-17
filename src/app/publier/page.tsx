@@ -10,6 +10,7 @@ import { CATEGORIES } from '@/lib/listings';
 import { SELLER_PLANS } from '@/lib/plans';
 import { formatCFA } from '@/lib/format';
 import { QuotaBanner } from '@/components/QuotaBanner';
+import { FakePaymentModal } from '@/components/FakePaymentModal';
 import { Field, inputClass, selectClass } from '@/components/ui/Field';
 import { Button } from '@/components/ui/Button';
 import {
@@ -27,6 +28,7 @@ import {
   IconArrowLeft,
   IconPackage,
   IconX,
+  IconAlertCircle,
 } from '@/components/ui/Icons';
 
 export default function PublishPage() {
@@ -34,6 +36,7 @@ export default function PublishPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     userPlan,
+    setUserPlan,
     userListingsCount,
     addListing,
     showSuccessToast,
@@ -43,6 +46,7 @@ export default function PublishPage() {
     setSellerShopName,
   } = useApp();
 
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const planConfig = SELLER_PLANS.find((p) => p.id === userPlan) || SELLER_PLANS[0];
   const isQuotaReached = planConfig.maxActiveListings !== -1 && userListingsCount >= planConfig.maxActiveListings;
 
@@ -365,6 +369,103 @@ export default function PublishPage() {
             <span>Déposer une autre annonce</span>
           </Button>
         </div>
+      </div>
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // CAS 2.5 : QUOTA D'ANNONCES ATTEINT (BLOCAGE STRICT 3 ANNONCES GRATUITES)
+  // ─────────────────────────────────────────────────────────────────────────
+  if (isQuotaReached) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col gap-8 animate-fade-in">
+        <div className="bg-white rounded-[16px] border-2 border-[#7A5133] p-6 sm:p-10 shadow-md flex flex-col items-center text-center gap-6">
+          <div className="w-16 h-16 rounded-full bg-[#E8DBC8] text-[#7A5133] flex items-center justify-center font-bold text-2xl border-2 border-[#7A5133]">
+            <IconAlertCircle className="w-8 h-8 text-[#7A5133]" />
+          </div>
+
+          <div className="flex flex-col gap-2 max-w-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[999px] bg-[#E8DBC8] text-[#7A5133] text-xs font-bold uppercase tracking-wider mx-auto">
+              <span>Quota de publication atteint</span>
+              <span className="bg-[#7A5133] text-white px-2 py-0.5 rounded text-[11px]">
+                {userListingsCount} / {planConfig.maxActiveListings} annonces
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[#573721]">
+              Vous avez atteint la limite de {planConfig.maxActiveListings} annonces
+            </h1>
+            <p className="text-sm text-[#7A6A5C] leading-relaxed">
+              La formule <strong>{planConfig.name}</strong> est strictement limitée à {planConfig.maxActiveListings} annonces actives. Pour déposer une nouvelle annonce et débloquer jusqu’à <strong>30 annonces</strong>, activez votre abonnement <strong>Boutique Pro</strong> en quelques secondes via Wave ou Orange Money.
+            </p>
+          </div>
+
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 text-left pt-2">
+            <div className="p-5 rounded-[12px] bg-[#F2E9DC] border border-[#DDCDB6] flex flex-col justify-between gap-4">
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs font-bold uppercase text-[#7A5133]">Recommandé</span>
+                <h3 className="font-bold text-lg font-heading text-[#573721]">Boutique Pro</h3>
+                <div className="text-xl font-bold text-[#1C3049]">{formatCFA(6500)} <span className="text-xs text-[#7A6A5C]">/ mois</span></div>
+                <ul className="text-xs text-[#573721] space-y-1.5 pt-2">
+                  <li className="flex items-center gap-1.5">✓ <strong>Jusqu'à 30 annonces</strong> actives</li>
+                  <li className="flex items-center gap-1.5">✓ Badge officiel Boutique Vérifiée</li>
+                  <li className="flex items-center gap-1.5">✓ 1 mise en avant offerte / mois</li>
+                </ul>
+              </div>
+              <Button
+                variant="primary"
+                onClick={() => setUpgradeModalOpen(true)}
+                className="w-full"
+              >
+                <IconStar className="w-4 h-4 text-[#E8DBC8]" />
+                <span>Activer Boutique ({formatCFA(6500)})</span>
+              </Button>
+            </div>
+
+            <div className="p-5 rounded-[12px] bg-white border border-[#DDCDB6] flex flex-col justify-between gap-4">
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs font-bold uppercase text-[#1C3049]">Pour les pros</span>
+                <h3 className="font-bold text-lg font-heading text-[#1C3049]">Boutique Illimitée</h3>
+                <div className="text-xl font-bold text-[#1C3049]">{formatCFA(15000)} <span className="text-xs text-[#7A6A5C]">/ mois</span></div>
+                <ul className="text-xs text-[#573721] space-y-1.5 pt-2">
+                  <li className="flex items-center gap-1.5">✓ <strong>Annonces illimitées</strong></li>
+                  <li className="flex items-center gap-1.5">✓ 5 mises en avant offertes</li>
+                  <li className="flex items-center gap-1.5">✓ Assistance prioritaire 7j/7</li>
+                </ul>
+              </div>
+              <Link href="/tarifs">
+                <Button variant="secondary" className="w-full">
+                  <span>Voir tous les forfaits</span>
+                  <IconArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center gap-4 pt-4 border-t border-[#DDCDB6] w-full text-xs">
+            <Link href="/marche" className="text-[#7A5133] hover:underline font-semibold">
+              ← Retourner au marché
+            </Link>
+            <span className="text-[#DDCDB6]">|</span>
+            <Link href="/compte" className="text-[#7A5133] hover:underline font-semibold">
+              Gérer mes annonces existantes →
+            </Link>
+          </div>
+        </div>
+
+        {/* Upgrade Modal */}
+        {upgradeModalOpen && (
+          <FakePaymentModal
+            title="Activation Boutique Pro (6 500 CFA)"
+            amount={6500}
+            description="Débloquez 30 annonces actives simultanées et le badge Boutique Vérifiée."
+            onClose={() => setUpgradeModalOpen(false)}
+            onSuccess={() => {
+              setUserPlan('boutique');
+              setUpgradeModalOpen(false);
+              showSuccessToast('Formule Boutique Pro activée avec succès ! Vous pouvez maintenant publier jusqu’à 30 annonces.');
+            }}
+          />
+        )}
       </div>
     );
   }

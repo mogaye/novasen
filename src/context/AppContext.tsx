@@ -69,14 +69,48 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [activeService, setActiveServiceState] = useState<ServiceMode>('market');
   const [listings, setListings] = useState<Listing[]>(INITIAL_LISTINGS);
-  const [userPlan, setUserPlan] = useState<SellerPlanId>('particulier');
-  const [driverPlan, setDriverPlan] = useState<DriverPlanId>('commission');
+  const [userPlan, setUserPlanState] = useState<SellerPlanId>('particulier');
+  const [driverPlan, setDriverPlanState] = useState<DriverPlanId>('none');
   
   const [userListingsCount, setUserListingsCount] = useState<number>(0);
   const [featuredRemaining, setFeaturedRemaining] = useState<number>(0);
   
   const [isSellerRegistered, setIsSellerRegistered] = useState<boolean>(false);
   const [sellerShopName, setSellerShopName] = useState<string>('');
+
+  // Persist userPlan & driverPlan
+  const setUserPlan = (plan: SellerPlanId) => {
+    setUserPlanState(plan);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('novasen_user_plan', plan);
+      } catch (e) {}
+    }
+  };
+
+  const setDriverPlan = (plan: DriverPlanId) => {
+    setDriverPlanState(plan);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('novasen_driver_plan', plan);
+      } catch (e) {}
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedUserPlan = localStorage.getItem('novasen_user_plan') as SellerPlanId | null;
+        if (savedUserPlan && SELLER_PLANS.some((p) => p.id === savedUserPlan)) {
+          setUserPlanState(savedUserPlan);
+        }
+        const savedDriverPlan = localStorage.getItem('novasen_driver_plan') as DriverPlanId | null;
+        if (savedDriverPlan && (savedDriverPlan === 'journalier' || savedDriverPlan === 'mensuel' || savedDriverPlan === 'flotte')) {
+          setDriverPlanState(savedDriverPlan);
+        }
+      } catch (e) {}
+    }
+  }, []);
   
   const [sellerProfile, setSellerProfile] = useState<SellerProfile>({
     name: 'Mon Profil',
@@ -231,6 +265,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           }
         }
         setListings(combined);
+        setUserListingsCount(localCustom.length);
       } else {
         const combined = [...localCustom];
         for (const init of INITIAL_LISTINGS) {
@@ -239,6 +274,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           }
         }
         setListings(combined);
+        setUserListingsCount(localCustom.length);
       }
     } catch (err) {
       console.error('Error fetching listings from Supabase:', err);
@@ -295,6 +331,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const addListing = async (listingData: Partial<Listing>): Promise<{ success: boolean; error?: string; isQuotaReached?: boolean; data?: any }> => {
     try {
+      // 1. Strict Quota Enforcement
+      const currentPlanConfig = SELLER_PLANS.find((p) => p.id === userPlan) || SELLER_PLANS[0];
+      if (currentPlanConfig.maxActiveListings !== -1 && userListingsCount >= currentPlanConfig.maxActiveListings) {
+        return {
+          success: false,
+          isQuotaReached: true,
+          error: `Limite atteinte : votre formule actuelle (${currentPlanConfig.name}) est strictement limitée à ${currentPlanConfig.maxActiveListings} annonce(s). Passez à la formule Boutique pour publier davantage.`,
+        };
+      }
+
       const { data: userData } = await supabase.auth.getUser();
 
       const insertPayload = {
