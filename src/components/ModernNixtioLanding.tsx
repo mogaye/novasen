@@ -125,20 +125,26 @@ export function ModernNixtioLanding() {
         </p>
 
         {/* CTA Principal : Invitation irrésistible à entrer & se connecter */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mb-16">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto mb-16">
           <Link
-            href="/connexion"
-            className="w-full sm:w-auto px-9 py-4 rounded-full bg-[#7A5133] text-white font-bold text-base hover:bg-[#573721] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[#7A5133]/25 flex items-center justify-center gap-3 group"
+            href="/accueil"
+            className="w-full sm:w-auto px-9 py-4 rounded-full bg-[#573721] text-white font-extrabold text-base hover:bg-[#3D2616] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[#573721]/30 flex items-center justify-center gap-3 group border border-white/20"
           >
-            <span>Créer mon compte gratuit</span>
-            <IconArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <span>✦ Entrer sur NovaSen</span>
+            <IconArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#C9A882]" />
           </Link>
           <Link
             href="/connexion"
-            className="w-full sm:w-auto px-8 py-4 rounded-full glass-pill border border-[#DDCDB6] text-[#1C3049] font-bold text-base hover:bg-white hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#7A5133] text-white font-bold text-base hover:bg-[#573721] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#7A5133]/20 flex items-center justify-center gap-2"
+          >
+            <span>Créer mon compte</span>
+          </Link>
+          <Link
+            href="/connexion"
+            className="w-full sm:w-auto px-7 py-4 rounded-full glass-pill border border-[#DDCDB6] text-[#1C3049] font-bold text-base hover:bg-white hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
           >
             <IconUser className="w-5 h-5 text-[#1C3049]" />
-            <span>Déjà membre ? Se connecter</span>
+            <span>Se connecter</span>
           </Link>
         </div>
 

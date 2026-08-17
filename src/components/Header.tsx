@@ -56,9 +56,10 @@ export function Header() {
         {/* Brand & Mode Switcher */}
         <div className="flex items-center gap-4 lg:gap-5 shrink-0">
           <Link
-            href="/"
+            href="/accueil"
             className="flex flex-col group cursor-pointer focus:outline-none shrink-0"
             onClick={() => setActiveService('market')}
+            title="Page d'accueil NovaSen"
           >
             <div className="flex items-center gap-1.5">
               <span className="text-2xl sm:text-[1.65rem] font-bold tracking-tight text-[#573721] font-heading whitespace-nowrap">
@@ -102,6 +103,16 @@ export function Header() {
         {/* Desktop Navigation Links */}
         <nav className="hidden lg:flex items-center gap-5 xl:gap-7 text-xs sm:text-sm font-semibold text-[#2A211A] shrink-0">
           <Link
+            href="/accueil"
+            className={`hover:text-[#573721] transition-colors py-1 whitespace-nowrap ${
+              pathname === '/accueil'
+                ? 'text-[#573721] font-bold border-b-2 border-[#573721]'
+                : ''
+            }`}
+          >
+            Accueil
+          </Link>
+          <Link
             href="/marche"
             onClick={() => setActiveService('market')}
             className={`hover:text-[#7A5133] transition-colors py-1 whitespace-nowrap ${
@@ -130,6 +141,15 @@ export function Header() {
             }`}
           >
             Grille Tarifaire
+          </Link>
+          <Link
+            href="/"
+            className={`hover:text-[#7A6A5C] transition-colors py-1 whitespace-nowrap text-xs text-[#7A6A5C] ${
+              pathname === '/' ? 'text-[#573721] font-bold' : ''
+            }`}
+            title="Revoir la page de présentation"
+          >
+            Présentation
           </Link>
         </nav>
 
@@ -257,10 +277,24 @@ export function Header() {
 
             <nav className="flex flex-col gap-2 divide-y divide-[#DDCDB6]/50">
               <Link
+                href="/accueil"
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-3 text-base font-bold text-[#573721] flex items-center justify-between"
+              >
+                <span>🏠 Accueil NovaSen</span>
+                <span className="text-xs bg-[#E8DBC8] text-[#573721] px-2 py-0.5 rounded-full font-bold">
+                  2 Univers
+                </span>
+              </Link>
+              <Link
                 href="/marche"
+                onClick={() => {
+                  setActiveService('market');
+                  setMobileMenuOpen(false);
+                }}
                 className="py-3 text-base font-semibold text-[#2A211A] flex items-center justify-between"
               >
-                <span>Le Marché (Petites Annonces)</span>
+                <span>🛍️ Le Marché (Petites Annonces)</span>
                 <span className="text-xs text-[#7A6A5C]">40 offres</span>
               </Link>
               <Link
