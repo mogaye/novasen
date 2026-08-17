@@ -231,20 +231,6 @@ export function Header() {
             🔍
           </button>
 
-          {/* Quick Favorites */}
-          <Link
-            href="/marche?favorites=true"
-            className="p-2 rounded-full bg-white text-[#573721] border border-[#DDCDB6] shadow-xs text-sm relative"
-            title="Favoris"
-          >
-            <span>❤️</span>
-            {useApp().favorites.length > 0 && (
-              <span className="absolute -top-1 -right-1 px-1 bg-[#7A5133] text-white text-[9px] font-bold rounded-full min-w-[16px] text-center">
-                {useApp().favorites.length}
-              </span>
-            )}
-          </Link>
-
           {/* User Account / Login */}
           {user ? (
             <Link
@@ -264,29 +250,95 @@ export function Header() {
             </Link>
           )}
 
-          {/* Hamburger Menu Toggle */}
+          {/* Explicit Dropdown Menu Button */}
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-xl bg-[#E8DBC8] text-[#2A211A] border border-[#DDCDB6] shadow-xs flex items-center justify-center cursor-pointer"
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold shadow-xs cursor-pointer transition-all active:scale-95 ${
+              mobileMenuOpen
+                ? 'bg-[#7A5133] text-white border-[#7A5133]'
+                : 'bg-[#E8DBC8] hover:bg-[#DDCDB6] text-[#573721] border-[#DDCDB6]'
+            }`}
             aria-expanded={mobileMenuOpen}
-            aria-label="Ouvrir le menu principal"
+            aria-label="Menu déroulant"
           >
-            {mobileMenuOpen ? (
-              <IconX className="w-5 h-5 text-[#573721]" />
-            ) : (
-              <svg className="w-5 h-5 text-[#573721]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
+            <span>{mobileMenuOpen ? '✕ Fermer' : '☰ Menu ▾'}</span>
           </button>
         </div>
       </div>
 
-      {/* Modern Mobile Drawer */}
+      {/* Mobile Sub-Header Quick Links (Always visible horizontal scroll on mobile) */}
+      <div className="lg:hidden flex items-center gap-2 overflow-x-auto no-scrollbar px-4 py-2 bg-[#FAF6F0] border-t border-[#DDCDB6]/70 text-xs whitespace-nowrap shadow-inner">
+        <Link
+          href="/accueil"
+          onClick={() => setActiveService('market')}
+          className={`px-3 py-1 rounded-full font-bold transition-colors ${
+            pathname === '/accueil' || pathname === '/'
+              ? 'bg-[#573721] text-white shadow-xs'
+              : 'bg-white text-[#573721] border border-[#DDCDB6]'
+          }`}
+        >
+          🏠 Accueil
+        </Link>
+        <Link
+          href="/marche"
+          onClick={() => setActiveService('market')}
+          className={`px-3 py-1 rounded-full font-bold transition-colors ${
+            pathname.startsWith('/marche')
+              ? 'bg-[#7A5133] text-white shadow-xs'
+              : 'bg-white text-[#7A5133] border border-[#DDCDB6]'
+          }`}
+        >
+          🛍️ Marché
+        </Link>
+        <Link
+          href="/transport"
+          onClick={() => setActiveService('transport')}
+          className={`px-3 py-1 rounded-full font-bold transition-colors ${
+            pathname.startsWith('/transport')
+              ? 'bg-[#1C3049] text-white shadow-xs'
+              : 'bg-white text-[#1C3049] border border-[#DDCDB6]'
+          }`}
+        >
+          🚗 Colis & VTC
+        </Link>
+        <Link
+          href="/tarifs"
+          className={`px-3 py-1 rounded-full font-bold transition-colors flex items-center gap-1 ${
+            pathname === '/tarifs'
+              ? 'bg-gradient-to-r from-[#7A5133] to-[#573721] text-white shadow-xs'
+              : 'bg-[#E8DBC8] text-[#573721] border border-[#DDCDB6]'
+          }`}
+        >
+          <span>💳 Tarifs & Abonnements</span>
+          <span className="px-1 py-[1px] bg-amber-400 text-stone-900 text-[8px] font-black rounded-full uppercase">
+            Pro
+          </span>
+        </Link>
+        <Link
+          href="/vendeur"
+          className="px-3 py-1 rounded-full font-bold bg-white text-[#7A5133] border border-[#DDCDB6]"
+        >
+          🏪 Boutique
+        </Link>
+        <Link
+          href="/livreur"
+          className="px-3 py-1 rounded-full font-bold bg-white text-[#1C3049] border border-[#DDCDB6]"
+        >
+          🛵 Chauffeur
+        </Link>
+        <Link
+          href="/contact"
+          className="px-3 py-1 rounded-full font-bold bg-emerald-50 text-emerald-800 border border-emerald-200"
+        >
+          🎧 Assistance
+        </Link>
+      </div>
+
+      {/* Modern Mobile Drawer / Dropdown */}
       {mobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 top-20 z-50 bg-black/50 backdrop-blur-xs flex flex-col justify-start overflow-y-auto animate-fade-in"
+          className="lg:hidden fixed inset-0 top-[120px] z-50 bg-black/50 backdrop-blur-xs flex flex-col justify-start overflow-y-auto animate-fade-in"
           onClick={() => setMobileMenuOpen(false)}
         >
           <div
