@@ -116,13 +116,13 @@ export default function DriverOnboardingPage() {
       {/* Header */}
       <div className="flex flex-col gap-2 pb-4 border-b border-[#DDCDB6] text-center max-w-2xl mx-auto">
         <span className="text-xs font-bold uppercase tracking-widest text-[#1C3049]">
-          Espace Chauffeurs & Livreurs
+          Espace Livreurs & Coursiers Colis
         </span>
         <h1 className="text-3xl sm:text-4xl font-bold font-heading text-[#1C3049] tracking-tight">
-          Rejoignez la flotte logistique NovaSen
+          Rejoignez le réseau de livreurs NovaSen
         </h1>
         <p className="text-sm text-[#7A6A5C]">
-          Transportez des passagers ou livrez les colis du marché sénégalais en toute autonomie avec encaissement direct partout au Sénégal.
+          Recevez directement les commandes de livraison de nos marchands et clients à Dakar et au Sénégal. 0% de commission : fixez librement vos tarifs et gardez 100% de vos gains.
         </p>
       </div>
 
@@ -132,10 +132,10 @@ export default function DriverOnboardingPage() {
           1. Identité & Permis
         </div>
         <div className={`py-2.5 rounded-[8px] transition-colors ${step === 2 ? 'bg-[#1C3049] text-white shadow-sm' : 'text-[#1C3049]'}`}>
-          2. Véhicule & Métier
+          2. Véhicule & Matériel
         </div>
         <div className={`py-2.5 rounded-[8px] transition-colors ${step === 3 ? 'bg-[#1C3049] text-white shadow-sm' : 'text-[#1C3049]'}`}>
-          3. Formule & Revenus
+          3. Forfait Livreur
         </div>
         <div className={`py-2.5 rounded-[8px] transition-colors ${step === 4 ? 'bg-[#1C3049] text-white shadow-sm' : 'text-[#1C3049]'}`}>
           4. Validation
@@ -475,22 +475,9 @@ export default function DriverOnboardingPage() {
           {/* Missions Allowed */}
           <div className="flex flex-col gap-2 border-t border-[#DDCDB6] pt-4">
             <span className="text-xs font-bold uppercase tracking-wider text-[#1C3049]">
-              Métiers acceptés sur votre compte
+              Types de colis & marchandises pris en charge
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label className="p-3 rounded-[8px] border border-[#DDCDB6] bg-[#F2E9DC]/60 flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={activityTypes.passengers}
-                  onChange={(e) => setActivityTypes({ ...activityTypes, passengers: e.target.checked })}
-                  className="w-4 h-4 rounded text-[#1C3049] cursor-pointer"
-                />
-                <div>
-                  <span className="text-sm font-bold text-[#1C3049] block">Courses Passagers (VTC)</span>
-                  <span className="text-xs text-[#7A6A5C]">Transporter des clients dakarois d'un point A à un point B</span>
-                </div>
-              </label>
-
               <label className="p-3 rounded-[8px] border border-[#DDCDB6] bg-[#F2E9DC]/60 flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -499,10 +486,18 @@ export default function DriverOnboardingPage() {
                   className="w-4 h-4 rounded text-[#1C3049] cursor-pointer"
                 />
                 <div>
-                  <span className="text-sm font-bold text-[#1C3049] block">Livraison de Colis & Encaissement</span>
+                  <span className="text-sm font-bold text-[#1C3049] block">Plis, Colis Express & Marchandises</span>
                   <span className="text-xs text-[#7A6A5C]">Acheminer les commandes marchandes et encaisser à la livraison</span>
                 </div>
               </label>
+
+              <div className="p-3 rounded-[8px] border border-[#DDCDB6] bg-[#F2E9DC]/60 flex items-center gap-3">
+                <span className="text-xl">💰</span>
+                <div>
+                  <span className="text-sm font-bold text-[#1C3049] block">Paiements en direct</span>
+                  <span className="text-xs text-[#7A6A5C]">Vous encaissez directement auprès de vos clients sans commission</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -513,7 +508,7 @@ export default function DriverOnboardingPage() {
               <span>Retour</span>
             </Button>
             <Button type="submit" variant="primary">
-              <span>Étape 3 : Formule chauffeur</span>
+              <span>Étape 3 : Forfait Livreur</span>
               <IconArrowRight className="w-4 h-4" />
             </Button>
           </div>
@@ -521,20 +516,20 @@ export default function DriverOnboardingPage() {
       )}
 
       {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* ÉTAPE 3 : FORMULE CHAUFFEUR & SIMULATEUR */}
+      {/* ÉTAPE 3 : FORMULE LIVREUR & FORFAITS */}
       {/* ─────────────────────────────────────────────────────────────────── */}
       {step === 3 && (
         <div className="flex flex-col gap-8 animate-fade-in">
           <div className="text-center max-w-2xl mx-auto flex flex-col gap-2">
             <h2 className="text-2xl sm:text-3xl font-bold font-heading text-[#1C3049]">
-              Choisissez votre formule de travail
+              Choisissez votre forfait livreur
             </h2>
             <p className="text-sm text-[#7A6A5C]">
-              Pass Journée (1 500 F / jour) ou Abonnement Mensuel (25 000 F / mois) avec 0% de commission sur 100% de vos gains.
+              Pass Journée (1 500 F/j), Abonnement Mensuel (35 000 F/mois) ou Annuel (400 000 F/an). 0% de commission sur l'intégralité de vos courses.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {DRIVER_PLANS.map((plan) => (
               <div
                 key={plan.id}
@@ -557,7 +552,7 @@ export default function DriverOnboardingPage() {
           <div className="bg-[#13223A] text-white p-6 sm:p-8 rounded-[16px] border border-[#1C3049] shadow-md">
             <h3 className="text-lg font-bold font-heading text-[#C9A882] mb-4 flex items-center gap-2">
               <IconTrendingUp className="w-5 h-5" />
-              <span>Simulateur de rentabilité personnalisé</span>
+              <span>Simulateur de gains livreur indépendant</span>
             </h3>
             <EarningsSimulator />
           </div>
@@ -573,16 +568,15 @@ export default function DriverOnboardingPage() {
                 className="w-4 h-4 rounded text-[#1C3049] mt-0.5 cursor-pointer"
               />
               <label htmlFor="driver-terms" className="text-xs text-[#1C3049] cursor-pointer leading-relaxed">
-                Je certifie posséder un véhicule en état de marche avec carte grise et assurance valides, ainsi qu'un permis de conduire sénégalais en cours de validité. J'accepte la charte des transporteurs NovaSen.
+                Je certifie posséder un véhicule en état de marche avec carte grise et assurance valides, ainsi qu'un permis de conduire sénégalais en cours de validité. J'accepte la charte des livreurs partenaires NovaSen.
               </label>
             </div>
 
             <div className="flex items-center justify-between pt-4 border-t border-[#DDCDB6] flex-wrap gap-3">
               <div className="text-xs text-[#7A6A5C]">
-                Frais d’enregistrement et vérification de dossier :{' '}
-                {/* RULE OF COLOR: Dark Blue on amount */}
+                Forfait sélectionné :{' '}
                 <strong className="text-sm font-bold tabular-nums text-[#1C3049]">
-                  {formatCFA(DRIVER_REGISTRATION_FEE)}
+                  {selectedPlan.name} ({formatCFA(selectedPlan.price)})
                 </strong>
               </div>
 
@@ -592,7 +586,7 @@ export default function DriverOnboardingPage() {
                   <span>Retour</span>
                 </Button>
                 <Button variant="primary" onClick={handleValidation}>
-                  <span>Valider mon dossier ({formatCFA(DRIVER_REGISTRATION_FEE)})</span>
+                  <span>Activer mon forfait ({formatCFA(selectedPlan.price)})</span>
                   <IconArrowRight className="w-4 h-4" />
                 </Button>
               </div>
@@ -602,7 +596,7 @@ export default function DriverOnboardingPage() {
       )}
 
       {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* ÉTAPE 4 : CONFIRMATION & TABLEAU DE BORD CHAUFFEUR */}
+      {/* ÉTAPE 4 : CONFIRMATION & TABLEAU DE BORD LIVREUR */}
       {/* ─────────────────────────────────────────────────────────────────── */}
       {step === 4 && (
         <div className="bg-white rounded-[16px] border border-[#DDCDB6] p-8 sm:p-12 text-center flex flex-col items-center gap-6 shadow-md max-w-2xl mx-auto animate-fade-in">
@@ -612,19 +606,19 @@ export default function DriverOnboardingPage() {
 
           <div className="flex flex-col gap-2">
             <span className="text-xs font-bold uppercase tracking-widest text-[#1C3049]">
-              Dossier Chauffeur Validé
+              Dossier Livreur Validé
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold font-heading text-[#1C3049]">
-              Bienvenue dans la flotte, {fullName} !
+              Bienvenue dans le réseau, {fullName} !
             </h2>
             <p className="text-sm text-[#7A6A5C]">
-              Votre véhicule <strong>{vehicleModel} ({licensePlate})</strong> est activé sous la formule <strong>{selectedPlan.name}</strong>. Vous pouvez dès à présent recevoir des courses passagers et des missions de livraison de colis à Dakar.
+              Votre véhicule <strong>{vehicleModel} ({licensePlate})</strong> est activé sous la formule <strong>{selectedPlan.name}</strong>. Vous pouvez dès à présent recevoir des commandes et livraisons de colis à Dakar.
             </p>
           </div>
 
           <div className="w-full bg-[#F2E9DC] p-4 rounded-[10px] border border-[#DDCDB6] text-left flex flex-col gap-2 text-xs">
             <div className="flex justify-between">
-              <span className="text-[#7A6A5C]">Conducteur :</span>
+              <span className="text-[#7A6A5C]">Livreur :</span>
               <strong className="text-[#1C3049]">{fullName} ({phone})</strong>
             </div>
             <div className="flex justify-between">
@@ -632,13 +626,9 @@ export default function DriverOnboardingPage() {
               <strong className="text-[#1C3049]">{vehicleModel} • {licensePlate}</strong>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#7A6A5C]">Missions actives :</span>
+              <span className="text-[#7A6A5C]">Activité :</span>
               <strong className="text-[#1C3049]">
-                {activityTypes.passengers && activityTypes.parcels
-                  ? 'VTC Passagers & Colis Express'
-                  : activityTypes.passengers
-                  ? 'VTC Passagers uniquement'
-                  : 'Colis & Marchandises'}
+                Livraison Colis & Fret Express
               </strong>
             </div>
           </div>

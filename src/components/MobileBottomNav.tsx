@@ -84,7 +84,7 @@ export function MobileBottomNav() {
         <span className="text-[10px] tracking-tight whitespace-nowrap">Tarifs</span>
       </Link>
 
-      {/* 5. Transport */}
+      {/* 5. Livraison */}
       <Link
         href="/transport"
         onClick={() => setActiveService('transport')}
@@ -94,8 +94,8 @@ export function MobileBottomNav() {
             : 'text-[#7A6A5C] hover:text-[#1C3049]'
         }`}
       >
-        <span className="text-lg leading-none">🚗</span>
-        <span className="text-[10px] tracking-tight whitespace-nowrap">Transport</span>
+        <span className="text-lg leading-none">📦</span>
+        <span className="text-[10px] tracking-tight whitespace-nowrap">Livraison</span>
       </Link>
     </nav>
   );

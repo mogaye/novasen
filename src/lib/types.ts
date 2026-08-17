@@ -184,7 +184,7 @@ export interface DriverProfile {
 }
 
 export type SellerPlanId = 'particulier' | 'boutique' | 'boutique_pro';
-export type DriverPlanId = 'journalier' | 'mensuel' | 'flotte' | 'commission' | 'forfait' | 'none';
+export type DriverPlanId = 'journalier' | 'mensuel' | 'annuel' | 'flotte' | 'commission' | 'forfait' | 'none';
 
 export interface SellerPlan {
   id: SellerPlanId;
@@ -200,8 +200,8 @@ export interface SellerPlan {
 export interface DriverPlan {
   id: DriverPlanId;
   name: string;
-  price: number; // fixed cost or daily rate
-  period?: 'jour' | 'mois';
+  price: number; // fixed cost or daily/monthly/annual rate
+  period?: 'jour' | 'mois' | 'an';
   commissionRate: number;
   description: string;
   features: string[];

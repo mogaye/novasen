@@ -299,75 +299,84 @@ export function DoorSplit() {
           </div>
         ) : (
           /* ─────────────────────────────────────────────────────────────── */
-          /* PANEL B : LE TRANSPORT (VTC & Colis Interactive Console) */
+          /* PANEL B : LA LIVRAISON (Colis & Coursiers Indépendants) */
           /* ─────────────────────────────────────────────────────────────── */
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8 items-center animate-fade-in">
             {/* Left Calculator & Route Form */}
             <div className="lg:col-span-7 flex flex-col gap-6 relative z-30">
               <div className="flex flex-col gap-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#1C3049]">
-                  Logistique & Déplacements en direct
+                  Logistique Colis & Coursiers en direct
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-bold font-heading text-[#1C3049] tracking-tight">
-                  Calculez votre course ou livraison instantanément
+                  Expédiez vos plis & colis partout à Dakar
                 </h2>
                 <p className="text-sm text-[#7A6A5C]">
-                  Tarification transparente au kilomètre et à la minute avec prise en compte du trafic dakarois en temps réel.
+                  Estimation instantanée de la distance et de la durée. Mise en relation directe avec nos livreurs indépendants certifiés sans commission.
                 </p>
               </div>
 
               <form onSubmit={handleTransportSubmit} className="flex flex-col gap-4">
-                {/* Mode Selector */}
-                <div className="flex gap-2">
+                {/* Vehicle Selector */}
+                <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    onClick={() => setTransportType('passagers')}
+                    onClick={() => setParcelClass('moto')}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-[8px] text-xs font-bold uppercase tracking-wider transition-all ${
-                      transportType === 'passagers'
+                      parcelClass === 'moto'
                         ? 'bg-[#1C3049] text-white shadow-sm'
                         : 'bg-[#F2E9DC] text-[#7A6A5C] hover:text-[#2A211A] border border-[#DDCDB6]'
                     }`}
                   >
-                    <IconCar className="w-4 h-4" />
-                    <span>Passagers (VTC)</span>
+                    <span>🛵 Moto Express</span>
                   </button>
                   <button
                     type="button"
-                    onClick={() => setTransportType('colis')}
+                    onClick={() => setParcelClass('voiture')}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-[8px] text-xs font-bold uppercase tracking-wider transition-all ${
-                      transportType === 'colis'
+                      parcelClass === 'voiture'
                         ? 'bg-[#1C3049] text-white shadow-sm'
-                        : 'bg-[#F2E9DC] text-[#7A6A5C] hover:text-[#2A211A]'
+                        : 'bg-[#F2E9DC] text-[#7A6A5C] hover:text-[#2A211A] border border-[#DDCDB6]'
                     }`}
                   >
-                    <IconPackage className="w-4 h-4" />
-                    <span>Colis & Marchandises</span>
+                    <span>🚗 Voiture / Break</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setParcelClass('camionnette')}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-[8px] text-xs font-bold uppercase tracking-wider transition-all ${
+                      parcelClass === 'camionnette'
+                        ? 'bg-[#1C3049] text-white shadow-sm'
+                        : 'bg-[#F2E9DC] text-[#7A6A5C] hover:text-[#2A211A] border border-[#DDCDB6]'
+                    }`}
+                  >
+                    <span>🚚 Camionnette Fret</span>
                   </button>
                 </div>
 
                 {/* Location Search Inputs */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <LocationSearchInput
-                    label="Point de départ"
+                    label="Lieu de collecte (Départ)"
                     value={originId}
                     customText={originName}
                     onChange={(id, name) => {
                       setOriginId(id);
                       setOriginName(name);
                     }}
-                    placeholder="Ville, quartier ou rue de départ..."
+                    placeholder="Ville, quartier ou rue de collecte..."
                     accentColor="transport"
                   />
 
                   <LocationSearchInput
-                    label="Destination finale"
+                    label="Lieu de livraison (Arrivée)"
                     value={destinationId}
                     customText={destinationName}
                     onChange={(id, name) => {
                       setDestinationId(id);
                       setDestinationName(name);
                     }}
-                    placeholder="Ville, quartier ou rue d'arrivée..."
+                    placeholder="Ville, quartier ou rue de destination..."
                     accentColor="transport"
                   />
                 </div>
@@ -388,9 +397,9 @@ export function DoorSplit() {
                       </strong>
                     </div>
                     <div>
-                      <span className="text-[#7A6A5C] block">Tarif estimé :</span>
+                      <span className="text-[#7A6A5C] block">Repère indicatif :</span>
                       <strong className="text-base font-bold font-heading tabular-nums text-[#1C3049]">
-                        {formatCFA(currentFare)}
+                        {formatCFA(fares.parcelFares[parcelClass])}
                       </strong>
                     </div>
                   </div>
@@ -401,7 +410,7 @@ export function DoorSplit() {
                     size="md"
                     className="w-full sm:w-auto shrink-0"
                   >
-                    <span>Commander ({formatCFA(currentFare)})</span>
+                    <span>Trouver un livreur</span>
                     <IconArrowRight className="w-4 h-4 text-[#C9A882]" />
                   </GlowButton>
                 </div>
@@ -420,20 +429,20 @@ export function DoorSplit() {
                 {/* Floating Badge Top Left */}
                 <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-[8px] shadow-md border border-[#DDCDB6] text-xs font-bold text-[#1C3049] flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>2 940 chauffeurs & livreurs actifs</span>
+                  <span>Réseau de livreurs certifiés Dakar</span>
                 </div>
 
                 {/* Floating Bottom Card */}
                 <div className="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md p-4 rounded-[12px] border border-white/20 text-white flex items-center justify-between">
                   <div className="flex flex-col">
-                    <span className="text-xs text-[#E8DBC8] font-medium">Réseau Logistique NovaSen</span>
+                    <span className="text-xs text-[#E8DBC8] font-medium">Livraison Express NovaSen</span>
                     <span className="text-sm font-bold">{originName} → {destinationName}</span>
-                    <span className="text-xs text-white/80">Arrivée estimée en 4 min</span>
+                    <span className="text-xs text-white/80">Livreur disponible à proximité</span>
                   </div>
                   {/* RULE OF COLOR: Dark Blue on amount */}
                   <div className="bg-white px-3 py-1.5 rounded-[8px] shadow-sm">
                     <span className="text-sm font-bold font-heading tabular-nums text-[#1C3049]">
-                      {formatCFA(currentFare)}
+                      {formatCFA(fares.parcelFares[parcelClass])}
                     </span>
                   </div>
                 </div>
@@ -464,9 +473,9 @@ export function DoorSplit() {
             📦
           </div>
           <div>
-            <h4 className="font-bold text-sm text-[#1C3049]">Livraison & Encaissement COD</h4>
+            <h4 className="font-bold text-sm text-[#1C3049]">Livraison Colis & Marchandises</h4>
             <p className="text-xs text-[#7A6A5C] mt-0.5">
-              Le livreur récupère le colis, encaisse à l'arrivée et sécurise vos transactions en espèces ou Wave.
+              Motos, voitures ou camionnettes : expédiez vos colis partout avec paiement en direct.
             </p>
           </div>
         </div>

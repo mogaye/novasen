@@ -16,13 +16,13 @@ export function Testimonials() {
     },
     {
       name: 'Modou Ndiaye',
-      role: 'Chauffeur VTC & Livreur • Mermoz, Dakar',
+      role: 'Coursier & Livreur Indépendant • Mermoz, Dakar',
       avatar: '👨🏾',
       stars: 5,
       comment:
-        '« La formule flotte à 1 500 F CFA est imbattable à Dakar ! Dès mes premières courses, tous les gains me reviennent à 100%. Je combine transport de passagers le matin et livraison de colis l’après-midi. »',
-      badge: '★ Chauffeur Flotte Or',
-      date: 'Chauffeur certifié',
+        '« Le pass 1 500 F/jour ou l’abonnement 35 000 F/mois sans commission est une vraie révolution à Dakar ! Je fixe mes tarifs de livraison en direct avec les commerçants et je garde 100% de ce que j’encaisse. »',
+      badge: '★ Livreur Certifié',
+      date: 'Livreur actif',
     },
     {
       name: 'Ibrahima Ba',

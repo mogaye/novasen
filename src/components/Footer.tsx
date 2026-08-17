@@ -66,20 +66,20 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Transport & Colis */}
+          {/* Livraison & Colis */}
           <div className="flex flex-col gap-3">
             <h4 className="text-xs font-semibold uppercase tracking-widest text-[#C9A882]">
-              Transport & Logistique
+              Livraison & Coursiers
             </h4>
             <ul className="flex flex-col gap-2 text-sm text-[#E8DBC8]/90">
               <li>
-                <Link href="/transport?tab=passagers" className="hover:text-white transition-colors">
-                  Courses Passagers VTC
+                <Link href="/transport" className="hover:text-white transition-colors">
+                  Service Livraison Colis Express
                 </Link>
               </li>
               <li>
-                <Link href="/transport?tab=colis" className="hover:text-white transition-colors">
-                  Livraison de Colis Express
+                <Link href="/transport" className="hover:text-white transition-colors">
+                  Annuaire des Livreurs Certifiés
                 </Link>
               </li>
               <li>
@@ -89,12 +89,12 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/livreur" className="hover:text-white transition-colors">
-                  Devenir livreur ou chauffeur
+                  Devenir livreur partenaire (0% commission)
                 </Link>
               </li>
               <li>
-                <Link href="/accueil#simulateur" className="hover:text-white transition-colors">
-                  Simulateur d’amortissement
+                <Link href="/tarifs#bascule" className="hover:text-white transition-colors">
+                  Forfaits Livreurs (1 500 F / 35 000 F / 400 000 F)
                 </Link>
               </li>
             </ul>

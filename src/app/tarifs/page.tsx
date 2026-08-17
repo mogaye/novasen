@@ -63,13 +63,13 @@ export default function PricingPage() {
       {/* Header */}
       <div className="flex flex-col gap-3 text-center max-w-3xl mx-auto">
         <span className="text-xs font-bold uppercase tracking-widest text-[#7A5133]">
-          Modèle Économique Transparent
+          Modèle Économique Transparent • 0% Commission
         </span>
         <h1 className="text-3xl sm:text-5xl font-bold font-heading text-[#573721] tracking-tight">
-          Grilles Tarifaires Vendeurs & Chauffeurs
+          Grilles Tarifaires Vendeurs & Livreurs
         </h1>
         <p className="text-sm sm:text-base text-[#7A6A5C]">
-          Aucun frais caché. Des formules claires adaptées à chaque étape de votre activité à Dakar.
+          Aucun intermédiaire sur le prix de vos courses. Des forfaits clairs et transparents pour développer votre activité à Dakar et au Sénégal.
         </p>
 
         {/* Official Payment Gateways Supported */}
@@ -126,18 +126,33 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* 2. GRILLE LIVREURS & CHAUFFEURS */}
+      {/* 2. GRILLE LIVREURS (COLIS & MARCHANDISES) */}
       <section className="flex flex-col gap-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#DDCDB6] pb-4">
           <div>
             <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase text-[#1C3049] tracking-wider mb-1">
-              <span>Pour les chauffeurs VTC & coursiers</span>
+              <span>Pour les livreurs indépendants & coursiers (Motos, Voitures, Camionnettes)</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold font-heading text-[#1C3049]">
-              2. Formules Livreurs & Chauffeurs
+              2. Forfaits Livreurs & Coursiers Colis
             </h2>
           </div>
-          <span className="text-xs text-[#7A6A5C]">Frais de dossier unique : <strong>{formatCFA(DRIVER_REGISTRATION_FEE)}</strong></span>
+          <span className="text-xs text-[#7A6A5C]">Tarifs négociés librement avec vos clients • <strong>0% Commission</strong></span>
+        </div>
+
+        {/* Key Delivery Business Principle Card */}
+        <div className="bg-[#1C3049]/5 border border-[#1C3049]/20 rounded-[12px] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">📦</span>
+            <div>
+              <h4 className="font-bold text-sm text-[#1C3049]">
+                Liberté totale sur vos prix de livraison
+              </h4>
+              <p className="text-xs text-[#7A6A5C] mt-0.5 leading-relaxed">
+                NovaSen ne fixe aucun prix arbitraire. C'est vous, livreur indépendant, qui convenez directement du tarif de livraison avec le vendeur ou l'acheteur. Vous payez uniquement votre pass de référencement pour être visible et recevoir des missions.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Pricing Cards */}
@@ -154,49 +169,52 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* 3. LE POINT DE BASCULE (CŒUR DE L'ARGUMENTAIRE) */}
-      <section id="bascule" className="bg-[#1C3049] text-white rounded-[10px] border border-[#13223A] p-8 sm:p-12 flex flex-col gap-8">
+      {/* 3. COMPARATIF FORFAITS LIVREURS */}
+      <section id="bascule" className="bg-[#1C3049] text-white rounded-[16px] border border-[#13223A] p-8 sm:p-12 flex flex-col gap-8">
         <div className="flex flex-col gap-2 max-w-3xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[4px] bg-[#C9A882] text-[#13223A] text-xs font-bold uppercase tracking-wider w-fit">
             <IconTrendingUp className="w-4 h-4" />
-            <span>Comparatif Économique Chauffeur</span>
+            <span>Comparatif Forfaits Livreurs Colis</span>
           </div>
           <h3 className="text-2xl sm:text-4xl font-bold font-heading text-white">
-            Pass Journée vs Abonnement Mensuel (0% Commission)
+            Pass Journée vs Mensuel vs Annuel (0% Commission)
           </h3>
           <p className="text-sm sm:text-base text-[#E8DBC8]/90 leading-relaxed">
-            Chez NovaSen, <strong>aucun pourcentage n'est prélevé</strong> sur vos courses et livraisons. 100% de vos gains vous reviennent :
+            Chez NovaSen, <strong>aucun pourcentage n'est prélevé</strong> sur vos courses de livraison. 100% du prix payé par vos clients vous appartient :
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white/10 p-6 rounded-[8px] border border-white/15 flex flex-col gap-2">
+          <div className="bg-white/10 p-6 rounded-[10px] border border-white/15 flex flex-col gap-2">
             <span className="text-xs uppercase tracking-wider text-[#C9A882] font-semibold">Pass Journée (24h)</span>
             <div className="text-2xl font-bold font-heading tabular-nums text-white">
               1 500 CFA / jour
             </div>
-            <p className="text-xs text-[#E8DBC8]/80">
-              Idéal pour rouler ponctuellement ou tester la plateforme sans engagement.
+            <p className="text-xs text-[#E8DBC8]/80 leading-relaxed">
+              Idéal pour livrer ponctuellement ou tester la plateforme sans aucun engagement.
             </p>
           </div>
 
-          <div className="bg-white/10 p-6 rounded-[8px] border border-white/15 flex flex-col gap-2">
-            <span className="text-xs uppercase tracking-wider text-[#C9A882] font-semibold">Abonnement Mensuel</span>
+          <div className="bg-white/10 p-6 rounded-[10px] border border-white/15 flex flex-col gap-2 relative overflow-hidden">
+            <span className="absolute top-2 right-2 px-2 py-0.5 rounded bg-emerald-500 text-white font-bold text-[9px] uppercase">
+              Populaire
+            </span>
+            <span className="text-xs uppercase tracking-wider text-[#C9A882] font-semibold">Abonnement Mensuel Pro</span>
             <div className="text-2xl font-bold font-heading tabular-nums text-[#C9A882]">
-              25 000 CFA / mois
+              35 000 CFA / mois
             </div>
-            <p className="text-xs text-[#E8DBC8]/80">
-              Revient à seulement ≈ 833 F/jour pour une activité quotidienne à plein temps.
+            <p className="text-xs text-[#E8DBC8]/80 leading-relaxed">
+              Rentabilité maximale pour les coursiers et livreurs actifs tous les jours.
             </p>
           </div>
 
-          <div className="bg-white/10 p-6 rounded-[8px] border border-white/15 flex flex-col gap-2">
-            <span className="text-xs uppercase tracking-wider text-[#C9A882] font-semibold">Économie Mensuelle</span>
+          <div className="bg-white/10 p-6 rounded-[10px] border border-white/15 flex flex-col gap-2">
+            <span className="text-xs uppercase tracking-wider text-[#C9A882] font-semibold">Abonnement Annuel VIP</span>
             <div className="text-2xl font-bold font-heading tabular-nums text-emerald-400">
-              +14 000 CFA net / mois
+              400 000 CFA / an
             </div>
-            <p className="text-xs text-[#E8DBC8]/80">
-              Économisés par rapport au pass journalier (39 000 F vs 25 000 F sur 26 jours).
+            <p className="text-xs text-[#E8DBC8]/80 leading-relaxed">
+              Économisez 20 000 F par an avec un référencement VIP prioritaire 12 mois complets.
             </p>
           </div>
         </div>
@@ -205,12 +223,12 @@ export default function PricingPage() {
           <div className="flex items-center gap-3">
             <span className="w-3 h-3 rounded-full bg-[#C9A882]" />
             <p className="text-xs sm:text-sm text-[#E8DBC8]">
-              Testez vos propres hypothèses sur notre simulateur de rentabilité pour calculer vos bénéfices nets.
+              Devenez livreur certifié NovaSen et recevez les commandes de colis directement de nos marchands.
             </p>
           </div>
-          <Link href="/#simulateur">
+          <Link href="/livreur">
             <Button variant="secondary" size="md">
-              <span>Lancer le simulateur</span>
+              <span>Espace Livreur & Inscription</span>
               <IconArrowRight className="w-4 h-4" />
             </Button>
           </Link>
