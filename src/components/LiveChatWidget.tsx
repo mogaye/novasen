@@ -102,18 +102,18 @@ export function LiveChatWidget() {
             </div>
             <div className="flex items-center gap-1">
               <a
-                href="https://wa.me/221770001234"
+                href="https://wa.me/221705908725"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-1.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white text-xs transition-colors"
-                title="WhatsApp Direct"
+                title="Contacter sur WhatsApp"
               >
                 💬
               </a>
               <a
-                href="tel:+221780006789"
+                href="tel:+221789139036"
                 className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs transition-colors"
-                title="Appeler opérateur"
+                title="Appeler le support"
               >
                 📞
               </a>
