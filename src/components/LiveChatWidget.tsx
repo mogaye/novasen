@@ -54,7 +54,7 @@ export function LiveChatWidget() {
 
     // Smart bot responses
     setTimeout(() => {
-      let botReply = "Je suis à votre disposition ! Vous pouvez nous contacter aussi directement sur WhatsApp au +221 77 000 12 34.";
+      let botReply = "Je suis à votre disposition ! Vous pouvez aussi joindre notre support direct par WhatsApp ou par téléphone 7j/7.";
       const lower = text.toLowerCase();
 
       if (lower.includes('publier') || lower.includes('annonce')) {

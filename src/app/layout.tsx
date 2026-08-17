@@ -116,7 +116,7 @@ const jsonLdSchema = {
   },
   contactPoint: {
     '@type': 'ContactPoint',
-    telephone: '+221-77-000-00-00',
+    telephone: '+221-78-913-90-36',
     contactType: 'customer service',
     areaServed: 'SN',
     availableLanguage: ['French', 'Wolof'],

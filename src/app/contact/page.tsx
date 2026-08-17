@@ -66,19 +66,19 @@ export default function ContactPage() {
               WhatsApp Direct Opérateur
             </h3>
             <p className="text-xs sm:text-sm text-[#7A6A5C] leading-relaxed">
-              Discutez en direct avec notre cellule d’assistance nationale NovaSen Sénégal. Idéal pour partager une position GPS ou une photo de colis.
+              Discutez en direct avec notre cellule d’assistance commerciale et support NovaSen. Idéal pour un renseignement, une question boutique ou une livraison.
             </p>
           </div>
 
           <div className="flex flex-col gap-2 pt-4 border-t border-[#DDCDB6]/60">
             <span className="text-xs font-semibold text-[#573721]">Temps de réponse moyen : <strong>&lt; 2 minutes</strong></span>
             <a
-              href="https://wa.me/221770001234?text=Bonjour%20NovaSen,%20j'ai%20besoin%20d'aide%20concernant..."
+              href="https://wa.me/221705902787?text=Bonjour%20NovaSen,%20j'aimerais%20avoir%20une%20information."
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-sm transition-all"
             >
-              <span>Ouvrir WhatsApp (+221 77 000 12 34)</span>
+              <span>Contacter sur WhatsApp</span>
               <IconArrowRight className="w-4 h-4" />
             </a>
           </div>
@@ -91,23 +91,23 @@ export default function ContactPage() {
               📞
             </div>
             <div className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#1C3049]">
-              <span>Assistance Urgence Courses</span>
+              <span>Assistance Téléphonique 7j/7</span>
             </div>
             <h3 className="text-xl font-bold font-heading text-[#1C3049]">
-              Ligne Téléphonique Directe
+              Ligne d'Appel Directe
             </h3>
             <p className="text-xs sm:text-sm text-[#7A6A5C] leading-relaxed">
-              Pour toute urgence de livraison en cours, vérification d’un livreur ou problème d’encaissement partout au Sénégal.
+              Pour joindre immédiatement un conseiller NovaSen pour une livraison en cours, un chauffeur ou une question d'encaissement.
             </p>
           </div>
 
           <div className="flex flex-col gap-2 pt-4 border-t border-[#DDCDB6]/60">
             <span className="text-xs font-semibold text-[#573721]">Disponible 7j/7 : <strong>06h00 – 23h00</strong></span>
             <a
-              href="tel:+221780006789"
+              href="tel:+221789139036"
               className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#1C3049] hover:bg-[#13223A] text-white font-bold text-xs sm:text-sm shadow-sm transition-all"
             >
-              <span>Appeler le +221 78 000 67 89</span>
+              <span>Appeler le support</span>
             </a>
           </div>
         </div>
@@ -125,7 +125,7 @@ export default function ContactPage() {
               Hub Opérationnel Sénégal
             </h3>
             <p className="text-xs sm:text-sm text-[#7A6A5C] leading-relaxed">
-              Dakar, Thiès & régions. Accueil physique pour certification de profil, remise de stickers de flotte et formation vendeurs.
+              Dakar, Thiès & toutes régions. Accueil pour certification de profil, remise de stickers de flotte et accompagnement vendeurs.
             </p>
           </div>
 
