@@ -41,15 +41,20 @@ export function FakePaymentModal({
     setPaytechError(null);
 
     try {
-      // Call PayTech endpoint with dynamic itemPrice
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const orderRef = `NOVA-${Date.now()}`;
+      
+      // Call PayTech endpoint with dynamic itemPrice and current origin
       const res = await fetch('/api/paytech', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           itemName: title,
           itemPrice: Math.round(amount),
-          refCommand: `NOVA-${Date.now()}`,
+          refCommand: orderRef,
           commandName: description || `Paiement ${title}`,
+          successUrl: `${origin}/suivi/${orderRef}?payment=success&title=${encodeURIComponent(title)}`,
+          cancelUrl: `${origin}/compte?payment=cancelled`,
         }),
       });
 

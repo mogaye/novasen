@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { ZONES } from '@/lib/zones';
 import { formatCFA } from '@/lib/format';
@@ -20,6 +20,9 @@ import {
 
 export default function OrderTrackingPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
+  const paymentSuccess = searchParams.get('payment') === 'success';
+  const paymentTitle = searchParams.get('title') || 'Paiement';
   const orderId = Array.isArray(params?.orderId) ? params.orderId[0] : (params?.orderId as string) || 'CMD-001';
   const { activeOrder } = useApp();
 
@@ -54,6 +57,28 @@ export default function OrderTrackingPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-8">
+      {/* Payment Success Alert */}
+      {paymentSuccess && (
+        <div className="p-4 sm:p-5 bg-emerald-50 border-2 border-emerald-500 rounded-2xl flex items-center justify-between gap-4 shadow-sm animate-fade-in">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xl font-bold shadow-xs shrink-0">
+              ✓
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-bold text-emerald-900">
+                Paiement {paymentTitle} validé avec succès !
+              </span>
+              <span className="text-xs text-emerald-700">
+                Votre transaction PayTech SN a bien été enregistrée et votre commande est prise en charge.
+              </span>
+            </div>
+          </div>
+          <span className="hidden sm:inline-block px-3 py-1 bg-emerald-200 text-emerald-900 text-xs font-bold rounded-lg">
+            Payé Wave / OM
+          </span>
+        </div>
+      )}
+
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#DDCDB6]">
         <div>

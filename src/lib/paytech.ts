@@ -29,7 +29,7 @@ export interface PaytechPaymentResponse {
 export async function createPaytechPayment(payload: PaytechPaymentPayload): Promise<PaytechPaymentResponse> {
   const apiKey = process.env.PAYTECH_API_KEY;
   const apiSecret = process.env.PAYTECH_API_SECRET;
-  let rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://novasen.sn';
+  const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   if (!apiKey || !apiSecret) {
     console.warn('[PayTech] API Keys missing in environment variables. Falling back to test mode URL.');
@@ -40,23 +40,10 @@ export async function createPaytechPayment(payload: PaytechPaymentPayload): Prom
     };
   }
 
-  let siteUrl = rawSiteUrl;
-  if (!siteUrl.startsWith('https://')) {
-    siteUrl = siteUrl.replace('http://', 'https://');
-  }
-
-  // Ensure valid https default if on localhost
-  const ipnUrl = payload.ipnUrl?.startsWith('https://') 
-    ? payload.ipnUrl 
-    : `${siteUrl.includes('localhost') ? 'https://novasen.sn' : siteUrl}/api/paytech/webhook`;
-
-  const successUrl = payload.successUrl?.startsWith('https://')
-    ? payload.successUrl
-    : `${siteUrl.includes('localhost') ? 'https://novasen.sn' : siteUrl}/suivi/${payload.refCommand}?payment=success`;
-
-  const cancelUrl = payload.cancelUrl?.startsWith('https://')
-    ? payload.cancelUrl
-    : `${siteUrl.includes('localhost') ? 'https://novasen.sn' : siteUrl}/transport?payment=cancelled`;
+  // Use the exact current site URL (or provided URLs) without forcing non-existent external domains
+  const successUrl = payload.successUrl || `${rawSiteUrl}/suivi/${payload.refCommand}?payment=success`;
+  const cancelUrl = payload.cancelUrl || `${rawSiteUrl}/transport?payment=cancelled`;
+  const ipnUrl = payload.ipnUrl || `${rawSiteUrl}/api/paytech/webhook`;
 
   const requestedEnv = process.env.PAYTECH_ENV || 'test';
   const paytechEnv = (requestedEnv === 'prod' || requestedEnv === 'production' || requestedEnv === 'live') ? 'prod' : 'test';
