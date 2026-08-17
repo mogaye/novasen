@@ -186,6 +186,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Fetch real listings from Supabase
   const fetchListings = async () => {
     try {
+      let localCustom: Listing[] = [];
+      if (typeof window !== 'undefined') {
+        try {
+          const saved = localStorage.getItem('novasen_custom_listings');
+          if (saved) localCustom = JSON.parse(saved);
+        } catch (e) {}
+      }
+
       const { data, error } = await supabase
         .from('listings')
         .select('*')
@@ -193,24 +201,44 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       if (data && !error) {
         const mapped: Listing[] = data.map((d: any) => ({
-          id: d.id,
-          title: d.title,
-          price: Number(d.price),
-          category: d.category,
-          zoneId: d.zone_id as ZoneId,
-          neighborhood: d.address || d.zone_id,
+          id: String(d.id),
+          title: d.title || 'Annonce NovaSen',
+          price: Number(d.price) || 0,
+          category: d.category || 'vehicules',
+          zoneId: (d.zone_id as ZoneId) || 'plateau',
+          neighborhood: d.address || d.zone_id || 'Dakar',
           region: 'Dakar',
           condition: d.condition || 'Bon état',
           sellerName: d.phone || 'Vendeur NovaSen',
-          sellerSeniority: 'Membre NovaSen',
-          relativeDate: new Date(d.created_at).toLocaleDateString('fr-FR'),
+          sellerSeniority: 'Membre certifié',
+          relativeDate: d.created_at ? new Date(d.created_at).toLocaleDateString('fr-FR') : "Aujourd'hui",
           description: d.description || '',
           isVerifiedShop: false,
           isFeatured: d.is_featured || false,
           imageUrl: d.images?.[0] || '',
-          images: d.images || [],
+          images: d.images && d.images.length > 0 ? d.images : (d.imageUrl ? [d.imageUrl] : []),
         }));
-        setListings(mapped);
+
+        const combined = [...mapped];
+        for (const item of localCustom) {
+          if (!combined.some((c) => String(c.id) === String(item.id))) {
+            combined.push(item);
+          }
+        }
+        for (const init of INITIAL_LISTINGS) {
+          if (!combined.some((c) => String(c.id) === String(init.id))) {
+            combined.push(init);
+          }
+        }
+        setListings(combined);
+      } else {
+        const combined = [...localCustom];
+        for (const init of INITIAL_LISTINGS) {
+          if (!combined.some((c) => String(c.id) === String(init.id))) {
+            combined.push(init);
+          }
+        }
+        setListings(combined);
       }
     } catch (err) {
       console.error('Error fetching listings from Supabase:', err);
@@ -269,31 +297,57 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       const { data: userData } = await supabase.auth.getUser();
 
+      const insertPayload = {
+        user_id: userData.user?.id || null,
+        title: listingData.title || 'Nouvelle annonce',
+        price: Number(listingData.price) || 0,
+        category: listingData.category || 'vehicules',
+        zone_id: listingData.zoneId || 'plateau',
+        address: listingData.neighborhood || 'Dakar',
+        condition: listingData.condition || 'Bon état',
+        description: listingData.description || '',
+        images: listingData.images || (listingData.imageUrl ? [listingData.imageUrl] : []),
+        is_featured: listingData.isFeatured || false,
+        phone: listingData.sellerName || '',
+      };
+
       const { data, error } = await supabase
         .from('listings')
-        .insert({
-          user_id: userData.user?.id || null,
-          title: listingData.title || 'Nouvelle annonce',
-          price: listingData.price || 0,
-          category: listingData.category || 'vehicules',
-          zone_id: listingData.zoneId || 'plateau',
-          address: listingData.neighborhood || 'Dakar',
-          condition: listingData.condition || 'Bon état',
-          description: listingData.description || '',
-          images: listingData.images || (listingData.imageUrl ? [listingData.imageUrl] : []),
-          is_featured: listingData.isFeatured || false,
-          phone: listingData.sellerName || '',
-        })
+        .insert(insertPayload)
         .select()
         .single();
 
-      if (error) {
-        return { success: false, error: error.message };
+      const newListingItem: Listing = {
+        id: String(data?.id || `cust-${Date.now()}`),
+        title: insertPayload.title,
+        price: insertPayload.price,
+        category: insertPayload.category as any,
+        zoneId: insertPayload.zone_id as ZoneId,
+        neighborhood: insertPayload.address,
+        region: 'Dakar',
+        condition: insertPayload.condition as any,
+        sellerName: insertPayload.phone || 'Vendeur NovaSen',
+        sellerSeniority: 'Nouveau vendeur',
+        relativeDate: "Aujourd'hui",
+        description: insertPayload.description,
+        isVerifiedShop: false,
+        isFeatured: insertPayload.is_featured,
+        imageUrl: insertPayload.images[0] || '',
+        images: insertPayload.images,
+      };
+
+      if (typeof window !== 'undefined') {
+        try {
+          const saved = localStorage.getItem('novasen_custom_listings');
+          const list = saved ? JSON.parse(saved) : [];
+          localStorage.setItem('novasen_custom_listings', JSON.stringify([newListingItem, ...list]));
+        } catch (e) {}
       }
 
-      await fetchListings();
+      setListings((prev) => [newListingItem, ...prev.filter((l) => String(l.id) !== String(newListingItem.id))]);
       setUserListingsCount((prev) => prev + 1);
-      return { success: true, data };
+
+      return { success: true, data: data || newListingItem };
     } catch (err: any) {
       return { success: false, error: err.message || 'Erreur lors de la publication.' };
     }

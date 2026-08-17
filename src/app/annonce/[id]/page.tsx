@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, use } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { INITIAL_LISTINGS } from '@/lib/listings';
+import { Listing, ZoneId } from '@/lib/types';
 import { formatCFA, formatNumber } from '@/lib/format';
 import { CategoryVisual } from '@/components/ui/CategoryVisual';
 import { Badge } from '@/components/ui/Badge';
@@ -14,6 +15,7 @@ import { ChatModal } from '@/components/ChatModal';
 import { MakeOfferModal } from '@/components/MakeOfferModal';
 import { EarningsSimulator } from '@/components/EarningsSimulator';
 import { GlowButton } from '@/components/ui/GlowButton';
+import { supabase } from '@/lib/supabase';
 import {
   IconMapPin,
   IconClock,
@@ -29,24 +31,159 @@ import {
   IconArrowRight,
 } from '@/components/ui/Icons';
 
-export default function ListingDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function ListingDetailPage() {
+  const params = useParams();
+  const id = Array.isArray(params?.id) ? params.id[0] : (params?.id as string);
+
   const { listings } = useApp();
+  const [listing, setListing] = useState<Listing | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
   const [contactOpen, setContactOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [offerOpen, setOfferOpen] = useState(false);
   const [showSimulator, setShowSimulator] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | undefined>(undefined);
 
-  // Find listing from state or initial catalog
-  const listing = listings.find((l) => l.id === id) || INITIAL_LISTINGS.find((l) => l.id === id);
+  // Fetch / find listing from memory, cache, or Supabase
+  useEffect(() => {
+    if (!id) {
+      setLoading(false);
+      return;
+    }
 
+    let isMounted = true;
+
+    async function loadListing() {
+      // 1. Search in AppContext in-memory listings
+      const foundInMemory = listings.find((l) => String(l.id) === String(id));
+      if (foundInMemory) {
+        if (isMounted) {
+          setListing(foundInMemory);
+          setSelectedPhoto(foundInMemory.imageUrl || foundInMemory.images?.[0]);
+          setLoading(false);
+        }
+        return;
+      }
+
+      // 2. Search in INITIAL_LISTINGS
+      const foundInInitial = INITIAL_LISTINGS.find((l) => String(l.id) === String(id));
+      if (foundInInitial) {
+        if (isMounted) {
+          setListing(foundInInitial);
+          setSelectedPhoto(foundInInitial.imageUrl || foundInInitial.images?.[0]);
+          setLoading(false);
+        }
+        return;
+      }
+
+      // 3. Search in LocalStorage cache
+      if (typeof window !== 'undefined') {
+        try {
+          const cached = localStorage.getItem('novasen_custom_listings');
+          if (cached) {
+            const parsed: Listing[] = JSON.parse(cached);
+            const foundInCache = parsed.find((l) => String(l.id) === String(id));
+            if (foundInCache) {
+              if (isMounted) {
+                setListing(foundInCache);
+                setSelectedPhoto(foundInCache.imageUrl || foundInCache.images?.[0]);
+                setLoading(false);
+              }
+              return;
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 4. Fetch directly from Supabase by ID / UUID
+      try {
+        const { data, error } = await supabase
+          .from('listings')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (data && !error && isMounted) {
+          const fetchedListing: Listing = {
+            id: String(data.id),
+            title: data.title || 'Annonce NovaSen',
+            price: Number(data.price) || 0,
+            category: data.category || 'vehicules',
+            zoneId: (data.zone_id as ZoneId) || 'plateau',
+            neighborhood: data.address || data.zone_id || 'Dakar',
+            region: 'Dakar',
+            condition: data.condition || 'Bon état',
+            sellerName: data.phone || 'Vendeur NovaSen',
+            sellerSeniority: 'Membre certifié',
+            relativeDate: data.created_at
+              ? new Date(data.created_at).toLocaleDateString('fr-FR')
+              : "Aujourd'hui",
+            description: data.description || '',
+            isVerifiedShop: false,
+            isFeatured: data.is_featured || false,
+            imageUrl: data.images?.[0] || '',
+            images: data.images && data.images.length > 0 ? data.images : (data.imageUrl ? [data.imageUrl] : []),
+          };
+
+          setListing(fetchedListing);
+          setSelectedPhoto(fetchedListing.imageUrl || fetchedListing.images?.[0]);
+        }
+      } catch (err) {
+        console.error('Error fetching listing by ID:', err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadListing();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id, listings]);
+
+  // Loading skeleton state
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-pulse flex flex-col gap-8">
+        <div className="h-6 w-48 bg-[#E8DBC8] rounded-md" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-7 flex flex-col gap-4">
+            <div className="h-80 bg-[#E8DBC8] rounded-xl" />
+            <div className="h-40 bg-[#E8DBC8] rounded-xl" />
+          </div>
+          <div className="lg:col-span-5 flex flex-col gap-4">
+            <div className="h-60 bg-[#E8DBC8] rounded-xl" />
+            <div className="h-40 bg-[#E8DBC8] rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Not found fallback
   if (!listing) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-20 text-center flex flex-col items-center gap-4">
-        <h1 className="text-2xl font-bold font-heading text-[#573721]">Annonce introuvable</h1>
-        <p className="text-[#7A6A5C]">Cette annonce n'existe plus ou a été retirée du marché.</p>
+      <div className="max-w-4xl mx-auto px-4 py-20 text-center flex flex-col items-center gap-6 animate-fade-in">
+        <div className="w-16 h-16 rounded-full bg-[#E8DBC8] text-[#7A5133] flex items-center justify-center text-2xl font-bold">
+          📍
+        </div>
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[#573721]">
+            Annonce introuvable
+          </h1>
+          <p className="text-sm text-[#7A6A5C] max-w-md">
+            Cette annonce n'existe plus ou a été retirée du marché NovaSen.
+          </p>
+        </div>
         <Link href="/marche">
-          <Button variant="primary">Retourner au marché</Button>
+          <Button variant="primary">
+            <span>Explorer les annonces du marché</span>
+            <IconArrowRight className="w-4 h-4" />
+          </Button>
         </Link>
       </div>
     );
@@ -55,13 +192,12 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
   const isVehicle = listing.category === 'vehicules';
   const isEligibleForEarnings = isVehicle && (listing.eligiblePassengers || listing.eligibleParcels);
 
-  const [selectedPhoto, setSelectedPhoto] = useState<string | undefined>(
-    listing.imageUrl || listing.images?.[0]
-  );
-
-  const allPhotos = listing.images && listing.images.length > 0
-    ? listing.images
-    : listing.imageUrl ? [listing.imageUrl] : [];
+  const allPhotos =
+    listing.images && listing.images.length > 0
+      ? listing.images
+      : listing.imageUrl
+      ? [listing.imageUrl]
+      : [];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-10">
@@ -85,12 +221,12 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
               category={listing.category}
               vehicleType={listing.vehicleType}
               imageUrl={selectedPhoto || listing.imageUrl || listing.images?.[0]}
-              className="h-72 sm:h-96 w-full"
+              className="h-72 sm:h-96 w-full rounded-[8px] overflow-hidden"
             />
 
             {/* Thumbnail selector if multiple images */}
             {allPhotos.length > 1 && (
-              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
                 {allPhotos.map((photo, pIdx) => (
                   <button
                     key={`thumb-${pIdx}`}
@@ -120,37 +256,53 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
                 {listing.year && (
                   <div>
-                    <span className="text-xs text-[#7A6A5C] uppercase tracking-wider block font-medium">Année</span>
+                    <span className="text-xs text-[#7A6A5C] uppercase tracking-wider block font-medium">
+                      Année
+                    </span>
                     <span className="font-bold text-[#2A211A]">{listing.year}</span>
                   </div>
                 )}
                 {listing.transmission && (
                   <div>
-                    <span className="text-xs text-[#7A6A5C] uppercase tracking-wider block font-medium">Boîte</span>
+                    <span className="text-xs text-[#7A6A5C] uppercase tracking-wider block font-medium">
+                      Boîte
+                    </span>
                     <span className="font-bold text-[#2A211A]">{listing.transmission}</span>
                   </div>
                 )}
                 {listing.fuel && (
                   <div>
-                    <span className="text-xs text-[#7A6A5C] uppercase tracking-wider block font-medium">Carburant</span>
+                    <span className="text-xs text-[#7A6A5C] uppercase tracking-wider block font-medium">
+                      Carburant
+                    </span>
                     <span className="font-bold text-[#2A211A]">{listing.fuel}</span>
                   </div>
                 )}
                 {listing.mileage !== undefined && (
                   <div>
-                    <span className="text-xs text-[#7A6A5C] uppercase tracking-wider block font-medium">Kilométrage</span>
-                    <span className="font-bold tabular-nums text-[#1C3049]">{formatNumber(listing.mileage)} km</span>
+                    <span className="text-xs text-[#7A6A5C] uppercase tracking-wider block font-medium">
+                      Kilométrage
+                    </span>
+                    <span className="font-bold tabular-nums text-[#1C3049]">
+                      {formatNumber(listing.mileage)} km
+                    </span>
                   </div>
                 )}
                 {listing.consumption && (
                   <div>
-                    <span className="text-xs text-[#7A6A5C] uppercase tracking-wider block font-medium">Consommation</span>
+                    <span className="text-xs text-[#7A6A5C] uppercase tracking-wider block font-medium">
+                      Consommation
+                    </span>
                     <span className="font-bold text-[#2A211A]">{listing.consumption} L / 100km</span>
                   </div>
                 )}
                 <div>
-                  <span className="text-xs text-[#7A6A5C] uppercase tracking-wider block font-medium">Type flotte</span>
-                  <span className="font-bold text-[#2A211A] capitalize">{listing.vehicleType || 'Voiture'}</span>
+                  <span className="text-xs text-[#7A6A5C] uppercase tracking-wider block font-medium">
+                    Type flotte
+                  </span>
+                  <span className="font-bold text-[#2A211A] capitalize">
+                    {listing.vehicleType || 'Voiture'}
+                  </span>
                 </div>
               </div>
 
@@ -172,7 +324,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
               Description de l’article
             </h3>
             <p className="text-sm text-[#2A211A] leading-relaxed whitespace-pre-line">
-              {listing.description}
+              {listing.description || "Aucune description détaillée n'a été fournie pour cette annonce."}
             </p>
           </div>
         </div>
@@ -183,7 +335,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
             {/* Header info */}
             <div className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="condition">{listing.condition}</Badge>
+                <Badge variant="condition">{listing.condition || 'Bon état'}</Badge>
                 {listing.isVerifiedShop && <Badge variant="shop">Boutique vérifiée</Badge>}
                 {listing.isFeatured && <Badge variant="featured">En avant</Badge>}
               </div>
@@ -195,11 +347,11 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
               <div className="flex items-center gap-4 text-xs text-[#7A6A5C] pt-1">
                 <span className="flex items-center gap-1">
                   <IconMapPin className="w-4 h-4 text-[#7A5133]" />
-                  <strong className="text-[#573721]">{listing.neighborhood}</strong>, {listing.region}
+                  <strong className="text-[#573721]">{listing.neighborhood || 'Dakar'}</strong>, {listing.region || 'Sénégal'}
                 </span>
                 <span className="flex items-center gap-1">
                   <IconClock className="w-4 h-4" />
-                  {listing.relativeDate}
+                  {listing.relativeDate || "Aujourd'hui"}
                 </span>
               </div>
             </div>
@@ -207,9 +359,8 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
             {/* Price Tag */}
             <div className="p-4 bg-[#F2E9DC] rounded-[8px] border border-[#DDCDB6] flex items-center justify-between">
               <span className="text-xs uppercase font-semibold text-[#7A6A5C]">Prix de vente</span>
-              {/* RULE OF COLOR: Dark Blue Tabular Numbers */}
               <span className="text-3xl font-bold font-heading tabular-nums text-[#1C3049]">
-                {formatCFA(listing.price)}
+                {formatCFA(listing.price || 0)}
               </span>
             </div>
 
@@ -217,7 +368,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
             <div className="flex flex-col gap-3">
               {/* Action 1 : Commander avec livraison immédiate NovaSen (Glow Button) */}
               <GlowButton
-                href={`/livraison?annonceId=${listing.id}&pickupZone=${listing.zoneId}`}
+                href={`/livraison?annonceId=${listing.id}&pickupZone=${listing.zoneId || 'plateau'}`}
                 variant="transport"
                 size="lg"
                 fullWidth
@@ -281,7 +432,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
                   Vendeur certifié
                 </span>
                 <Link
-                  href={`/boutique/${encodeURIComponent(listing.sellerName)}`}
+                  href={`/boutique/${encodeURIComponent(listing.sellerName || 'Vendeur')}`}
                   className="text-xs font-bold text-[#7A5133] hover:underline"
                 >
                   Visiter la boutique →
@@ -289,17 +440,19 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
               </div>
               <div className="flex items-center justify-between">
                 <Link
-                  href={`/boutique/${encodeURIComponent(listing.sellerName)}`}
+                  href={`/boutique/${encodeURIComponent(listing.sellerName || 'Vendeur')}`}
                   className="flex items-center gap-3 group"
                 >
                   <div className="w-10 h-10 rounded-full bg-[#7A5133] text-white font-bold flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
-                    {listing.sellerName.charAt(0)}
+                    {(listing.sellerName || 'V').charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <h4 className="font-bold text-sm text-[#2A211A] group-hover:text-[#7A5133] transition-colors">
-                      {listing.sellerName}
+                      {listing.sellerName || 'Vendeur NovaSen'}
                     </h4>
-                    <p className="text-xs text-[#7A6A5C]">{listing.sellerSeniority} • {listing.neighborhood}</p>
+                    <p className="text-xs text-[#7A6A5C]">
+                      {listing.sellerSeniority || 'Membre NovaSen'} • {listing.neighborhood || 'Dakar'}
+                    </p>
                   </div>
                 </Link>
                 {listing.isVerifiedShop && (
@@ -330,7 +483,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
               Calculateur personnalisé pour cette annonce
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold font-heading text-[#573721]">
-              Combien vous rapportera ce véhicule à {formatCFA(listing.price)} ?
+              Combien vous rapportera ce véhicule à {formatCFA(listing.price || 0)} ?
             </h2>
           </div>
 
@@ -355,7 +508,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
         listingTitle={listing.title}
         listingPrice={listing.price}
         sellerName={listing.sellerName}
-        sellerZone={`${listing.neighborhood}, Dakar`}
+        sellerZone={`${listing.neighborhood || 'Dakar'}, Sénégal`}
       />
 
       {/* Make Offer Modal */}
