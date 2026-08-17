@@ -84,6 +84,8 @@ export interface Listing {
   isFeatured?: boolean;
   imageUrl?: string;
   images?: string[];
+  quantity?: number; // Stock total / nombre d'exemplaires (ex: 5)
+  soldCount?: number; // Nombre d'exemplaires vendus
   
   // Specific to vehicles
   year?: number;

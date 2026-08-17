@@ -39,6 +39,8 @@ interface AppContextType {
   listings: Listing[];
   fetchListings: () => Promise<void>;
   addListing: (listingData: Partial<Listing>) => Promise<{ success: boolean; error?: string; isQuotaReached?: boolean; data?: any }>;
+  updateListing: (listingId: string, updatedData: Partial<Listing>) => Promise<{ success: boolean; error?: string }>;
+  decrementListingStock: (listingId: string, count?: number) => Promise<{ success: boolean }>;
   deleteListing: (listingId: string) => Promise<{ success: boolean; error?: string }>;
   driverTrips: DriverTrip[];
   addDriverTrip: (tripData: Partial<DriverTrip>) => Promise<{ success: boolean; error?: string }>;
@@ -455,6 +457,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         isFeatured: insertPayload.is_featured,
         imageUrl: insertPayload.images[0] || '',
         images: insertPayload.images,
+        quantity: Number(listingData.quantity) || 1,
+        soldCount: 0,
       };
 
       if (typeof window !== 'undefined') {
@@ -471,6 +475,90 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return { success: true, data: data || newListingItem };
     } catch (err: any) {
       return { success: false, error: err.message || 'Erreur lors de la publication.' };
+    }
+  };
+
+  const updateListing = async (listingId: string, updatedData: Partial<Listing>): Promise<{ success: boolean; error?: string }> => {
+    try {
+      // 1. Update in Supabase if online
+      try {
+        await supabase
+          .from('listings')
+          .update({
+            title: updatedData.title,
+            price: updatedData.price !== undefined ? Number(updatedData.price) : undefined,
+            category: updatedData.category,
+            zone_id: updatedData.zoneId,
+            address: updatedData.neighborhood,
+            condition: updatedData.condition,
+            description: updatedData.description,
+            images: updatedData.images,
+            is_featured: updatedData.isFeatured,
+            phone: updatedData.sellerName,
+          })
+          .eq('id', listingId);
+      } catch (e) {
+        console.warn('Could not update in Supabase, updating locally', e);
+      }
+
+      // 2. Update in localStorage
+      if (typeof window !== 'undefined') {
+        try {
+          const saved = localStorage.getItem('novasen_custom_listings');
+          if (saved) {
+            const list: Listing[] = JSON.parse(saved);
+            const updated = list.map((item) =>
+              String(item.id) === String(listingId) ? { ...item, ...updatedData } : item
+            );
+            localStorage.setItem('novasen_custom_listings', JSON.stringify(updated));
+          }
+        } catch (e) {}
+      }
+
+      // 3. Update memory state
+      setListings((prev) =>
+        prev.map((item) => (String(item.id) === String(listingId) ? { ...item, ...updatedData } : item))
+      );
+
+      showSuccessToast('Annonce mise à jour avec succès !');
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Erreur lors de la modification de l’annonce' };
+    }
+  };
+
+  const decrementListingStock = async (listingId: string, count: number = 1): Promise<{ success: boolean }> => {
+    try {
+      const targetListing = listings.find((l) => String(l.id) === String(listingId));
+      const currentSold = targetListing?.soldCount || 0;
+      const newSold = currentSold + count;
+
+      setListings((prev) =>
+        prev.map((item) =>
+          String(item.id) === String(listingId)
+            ? { ...item, soldCount: newSold }
+            : item
+        )
+      );
+
+      if (typeof window !== 'undefined') {
+        try {
+          const saved = localStorage.getItem('novasen_custom_listings');
+          if (saved) {
+            const list: Listing[] = JSON.parse(saved);
+            const updated = list.map((item) =>
+              String(item.id) === String(listingId)
+                ? { ...item, soldCount: newSold }
+                : item
+            );
+            localStorage.setItem('novasen_custom_listings', JSON.stringify(updated));
+          }
+        } catch (e) {}
+      }
+
+      return { success: true };
+    } catch (e) {
+      return { success: false };
     }
   };
 
@@ -637,6 +725,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         listings,
         fetchListings,
         addListing,
+        updateListing,
+        decrementListingStock,
         deleteListing,
         driverTrips,
         addDriverTrip,

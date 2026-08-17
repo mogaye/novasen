@@ -356,27 +356,78 @@ export default function ListingDetailPage() {
               </div>
             </div>
 
-            {/* Price Tag */}
-            <div className="p-4 bg-[#F2E9DC] rounded-[8px] border border-[#DDCDB6] flex items-center justify-between">
-              <span className="text-xs uppercase font-semibold text-[#7A6A5C]">Prix de vente</span>
-              <span className="text-3xl font-bold font-heading tabular-nums text-[#1C3049]">
-                {formatCFA(listing.price || 0)}
-              </span>
+            {/* Price Tag & Stock Status */}
+            <div className="p-4 bg-[#F2E9DC] rounded-[8px] border border-[#DDCDB6] flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs uppercase font-semibold text-[#7A6A5C]">Prix de vente</span>
+                <span className="text-3xl font-bold font-heading tabular-nums text-[#1C3049]">
+                  {formatCFA(listing.price || 0)}
+                </span>
+              </div>
+
+              {/* Stock Status Indicator */}
+              <div className="pt-2 border-t border-[#DDCDB6] flex items-center justify-between">
+                <span className="text-xs text-[#7A6A5C] font-medium flex items-center gap-1.5">
+                  <IconPackage className="w-4 h-4 text-[#7A5133]" />
+                  <span>Disponibilité :</span>
+                </span>
+                {(() => {
+                  const avail = Math.max(0, (listing.quantity ?? 1) - (listing.soldCount ?? 0));
+                  if (avail <= 0) {
+                    return (
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-red-100 text-red-800 flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                        Rupture de stock
+                      </span>
+                    );
+                  }
+                  if (avail === 1) {
+                    return (
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                        Dernier exemplaire disponible !
+                      </span>
+                    );
+                  }
+                  return (
+                    <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                      En stock ({avail} exemplaires)
+                    </span>
+                  );
+                })()}
+              </div>
             </div>
 
             {/* LES ACTIONS PRINCIPALES */}
             <div className="flex flex-col gap-3">
               {/* Action 1 : Commander avec livraison immédiate NovaSen (Glow Button) */}
-              <GlowButton
-                href={`/livraison?annonceId=${listing.id}&pickupZone=${listing.zoneId || 'plateau'}`}
-                variant="transport"
-                size="lg"
-                fullWidth
-              >
-                <span className="text-lg">🛵</span>
-                <span>Commander avec livraison NovaSen</span>
-                <IconArrowRight className="w-4 h-4 text-[#C9A882]" />
-              </GlowButton>
+              {(() => {
+                const avail = Math.max(0, (listing.quantity ?? 1) - (listing.soldCount ?? 0));
+                if (avail <= 0) {
+                  return (
+                    <button
+                      type="button"
+                      disabled
+                      className="w-full py-3.5 px-4 rounded-[8px] bg-gray-200 text-gray-500 font-bold text-sm cursor-not-allowed flex items-center justify-center gap-2 border border-gray-300"
+                    >
+                      <span>❌ Cet article est actuellement épuisé</span>
+                    </button>
+                  );
+                }
+                return (
+                  <GlowButton
+                    href={`/livraison?annonceId=${listing.id}&pickupZone=${listing.zoneId || 'plateau'}`}
+                    variant="transport"
+                    size="lg"
+                    fullWidth
+                  >
+                    <span className="text-lg">🛵</span>
+                    <span>Commander avec livraison NovaSen</span>
+                    <IconArrowRight className="w-4 h-4 text-[#C9A882]" />
+                  </GlowButton>
+                );
+              })()}
 
               {/* Action 2 : Discuter avec le vendeur (Espace Chat) */}
               <Button

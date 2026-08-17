@@ -9,6 +9,8 @@ import { formatCFA } from '@/lib/format';
 import { FakePaymentModal } from '@/components/FakePaymentModal';
 import { Button } from '@/components/ui/Button';
 import { GlowButton } from '@/components/ui/GlowButton';
+import { EditListingModal } from '@/components/EditListingModal';
+import { Listing } from '@/lib/types';
 import {
   IconStar,
   IconPlus,
@@ -27,6 +29,7 @@ export default function MyBoutiquePage() {
   const {
     listings,
     deleteListing,
+    updateListing,
     userPlan,
     setUserPlan,
     userListingsCount,
@@ -37,6 +40,7 @@ export default function MyBoutiquePage() {
   } = useApp();
 
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [editingListing, setEditingListing] = useState<Listing | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteModal, setConfirmDeleteModal] = useState<string | null>(null);
 
@@ -363,9 +367,28 @@ export default function MyBoutiquePage() {
 
                 {/* Body Content */}
                 <div className="p-4 flex flex-col gap-2 flex-1">
-                  <span className="text-[11px] font-bold uppercase text-[#7A5133] tracking-wider">
-                    {item.category} • {item.neighborhood || 'Dakar'}
-                  </span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] font-bold uppercase text-[#7A5133] tracking-wider">
+                      {item.category} • {item.neighborhood || 'Dakar'}
+                    </span>
+                    {/* Stock badge */}
+                    {(() => {
+                      const avail = Math.max(0, (item.quantity ?? 1) - (item.soldCount ?? 0));
+                      return (
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            avail > 3
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : avail > 0
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}
+                        >
+                          📦 Stock : {avail} rest.
+                        </span>
+                      );
+                    })()}
+                  </div>
                   <h3 className="font-bold text-[#573721] text-base line-clamp-2">
                     {item.title}
                   </h3>
@@ -381,10 +404,19 @@ export default function MyBoutiquePage() {
                     target="_blank"
                     className="text-xs font-bold text-[#1C3049] hover:text-[#7A5133] flex items-center gap-1"
                   >
-                    <span>👁️ Voir la fiche</span>
+                    <span>👁️ Voir</span>
                   </Link>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setEditingListing(item)}
+                      className="px-2.5 py-1.5 rounded-[6px] bg-[#FAF8F5] hover:bg-[#E8DBC8] text-[#573721] border border-[#DDCDB6] text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                      title="Modifier les informations et le stock de l’annonce"
+                    >
+                      <span>✏️ Modifier</span>
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => handleBoost(item.id)}
@@ -470,6 +502,16 @@ export default function MyBoutiquePage() {
           }}
         />
       )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* MODAL ÉDITION D'ANNONCE & GESTION DU STOCK */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <EditListingModal
+        isOpen={!!editingListing}
+        listing={editingListing}
+        onClose={() => setEditingListing(null)}
+        onSave={updateListing}
+      />
     </div>
   );
 }

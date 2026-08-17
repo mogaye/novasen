@@ -26,13 +26,15 @@ import {
   IconAlertCircle,
 } from '@/components/ui/Icons';
 import { useAuth } from '@/context/AuthContext';
-import { DriverTrip } from '@/lib/types';
+import { DriverTrip, Listing } from '@/lib/types';
+import { EditListingModal } from '@/components/EditListingModal';
 
 export default function AccountPage() {
   const { user, profile, signOut } = useAuth();
   const {
     listings,
     deleteListing,
+    updateListing,
     driverTrips,
     addDriverTrip,
     deleteDriverTrip,
@@ -52,6 +54,7 @@ export default function AccountPage() {
 
   const [activeProfileTab, setActiveProfileTab] = useState<'seller' | 'driver'>('seller');
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [editingListing, setEditingListing] = useState<Listing | null>(null);
   const [targetUpgradePlan, setTargetUpgradePlan] = useState<any>(null);
   const [confirmDeleteListingId, setConfirmDeleteListingId] = useState<string | null>(null);
   const [confirmDeleteTripId, setConfirmDeleteTripId] = useState<string | null>(null);
@@ -546,9 +549,23 @@ export default function AccountPage() {
                           className="w-16 h-16 rounded-[8px] object-cover shrink-0 bg-[#E8DBC8]"
                         />
                         <div className="flex flex-col min-w-0">
-                          <span className="text-[10px] font-bold uppercase text-[#7A5133] tracking-wider truncate">
-                            {item.category}
-                          </span>
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="text-[10px] font-bold uppercase text-[#7A5133] tracking-wider truncate">
+                              {item.category}
+                            </span>
+                            {(() => {
+                              const avail = Math.max(0, (item.quantity ?? 1) - (item.soldCount ?? 0));
+                              return (
+                                <span
+                                  className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${
+                                    avail > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
+                                  }`}
+                                >
+                                  Stock: {avail}
+                                </span>
+                              );
+                            })()}
+                          </div>
                           <h4 className="font-bold text-[#573721] text-xs line-clamp-1">
                             {item.title}
                           </h4>
@@ -562,19 +579,29 @@ export default function AccountPage() {
                         <Link
                           href={`/annonce/${item.id}`}
                           target="_blank"
-                          className="text-[#1C3049] hover:underline font-bold"
+                          className="text-[#1C3049] hover:underline font-bold text-[11px]"
                         >
                           👁️ Voir
                         </Link>
 
-                        <button
-                          type="button"
-                          onClick={() => setConfirmDeleteListingId(item.id)}
-                          className="text-red-600 hover:text-red-800 font-bold flex items-center gap-1 cursor-pointer"
-                        >
-                          <IconTrash className="w-3.5 h-3.5" />
-                          <span>Supprimer</span>
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setEditingListing(item)}
+                            className="text-[#7A5133] hover:text-[#573721] font-bold flex items-center gap-1 cursor-pointer text-[11px] bg-[#E8DBC8]/50 hover:bg-[#E8DBC8] px-2 py-0.5 rounded transition-colors"
+                          >
+                            <span>✏️ Modifier</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setConfirmDeleteListingId(item.id)}
+                            className="text-red-600 hover:text-red-800 font-bold flex items-center gap-1 cursor-pointer text-[11px]"
+                          >
+                            <IconTrash className="w-3.5 h-3.5" />
+                            <span>Supprimer</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -1136,6 +1163,16 @@ export default function AccountPage() {
           }}
         />
       )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* MODAL ÉDITION D'ANNONCE & GESTION DU STOCK */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <EditListingModal
+        isOpen={!!editingListing}
+        listing={editingListing}
+        onClose={() => setEditingListing(null)}
+        onSave={updateListing}
+      />
     </div>
   );
 }

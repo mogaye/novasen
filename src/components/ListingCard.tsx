@@ -86,16 +86,37 @@ export function ListingCard({ listing, showDeliveryButton = true }: ListingCardP
           </h3>
         </Link>
 
-        {/* Seller Shop Link */}
+        {/* Seller Shop Link & Stock */}
         <div className="flex items-center justify-between text-[11px] text-[#7A6A5C] pt-1.5 border-t border-[#DDCDB6]/50">
           <Link
             href={`/boutique/${encodeURIComponent(listing.sellerName)}`}
-            className="font-semibold text-[#7A5133] hover:underline truncate max-w-[130px]"
+            className="font-semibold text-[#7A5133] hover:underline truncate max-w-[120px]"
             title={`Visiter la boutique de ${listing.sellerName}`}
           >
             🏪 {listing.sellerName}
           </Link>
-          <span className="text-[10px] text-[#7A6A5C]/80">{listing.sellerSeniority}</span>
+          {(() => {
+            const avail = Math.max(0, (listing.quantity ?? 1) - (listing.soldCount ?? 0));
+            if (avail <= 0) {
+              return (
+                <span className="text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
+                  Épuisé
+                </span>
+              );
+            }
+            if (avail === 1) {
+              return (
+                <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
+                  ⚡ 1 restant
+                </span>
+              );
+            }
+            return (
+              <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                📦 {avail} en stock
+              </span>
+            );
+          })()}
         </div>
       </div>
 
@@ -110,14 +131,26 @@ export function ListingCard({ listing, showDeliveryButton = true }: ListingCardP
         </Link>
 
         {showDeliveryButton && (
-          <Link
-            href={`/livraison?annonceId=${listing.id}`}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[8px] bg-[#1C3049] hover:bg-[#2A4365] text-white font-bold text-[10px] sm:text-[11px] shadow-xs transition-colors shrink-0"
-            title="Commander la livraison express"
-          >
-            <IconPackage className="w-3.5 h-3.5 text-[#C9A882]" />
-            <span>Livrer</span>
-          </Link>
+          (() => {
+            const isOutOfStock = Math.max(0, (listing.quantity ?? 1) - (listing.soldCount ?? 0)) <= 0;
+            if (isOutOfStock) {
+              return (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[8px] bg-gray-200 text-gray-500 font-bold text-[10px] sm:text-[11px] shrink-0 cursor-not-allowed">
+                  <span>Épuisé</span>
+                </span>
+              );
+            }
+            return (
+              <Link
+                href={`/livraison?annonceId=${listing.id}`}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[8px] bg-[#1C3049] hover:bg-[#2A4365] text-white font-bold text-[10px] sm:text-[11px] shadow-xs transition-colors shrink-0"
+                title="Commander la livraison express"
+              >
+                <IconPackage className="w-3.5 h-3.5 text-[#C9A882]" />
+                <span>Livrer</span>
+              </Link>
+            );
+          })()
         )}
       </div>
     </article>

@@ -26,9 +26,10 @@ import { LogoWave, LogoOrangeMoney, LogoCard } from '@/components/PaymentLogos';
 function LivraisonContent() {
   const searchParams = useSearchParams();
   const annonceId = searchParams.get('annonceId') || 'tel-1';
-  const { listings } = useApp();
+  const { listings, decrementListingStock } = useApp();
 
   const [activeListing, setActiveListing] = useState<any>(null);
+  const [selectedQuantity, setSelectedQuantity] = useState<number>(1);
 
   useEffect(() => {
     const found = listings.find((l) => String(l.id) === String(annonceId)) ||
@@ -76,14 +77,20 @@ function LivraisonContent() {
   const [isOrdering, setIsOrdering] = useState(false);
   const [assignedDriver, setAssignedDriver] = useState<DriverAssignment | null>(null);
 
+  const availableStock = Math.max(0, (listing.quantity ?? 1) - (listing.soldCount ?? 0));
+
   const fares = calculateFares(originId, destinationId);
   const tripMetrics = calculateTripMetrics(originId, destinationId);
   const deliveryFare = fares.parcelFares[parcelClass];
-  const totalAmount = enableCod ? (listing.price || 0) + deliveryFare : deliveryFare;
+  const totalAmount = enableCod ? (listing.price || 0) * selectedQuantity + deliveryFare : deliveryFare;
 
-  const handleOrderDelivery = (e: React.FormEvent) => {
+  const handleOrderDelivery = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsOrdering(true);
+
+    if (listing?.id) {
+      await decrementListingStock(listing.id, selectedQuantity);
+    }
 
     setTimeout(() => {
       setIsOrdering(false);
@@ -152,11 +159,45 @@ function LivraisonContent() {
                   </div>
                 </div>
                 {/* RULE OF COLOR: Dark Blue */}
-                <div className="text-right">
-                  <span className="text-xs text-[#7A6A5C] uppercase block">Prix article</span>
+                <div className="text-right flex flex-col items-end">
+                  <span className="text-xs text-[#7A6A5C] uppercase block">Prix unitaire</span>
                   <span className="text-xl font-bold font-heading tabular-nums text-[#1C3049]">
                     {formatCFA(listing.price)}
                   </span>
+                </div>
+              </div>
+
+              {/* Quantity Selector if multiple units */}
+              <div className="flex items-center justify-between p-3 bg-[#FAF8F5] rounded-[6px] border border-[#DDCDB6]">
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-[#573721]">
+                    Nombre d'exemplaires à commander :
+                  </span>
+                  <span className="text-[11px] text-[#7A6A5C]">
+                    {availableStock > 0 ? `${availableStock} exemplaire(s) en stock` : 'Rupture de stock'}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedQuantity((prev) => Math.max(1, prev - 1))}
+                    disabled={selectedQuantity <= 1}
+                    className="w-8 h-8 rounded-[6px] bg-[#E8DBC8] hover:bg-[#DDCDB6] text-[#573721] font-bold text-sm flex items-center justify-center transition-colors disabled:opacity-40 cursor-pointer"
+                  >
+                    -
+                  </button>
+                  <span className="w-8 text-center font-bold text-sm text-[#1C3049]">
+                    {selectedQuantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedQuantity((prev) => Math.min(availableStock || 1, prev + 1))}
+                    disabled={selectedQuantity >= availableStock}
+                    className="w-8 h-8 rounded-[6px] bg-[#E8DBC8] hover:bg-[#DDCDB6] text-[#573721] font-bold text-sm flex items-center justify-center transition-colors disabled:opacity-40 cursor-pointer"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
             </div>

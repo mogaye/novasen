@@ -68,6 +68,7 @@ export default function PublishPage() {
   const [zoneId, setZoneId] = useState<ZoneId>('medina');
   const [description, setDescription] = useState('');
   const [sellerName, setSellerName] = useState(sellerShopName || 'Boutique Teranga');
+  const [quantity, setQuantity] = useState<number>(1);
   const [allowDelivery, setAllowDelivery] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
 
@@ -155,6 +156,8 @@ export default function PublishPage() {
       condition,
       description: brand ? `[Marque: ${brand}] ${description}` : description,
       sellerName: sellerName || quickSellerName || 'Vendeur Vérifié',
+      quantity: Math.max(1, Number(quantity) || 1),
+      soldCount: 0,
       isFeatured,
       imageUrl: uploadedPhotos[0] || undefined,
       images: uploadedPhotos.length > 0 ? uploadedPhotos : undefined,
@@ -745,7 +748,7 @@ export default function PublishPage() {
               </Field>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Field label="Prix de vente (FCFA)" required helper="Montant encaissé par le livreur">
                 <input
                   type="number"
@@ -758,20 +761,50 @@ export default function PublishPage() {
                 />
               </Field>
 
+              <Field label="Nombre d'exemplaires (Stock)" required helper="Quantité disponible à la vente">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                    className="w-10 h-10 rounded-[6px] bg-[#E8DBC8] hover:bg-[#DDCDB6] text-[#573721] font-bold text-lg flex items-center justify-center transition-colors cursor-pointer border border-[#DDCDB6] shrink-0"
+                    title="Diminuer la quantité"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    max="9999"
+                    value={quantity}
+                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                    className={`${inputClass} text-center font-bold text-base`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((prev) => prev + 1)}
+                    className="w-10 h-10 rounded-[6px] bg-[#E8DBC8] hover:bg-[#DDCDB6] text-[#573721] font-bold text-lg flex items-center justify-center transition-colors cursor-pointer border border-[#DDCDB6] shrink-0"
+                    title="Augmenter la quantité"
+                  >
+                    +
+                  </button>
+                </div>
+              </Field>
+
               <Field label="État de l’objet" required>
                 <select
                   value={condition}
                   onChange={(e) => setCondition(e.target.value as Condition)}
                   className={selectClass}
                 >
-                  <option value="Neuf">Neuf (dans l'emballage d'origine)</option>
-                  <option value="Comme neuf">Comme neuf (très peu utilisé)</option>
-                  <option value="Bon état">Bon état (fonctionne parfaitement)</option>
+                  <option value="Neuf">Neuf (dans l'emballage)</option>
+                  <option value="Comme neuf">Comme neuf (très peu servi)</option>
+                  <option value="Bon état">Bon état (fonctionne bien)</option>
                   <option value="Pour pièces">Pour pièces / À réparer</option>
                 </select>
               </Field>
 
-              <Field label="Localisation au Sénégal" required helper="Ville ou quartier de collecte pour le coursier">
+              <Field label="Localisation au Sénégal" required helper="Quartier de collecte">
                 <select
                   value={zoneId}
                   onChange={(e) => setZoneId(e.target.value as ZoneId)}
