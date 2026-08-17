@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { CategoryId, Condition, ZoneId } from '@/lib/types';
-import { ZONES } from '@/lib/zones';
+import { ZONES, SENEGAL_REGIONS } from '@/lib/zones';
 import { CATEGORIES } from '@/lib/listings';
 import { Field, selectClass } from './ui/Field';
 import { Button } from './ui/Button';
@@ -28,34 +28,40 @@ export interface FilterState {
   sortBy: 'date_desc' | 'price_asc' | 'price_desc';
 }
 
-interface FilterPanelProps {
+export interface FilterPanelProps {
   filters: FilterState;
-  setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
+  setFilters?: React.Dispatch<React.SetStateAction<FilterState>>;
+  onChange?: (filters: FilterState) => void;
   onReset: () => void;
-  isOpenMobile: boolean;
-  onCloseMobile: () => void;
+  isOpenMobile?: boolean;
+  onCloseMobile?: () => void;
 }
 
 export function FilterPanel({
   filters,
   setFilters,
+  onChange,
   onReset,
   isOpenMobile,
   onCloseMobile,
 }: FilterPanelProps) {
-  const update = (key: keyof FilterState, val: any) => {
-    setFilters((prev) => ({ ...prev, [key]: val }));
+  const update = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
+    if (onChange) {
+      onChange({ ...filters, [key]: value });
+    } else if (setFilters) {
+      setFilters((prev) => ({ ...prev, [key]: value }));
+    }
   };
 
   const POPULAR_ZONES: { id: ZoneId; name: string; icon: string }[] = [
     { id: 'almadies', name: 'Almadies', icon: '🌊' },
     { id: 'plateau', name: 'Plateau', icon: '🏛️' },
-    { id: 'mermoz', name: 'Mermoz', icon: '🏙️' },
-    { id: 'medina', name: 'Médina', icon: '🕌' },
-    { id: 'yoff', name: 'Yoff', icon: '🏖️' },
-    { id: 'ouakam', name: 'Ouakam', icon: '🗿' },
-    { id: 'parcelles', name: 'Parcelles', icon: '🏘️' },
-    { id: 'pikine', name: 'Pikine', icon: '📦' },
+    { id: 'keur_massar', name: 'Keur Massar', icon: '🏙️' },
+    { id: 'thies', name: 'Thiès', icon: '🚂' },
+    { id: 'saly', name: 'Saly / Mbour', icon: '🏖️' },
+    { id: 'touba', name: 'Touba', icon: '🕌' },
+    { id: 'saint_louis', name: 'Saint-Louis', icon: '🏛️' },
+    { id: 'ziguinchor', name: 'Ziguinchor', icon: '🌴' },
   ];
 
   return (
@@ -98,7 +104,7 @@ export function FilterPanel({
         <Field label="Catégorie">
           <select
             value={filters.category}
-            onChange={(e) => update('category', e.target.value)}
+            onChange={(e) => update('category', e.target.value as CategoryId | 'all')}
             className={selectClass}
           >
             <option value="all">Toutes les catégories (80+ annonces)</option>
@@ -110,19 +116,27 @@ export function FilterPanel({
           </select>
         </Field>
 
-        {/* Quartier / Zone de Dakar */}
-        <Field label="Quartier de Dakar">
+        {/* Quartier / Région du Sénégal */}
+        <Field label="Localisation (14 Régions)">
           <select
             value={filters.zoneId}
-            onChange={(e) => update('zoneId', e.target.value)}
+            onChange={(e) => update('zoneId', e.target.value as ZoneId | 'all')}
             className={selectClass}
           >
-            <option value="all">Tout Dakar (16 quartiers)</option>
-            {ZONES.map((zone) => (
-              <option key={`filter-zone-${zone.id}`} value={zone.id}>
-                {zone.name}
-              </option>
-            ))}
+            <option value="all">🇸🇳 Tout le Sénégal (14 Régions & Villes)</option>
+            {SENEGAL_REGIONS.map((reg) => {
+              const regZones = ZONES.filter((z) => z.region.toLowerCase() === reg.name.toLowerCase());
+              if (regZones.length === 0) return null;
+              return (
+                <optgroup key={`reg-group-${reg.id}`} label={`${reg.badge} Région de ${reg.name} (${regZones.length} localités)`}>
+                  {regZones.map((zone) => (
+                    <option key={`filter-zone-${zone.id}`} value={zone.id}>
+                      {zone.name}
+                    </option>
+                  ))}
+                </optgroup>
+              );
+            })}
           </select>
         </Field>
 
@@ -196,7 +210,7 @@ export function FilterPanel({
         <Field label="État de l’article">
           <select
             value={filters.condition}
-            onChange={(e) => update('condition', e.target.value)}
+            onChange={(e) => update('condition', e.target.value as Condition | 'all')}
             className={selectClass}
           >
             <option value="all">Tous les états</option>

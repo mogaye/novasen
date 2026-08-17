@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { CategoryId, Condition, FuelType, TransmissionType, ZoneId } from '@/lib/types';
-import { ZONES } from '@/lib/zones';
+import { ZONES, SENEGAL_REGIONS } from '@/lib/zones';
 import { CATEGORIES } from '@/lib/listings';
 import { SELLER_PLANS } from '@/lib/plans';
 import { formatCFA } from '@/lib/format';
@@ -670,17 +670,25 @@ export default function PublishPage() {
                 </select>
               </Field>
 
-              <Field label="Quartier à Dakar" required helper="Lieu de collecte pour le coursier">
+              <Field label="Localisation au Sénégal" required helper="Ville ou quartier de collecte pour le coursier">
                 <select
                   value={zoneId}
                   onChange={(e) => setZoneId(e.target.value as ZoneId)}
                   className={selectClass}
                 >
-                  {ZONES.map((z) => (
-                    <option key={z.id} value={z.id}>
-                      {z.name}
-                    </option>
-                  ))}
+                  {SENEGAL_REGIONS.map((reg) => {
+                    const regZones = ZONES.filter((z) => z.region.toLowerCase() === reg.name.toLowerCase());
+                    if (regZones.length === 0) return null;
+                    return (
+                      <optgroup key={`pub-reg-${reg.id}`} label={`${reg.badge} Région de ${reg.name}`}>
+                        {regZones.map((z) => (
+                          <option key={z.id} value={z.id}>
+                            {z.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    );
+                  })}
                 </select>
               </Field>
             </div>

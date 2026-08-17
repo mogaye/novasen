@@ -15,6 +15,7 @@ export function calculateTripMetrics(originId: ZoneId, destinationId: ZoneId, fo
   distanceKm: number;
   durationMinutes: number;
   isRushHour: boolean;
+  isInterurban: boolean;
 } {
   const origin = getZone(originId);
   const destination = getZone(destinationId);
@@ -24,27 +25,78 @@ export function calculateTripMetrics(originId: ZoneId, destinationId: ZoneId, fo
     flightDistance = 1.5; // Short intra-neighborhood trip
   }
 
-  // Road sinuosity factor 1.35
-  const distanceKm = flightDistance * 1.35;
+  // Road sinuosity factor (1.30 to 1.35)
+  const distanceKm = Math.round(flightDistance * 1.32 * 10) / 10;
 
-  // Average speed in Dakar traffic: 22 km/h
-  const baseMinutes = (distanceKm / 22) * 60;
+  const isInterurban = distanceKm > 35 || origin.region !== destination.region;
+
+  // Average speed: 22 km/h in urban city traffic, 72 km/h on national highways
+  const avgSpeed = isInterurban ? (distanceKm > 150 ? 78 : 65) : 22;
+  const baseMinutes = (distanceKm / avgSpeed) * 60;
 
   const isRushHour = forceRushHour !== undefined ? forceRushHour : isCurrentlyRushHour();
-  const durationMinutes = isRushHour ? baseMinutes * 1.5 : baseMinutes;
+  // Rush hour impacts urban trips more heavily
+  const rushFactor = isRushHour ? (isInterurban ? 1.15 : 1.45) : 1.0;
+  const durationMinutes = Math.round(baseMinutes * rushFactor);
 
   return {
     distanceKm,
     durationMinutes,
     isRushHour,
+    isInterurban,
   };
 }
 
 export function calculateFares(originId: ZoneId, destinationId: ZoneId, forceRushHour?: boolean): FareCalculation {
-  const { distanceKm, durationMinutes, isRushHour } = calculateTripMetrics(originId, destinationId, forceRushHour);
+  const { distanceKm, durationMinutes, isRushHour, isInterurban } = calculateTripMetrics(originId, destinationId, forceRushHour);
 
-  const passengerSurge = isRushHour ? 1.25 : 1.0;
+  const passengerSurge = isRushHour ? 1.2 : 1.0;
 
+  if (isInterurban) {
+    // Interurban / Régional (Tarifs dégressifs réalistes pour trajets inter-régions au Sénégal)
+    // Éco (style VTC partagé / confort): 1 500 F base + 45 F/km
+    const ecoRaw = (1500 + distanceKm * 48) * passengerSurge;
+    const ecoFare = round10(Math.max(2500, ecoRaw));
+
+    // Confort (VTC privé climatisé): 2 500 F base + 65 F/km
+    const confortRaw = (2500 + distanceKm * 68) * passengerSurge;
+    const confortFare = round10(Math.max(3800, confortRaw));
+
+    // Confort + (Berline / SUV Privé): 4 000 F base + 95 F/km
+    const confortPlusRaw = (4000 + distanceKm * 98) * passengerSurge;
+    const confortPlusFare = round10(Math.max(5500, confortPlusRaw));
+
+    // Colis Interurbain:
+    // Moto / Express bagage léger (<= 5 kg): 1 200 F base + 35 F/km
+    const motoRaw = 1200 + distanceKm * 38;
+    const motoFare = round10(Math.max(2000, motoRaw));
+
+    // Voiture Colis (<= 30 kg): 2 000 F base + 50 F/km
+    const voitureRaw = 2000 + distanceKm * 52;
+    const voitureFare = round10(Math.max(3500, voitureRaw));
+
+    // Camionnette Fret régional (<= 300 kg): 6 000 F base + 90 F/km
+    const camionnetteRaw = 6000 + distanceKm * 95;
+    const camionnetteFare = round10(Math.max(8000, camionnetteRaw));
+
+    return {
+      distanceKm,
+      durationMinutes,
+      isRushHour,
+      passengerFares: {
+        eco: ecoFare,
+        confort: confortFare,
+        confort_plus: confortPlusFare,
+      },
+      parcelFares: {
+        moto: motoFare,
+        voiture: voitureFare,
+        camionnette: camionnetteFare,
+      },
+    };
+  }
+
+  // Intra-Urbain (Dakar et agglomération)
   // PASSAGERS:
   // Éco: 300 F + 170 F/km + 15 F/min, minimum 570 F
   const ecoRaw = (300 + distanceKm * 170 + durationMinutes * 15) * passengerSurge;
@@ -58,7 +110,7 @@ export function calculateFares(originId: ZoneId, destinationId: ZoneId, forceRus
   const confortPlusRaw = (500 + distanceKm * 290 + durationMinutes * 28) * passengerSurge;
   const confortPlusFare = round10(Math.max(800, confortPlusRaw));
 
-  // COLIS (No hourly component):
+  // COLIS:
   // Moto (<= 5 kg): 500 F + 130 F/km, minimum 700 F
   const motoRaw = 500 + distanceKm * 130;
   const motoFare = round10(Math.max(700, motoRaw));

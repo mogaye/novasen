@@ -218,7 +218,9 @@ function TransportContent() {
                 <span className="text-[11px] uppercase font-bold text-[#7A6A5C] tracking-wide block mb-0.5">
                   Vitesse moy.
                 </span>
-                <span className="text-base sm:text-lg font-bold text-[#2A211A]">22 km/h</span>
+                <span className="text-base sm:text-lg font-bold text-[#2A211A]">
+                  {tripMetrics.isInterurban ? (tripMetrics.distanceKm > 150 ? '78 km/h' : '65 km/h') : '22 km/h'}
+                </span>
               </div>
             </div>
 
@@ -229,9 +231,13 @@ function TransportContent() {
                   <IconClock className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="font-bold text-[#2A211A] block">Trafic & Heures de pointe (7h–9h / 17h–20h)</span>
+                  <span className="font-bold text-[#2A211A] block">
+                    {tripMetrics.isInterurban ? 'Trajet Interurbain (Réseau National)' : 'Trafic Urbain & Heures de pointe'}
+                  </span>
                   <span className="text-[#7A6A5C] text-[11px]">
-                    {forceRushHour
+                    {tripMetrics.isInterurban
+                      ? 'Tarif interurbain optimisé • Autoroutes & Nationales'
+                      : forceRushHour
                       ? '+25% passagers et durée x1,5 appliquée'
                       : 'Conditions de circulation fluide'}
                   </span>

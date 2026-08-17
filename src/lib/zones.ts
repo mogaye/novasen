@@ -1,29 +1,1027 @@
 import { Zone, ZoneId } from './types';
 
-export const ZONES: Zone[] = [
-  { id: 'plateau', name: 'Plateau', x: 0, y: 0, description: 'Centre des affaires et ministères', popular: true },
-  { id: 'medina', name: 'Médina', x: 1.5, y: 1.5, description: 'Quartier historique et commerçant', popular: true },
-  { id: 'pointe', name: 'Point E', x: 3, y: 2.5, description: 'Zone résidentielle et ambassades', popular: true },
-  { id: 'liberte6', name: 'Liberté 6', x: 5, y: 4, description: 'Carrefour central et commerces', popular: true },
-  { id: 'mermoz', name: 'Mermoz Sacré-Cœur', x: 4.5, y: 5.5, description: 'Quartier résidentiel prisé', popular: true },
-  { id: 'grandyoff', name: 'Grand Yoff', x: 7, y: 5, description: 'Grand quartier populaire et animé', popular: true },
-  { id: 'ouakam', name: 'Ouakam', x: 5, y: 8, description: 'Monument de la Renaissance, Mamelles', popular: true },
-  { id: 'almadies', name: 'Almadies', x: 5.5, y: 10.5, description: 'Pointe des Almadies, restaurants, bord de mer', popular: true },
-  { id: 'ngor', name: 'Ngor', x: 7, y: 11, description: 'Île de Ngor, plage et village traditionnel', popular: false },
-  { id: 'yoff', name: 'Yoff', x: 8.5, y: 10, description: 'Plage BCEAO et tradition léboue', popular: false },
-  { id: 'parcelles', name: 'Parcelles Assainies', x: 10, y: 7, description: 'Grands marchés et vie de quartier', popular: true },
-  { id: 'pikine', name: 'Pikine', x: 12, y: 5, description: 'Grand carrefour de la banlieue', popular: true },
-  { id: 'guediawaye', name: 'Guédiawaye', x: 13.5, y: 7, description: 'Corniche de Guédiawaye et commerces', popular: true },
-  { id: 'thiaroye', name: 'Thiaroye', x: 14, y: 4.5, description: 'Gare TER et zone marchande', popular: false },
-  { id: 'rufisque', name: 'Rufisque', x: 18, y: 3, description: 'Ville historique et carrefour autoroutier', popular: true },
-  { id: 'aibd', name: 'Aéroport AIBD', x: 34, y: -2, description: 'Aéroport International Blaise Diagne (Dias)', popular: true },
+export interface RegionInfo {
+  id: string;
+  name: string;
+  capital: string;
+  description: string;
+  badge: string;
+}
+
+export const SENEGAL_REGIONS: RegionInfo[] = [
+  { id: 'dakar', name: 'Dakar', capital: 'Dakar', description: 'Capitale, presqu’île & pôle économique', badge: '🏙️' },
+  { id: 'thies', name: 'Thiès', capital: 'Thiès', description: 'Petite-Côte, Saly, Tivaouane & carrefour ferroviaire', badge: '🏖️' },
+  { id: 'diourbel', name: 'Diourbel', capital: 'Diourbel', description: 'Touba, Mbacké, Bambey & bassin arachidier', badge: '🕌' },
+  { id: 'fatick', name: 'Fatick', capital: 'Fatick', description: 'Delta du Saloum, Foundiougne & îles', badge: '🛶' },
+  { id: 'kaolack', name: 'Kaolack', capital: 'Kaolack', description: 'Médina Baye & carrefour commercial centre', badge: '🌾' },
+  { id: 'kaffrine', name: 'Kaffrine', capital: 'Kaffrine', description: 'Ndoucoumane & grand bassin agricole', badge: '🌱' },
+  { id: 'saint_louis', name: 'Saint-Louis', capital: 'Saint-Louis', description: 'Île Ndar, Richard-Toll, Dagana & Podor', badge: '🏛️' },
+  { id: 'louga', name: 'Louga', capital: 'Louga', description: 'Dahra Djoloff, Linguère & élevage', badge: '🐄' },
+  { id: 'matam', name: 'Matam', capital: 'Matam', description: 'Ourossogui, vallée du fleuve & Fouta', badge: '🌊' },
+  { id: 'tambacounda', name: 'Tambacounda', capital: 'Tambacounda', description: 'Sénégal oriental, Bakel & carrefour sous-régional', badge: '🚂' },
+  { id: 'kedougou', name: 'Kédougou', capital: 'Kédougou', description: 'Pays Bassari, cascades de Dindéfélo & mines d’or', badge: '⛰️' },
+  { id: 'ziguinchor', name: 'Ziguinchor', capital: 'Ziguinchor', description: 'Basse-Casamance, Cap Skirring & Bignona', badge: '🌴' },
+  { id: 'sedhiou', name: 'Sédhiou', capital: 'Sédhiou', description: 'Pakao, fleuve Casamance & Bounkiling', badge: '🌿' },
+  { id: 'kolda', name: 'Kolda', capital: 'Kolda', description: 'Fouladou, Vélingara & marché de Diaobé', badge: '🐄' },
 ];
 
-export const ZONES_BY_ID = ZONES.reduce<Record<ZoneId, Zone>>((acc, zone) => {
+export const ZONES: Zone[] = [
+  // ════════════════════════════════════════════════════════════════════════
+  // 1. RÉGION DE DAKAR (Centre, Quartiers, Banlieue, Pôle Urbain)
+  // ════════════════════════════════════════════════════════════════════════
+  {
+    id: 'plateau',
+    name: 'Dakar Plateau',
+    region: 'Dakar',
+    department: 'Dakar',
+    x: 0,
+    y: 0,
+    description: 'Centre des affaires, Ministères, Port Autonome et Place de l’Indépendance',
+    popular: true,
+    keywords: ['centre-ville', 'sandaga', 'pompidou', 'port', 'teranga', 'assemblee', 'palais'],
+  },
+  {
+    id: 'medina',
+    name: 'Médina / Tilène',
+    region: 'Dakar',
+    department: 'Dakar',
+    x: 1.5,
+    y: 1.5,
+    description: 'Quartier historique, marché Tilène, Soumbédioune et Rue 6 / Rue 10',
+    popular: true,
+    keywords: ['tilene', 'soumbedioune', 'rue 6', 'rue 10', 'fass', 'colobane', 'artisanat'],
+  },
+  {
+    id: 'fass_colobane',
+    name: 'Fass / Colobane / Gueule Tapée',
+    region: 'Dakar',
+    department: 'Dakar',
+    x: 2,
+    y: 2,
+    description: 'Grand marché de friperie de Colobane, Canal 4 et RTS',
+    popular: true,
+    keywords: ['colobane', 'marche colobane', 'fass delorme', 'gueule tapee', 'canal 4'],
+  },
+  {
+    id: 'pointe',
+    name: 'Point E / Fann Résidence',
+    region: 'Dakar',
+    department: 'Dakar',
+    x: 3,
+    y: 2.5,
+    description: 'Zone résidentielle, Université Cheikh Anta Diop (UCAD), ambassades et cliniques',
+    popular: true,
+    keywords: ['fann', 'ucad', 'universite', 'piscine olympique', 'ambassades', 'hopital fann'],
+  },
+  {
+    id: 'mermoz',
+    name: 'Mermoz / Sacré-Cœur',
+    region: 'Dakar',
+    department: 'Dakar',
+    x: 4.5,
+    y: 5.5,
+    description: 'Boulangerie jaune, Sacré-Cœur 1-2-3, VDN et quartier d’affaires moderne',
+    popular: true,
+    keywords: ['sacre coeur', 'vdn', 'boulangerie jaune', 'keur gorgui', 'siege orange'],
+  },
+  {
+    id: 'liberte6',
+    name: 'Sicap Liberté (1 à 6) / Dieuppeul',
+    region: 'Dakar',
+    department: 'Dakar',
+    x: 5,
+    y: 4,
+    description: 'Rond-point Liberté 6, Terminus DDD, Dieuppeul-Derklé et commerces',
+    popular: true,
+    keywords: ['liberte 6', 'liberte 5', 'dieuppeul', 'derkle', 'terminus', 'camp penal'],
+  },
+  {
+    id: 'granddakar',
+    name: 'Grand Dakar / Marché HLM',
+    region: 'Dakar',
+    department: 'Dakar',
+    x: 3.5,
+    y: 3.5,
+    description: 'Grand marché de tissus HLM, Niary Tally, Bopp et Biscuiterie',
+    popular: true,
+    keywords: ['hlm', 'marche hlm', 'tissus', 'niary tally', 'bopp', 'biscuiterie'],
+  },
+  {
+    id: 'ouakam',
+    name: 'Ouakam / Mamelles',
+    region: 'Dakar',
+    department: 'Dakar',
+    x: 5,
+    y: 8,
+    description: 'Monument de la Renaissance Africaine, Phare des Mamelles et village lébou',
+    popular: true,
+    keywords: ['mamelles', 'monument renaissance', 'phare', 'cite touba ouakam', 'aeroport leopold'],
+  },
+  {
+    id: 'almadies',
+    name: 'Les Almadies',
+    region: 'Dakar',
+    department: 'Dakar',
+    x: 5.5,
+    y: 10.5,
+    description: 'Pointe des Almadies, restaurants gastronomiques, hôtels de luxe et ambassades',
+    popular: true,
+    keywords: ['pointe', 'corniche', 'hotel king fahd', 'restaurants', 'meridian', 'plage'],
+  },
+  {
+    id: 'ngor',
+    name: 'Ngor / Île de Ngor',
+    region: 'Dakar',
+    department: 'Dakar',
+    x: 7,
+    y: 11,
+    description: 'Village traditionnel lébou, embarcadère pour l’Île de Ngor et plages de surf',
+    popular: true,
+    keywords: ['ile de ngor', 'plage ngor', 'surf', 'embarcadere'],
+  },
+  {
+    id: 'yoff',
+    name: 'Yoff / BCEAO / Tonghor',
+    region: 'Dakar',
+    department: 'Dakar',
+    x: 8.5,
+    y: 10,
+    description: 'Plage BCEAO, mausolée Layène, village de pêcheurs et virage Yoff',
+    popular: true,
+    keywords: ['plage bceao', 'layene', 'virage', 'tonghor', 'peche'],
+  },
+  {
+    id: 'grandyoff',
+    name: 'Grand Yoff / Scat Urbam',
+    region: 'Dakar',
+    department: 'Dakar',
+    x: 7,
+    y: 5,
+    description: 'Grand carrefour populaire, Scat Urbam, hôpital CTO / Idrissa Pouye',
+    popular: true,
+    keywords: ['scat urbam', 'cto', 'hopital militaire', 'khar yalla', 'zone de captage'],
+  },
+  {
+    id: 'parcelles',
+    name: 'Parcelles Assainies (Unités 1 à 26)',
+    region: 'Dakar',
+    department: 'Dakar',
+    x: 10,
+    y: 7,
+    description: 'Case Bi, Marché Dior, Unités 1 à 26, Rond-Point 26 et commerces',
+    popular: true,
+    keywords: ['case bi', 'marche dior', 'unite 15', 'unite 26', 'croisement 22'],
+  },
+  {
+    id: 'camberene',
+    name: 'Cambérène',
+    region: 'Dakar',
+    department: 'Dakar',
+    x: 11,
+    y: 8,
+    description: 'Cité religieuse Layène, grande plage et voie de dégagement nord (VDN 3)',
+    popular: false,
+    keywords: ['layene', 'vdn 3', 'plage camberene', 'mausolee'],
+  },
+  {
+    id: 'hann_belair',
+    name: 'Hann Maristes / Bel-Air',
+    region: 'Dakar',
+    department: 'Dakar',
+    x: 6,
+    y: 3,
+    description: 'Parc zoologique de Hann, Cité Maristes 1 & 2, zone industrielle et portuaire',
+    popular: true,
+    keywords: ['parc de hann', 'maristes', 'zone industrielle', 'bel air'],
+  },
+  {
+    id: 'pikine',
+    name: 'Pikine (Nord, Ouest, Icotaf, Tally Boumack)',
+    region: 'Dakar',
+    department: 'Pikine',
+    x: 12,
+    y: 5,
+    description: 'Pikine Icotaf, Marché Zinc, Guinaw Rails, Technopole et Tally Boubess',
+    popular: true,
+    keywords: ['icotaf', 'marche zinc', 'guinaw rails', 'technopole', 'tally boumack', 'dalifort'],
+  },
+  {
+    id: 'guediawaye',
+    name: 'Guédiawaye (Golf Sud, Sam Notaire, Wakhinane)',
+    region: 'Dakar',
+    department: 'Guédiawaye',
+    x: 13.5,
+    y: 7,
+    description: 'Corniche de Guédiawaye, Hamo 4-5-6, Sam Notaire, Ndiarème et Marché Sham',
+    popular: true,
+    keywords: ['golf sud', 'sam notaire', 'wakhinane', 'hamo', 'corniche guediawaye', 'sham'],
+  },
+  {
+    id: 'keur_massar',
+    name: 'Keur Massar (Arrêt Buur, Jaxaay, Malika)',
+    region: 'Dakar',
+    department: 'Keur Massar',
+    x: 15,
+    y: 6,
+    description: 'Nouveau département, Rond-Point Keur Massar, Arrêt Buur, Jaxaay, Cité Aïnoumady',
+    popular: true,
+    keywords: ['arret buur', 'jaxaay', 'malika', 'keur massar village', 'cite gendarmerie', 'sedima'],
+  },
+  {
+    id: 'yeumbeul',
+    name: 'Yeumbeul (Nord, Sud, Asecna, Comico)',
+    region: 'Dakar',
+    department: 'Keur Massar',
+    x: 14,
+    y: 5.5,
+    description: 'Yeumbeul Asecna, Yeumbeul Nord/Sud, Route des Niayes et Cité Comico',
+    popular: true,
+    keywords: ['yeumbeul asecna', 'yeumbeul nord', 'yeumbeul sud', 'comico', 'bene barack'],
+  },
+  {
+    id: 'thiaroye',
+    name: 'Thiaroye (Gare TER, Sur Mer, Azur)',
+    region: 'Dakar',
+    department: 'Pikine',
+    x: 14,
+    y: 4.5,
+    description: 'Gare TER de Thiaroye, grand marché de légumes et Thiaroye-sur-Mer',
+    popular: true,
+    keywords: ['thiaroye gare', 'ter', 'thiaroye sur mer', 'postecour', 'marche legumes'],
+  },
+  {
+    id: 'rufisque',
+    name: 'Rufisque (Centre, Dangou, Arafat, Diokoul)',
+    region: 'Dakar',
+    department: 'Rufisque',
+    x: 18,
+    y: 3,
+    description: 'Ville historique coloniale, Gare TER Rufisque, Dangou, Diokoul et HLM Rufisque',
+    popular: true,
+    keywords: ['dangou', 'diokoul', 'arafat', 'hlm rufisue', 'canal', 'ter rufisue'],
+  },
+  {
+    id: 'bargny',
+    name: 'Bargny / Sendou',
+    region: 'Dakar',
+    department: 'Rufisque',
+    x: 21,
+    y: 2,
+    description: 'Port de pêche traditionnel, zone industrielle et côte sud',
+    popular: false,
+    keywords: ['bargny gouddau', 'sendou', 'port mineralier', 'cote'],
+  },
+  {
+    id: 'diamniadio',
+    name: 'Diamniadio Pôle Urbain / CICAD',
+    region: 'Dakar',
+    department: 'Rufisque',
+    x: 26,
+    y: 1,
+    description: 'Centre International Abdou Diouf (CICAD), Stade Abdoulaye Wade, Gare TER & Ministères',
+    popular: true,
+    keywords: ['stade abdoulaye wade', 'cicad', 'dakar arena', 'pole urbain', 'ter diamniadio'],
+  },
+  {
+    id: 'sangalkam',
+    name: 'Sangalkam / Bambylor / Lac Rose',
+    region: 'Dakar',
+    department: 'Rufisque',
+    x: 22,
+    y: 7,
+    description: 'Lac Rose (Lac Retba), zone maraîchère des Niayes, Bambylor et résidences champêtres',
+    popular: true,
+    keywords: ['lac rose', 'retba', 'bambylor', 'niayes', 'cite champetre', 'deni biram ndao'],
+  },
+  {
+    id: 'sebikotane',
+    name: 'Sébikotane / Dougar',
+    region: 'Dakar',
+    department: 'Rufisque',
+    x: 28,
+    y: 2,
+    description: 'Carrefour RN1, vergers, cimenterie et liaison vers Thiès',
+    popular: false,
+    keywords: ['sebikhotane', 'dougar', 'vergers', 'rn1'],
+  },
+  {
+    id: 'aibd',
+    name: 'Aéroport International Blaise Diagne (AIBD)',
+    region: 'Thiès',
+    department: 'Mbour',
+    x: 34,
+    y: -2,
+    description: 'Hub aéroportuaire international du Sénégal, Diass & Gare TER AIBD',
+    popular: true,
+    keywords: ['aeroport', 'diass', 'blaise diagne', 'vols', 'international', 'ter aibd'],
+  },
+
+  // ════════════════════════════════════════════════════════════════════════
+  // 2. RÉGION DE THIÈS & PETITE-CÔTE
+  // ════════════════════════════════════════════════════════════════════════
+  {
+    id: 'thies',
+    name: 'Thiès Ville (Centre, Escale, Cités)',
+    region: 'Thiès',
+    department: 'Thiès',
+    x: 52,
+    y: 12,
+    description: 'Deuxième ville du Sénégal, Cité du Rail, Place de France, Iba Der Thiam',
+    popular: true,
+    keywords: ['thies escale', 'randoulene', 'dixieme', 'mbour 1', 'universite iba der thiam', 'gare thies'],
+  },
+  {
+    id: 'mbour',
+    name: 'Mbour Ville (Escale, Grand Marché, Tefess)',
+    region: 'Thiès',
+    department: 'Mbour',
+    x: 58,
+    y: -14,
+    description: 'Capitale de la Petite-Côte, port de pêche de Tefess et grand marché central',
+    popular: true,
+    keywords: ['tefess', 'oncad', 'peche', 'grand marche mbour', 'petite cote'],
+  },
+  {
+    id: 'saly',
+    name: 'Saly Portudal / Palm Beach / Niakhniakhal',
+    region: 'Thiès',
+    department: 'Mbour',
+    x: 55,
+    y: -12,
+    description: 'Première station balnéaire d’Afrique de l’Ouest, plages, villas et complexes hôteliers',
+    popular: true,
+    keywords: ['saly centre', 'palm beach', 'niakhniakhal', 'station balneaire', 'golf saly'],
+  },
+  {
+    id: 'somone',
+    name: 'Somone / Ngaparou',
+    region: 'Thiès',
+    department: 'Mbour',
+    x: 48,
+    y: -9,
+    description: 'Lagune naturelle de la Somone, pélicans, résidences côtières calmes et Ngaparou',
+    popular: true,
+    keywords: ['lagune somone', 'ngaparou', 'residences', 'plage'],
+  },
+  {
+    id: 'popenguine',
+    name: 'Popenguine / Toubab Dialaw / Ndayane',
+    region: 'Thiès',
+    department: 'Mbour',
+    x: 38,
+    y: -8,
+    description: 'Sanctuaire Marial, falaises de Popenguine, théâtre Gérard Chenet et futur grand port de Ndayane',
+    popular: true,
+    keywords: ['toubab dialaw', 'ndayane', 'sanctuaire marial', 'falaises', 'port ndayane'],
+  },
+  {
+    id: 'tivaouane',
+    name: 'Tivaouane',
+    region: 'Thiès',
+    department: 'Tivaouane',
+    x: 68,
+    y: 30,
+    description: 'Sainte cité de la Tijaniyya au Sénégal, Grande Mosquée d’El Hadji Malick Sy (Gamou)',
+    popular: true,
+    keywords: ['gamou', 'grande mosquee', 'el hadji malick sy', 'tijaniyya'],
+  },
+  {
+    id: 'joal_fadiouth',
+    name: 'Joal-Fadiouth (Île aux Coquillages)',
+    region: 'Thiès',
+    department: 'Mbour',
+    x: 75,
+    y: -28,
+    description: 'Ville natale de Léopold Sédar Senghor, pont en bois et île aux coquillages',
+    popular: true,
+    keywords: ['fadiouth', 'ile aux coquillages', 'senghor', 'pont joal'],
+  },
+  {
+    id: 'kayar',
+    name: 'Kayar',
+    region: 'Thiès',
+    department: 'Thiès',
+    x: 42,
+    y: 22,
+    description: 'Un des plus grands débarcadères de pêche artisanale du Sénégal',
+    popular: false,
+    keywords: ['quai de peche', 'pirogues', 'littoral nord'],
+  },
+  {
+    id: 'pout',
+    name: 'Pout / Khombole',
+    region: 'Thiès',
+    department: 'Thiès',
+    x: 40,
+    y: 8,
+    description: 'Marché de fruits et légumes frais, mangues, agrumes sur la RN2',
+    popular: false,
+    keywords: ['marche fruits', 'mangues', 'khombole', 'rn2'],
+  },
+
+  // ════════════════════════════════════════════════════════════════════════
+  // 3. RÉGION DE DIOURBEL (Touba, Mbacké, Bambey)
+  // ════════════════════════════════════════════════════════════════════════
+  {
+    id: 'touba',
+    name: 'Touba Mosquée (Cité Religieuse)',
+    region: 'Diourbel',
+    department: 'Mbacké',
+    x: 135,
+    y: 25,
+    description: 'Deuxième agglomération du Sénégal, Grande Mosquée de Cheikh Ahmadou Bamba (Magal)',
+    popular: true,
+    keywords: ['magal', 'cheikh ahmadou bamba', 'darou khoudoss', 'dianatoul mahwa', '28'],
+  },
+  {
+    id: 'mbacke',
+    name: 'Mbacké Ville',
+    region: 'Diourbel',
+    department: 'Mbacké',
+    x: 128,
+    y: 20,
+    description: 'Centre commercial et hub de transport reliant Touba au réseau national',
+    popular: true,
+    keywords: ['gare mbacke', 'marche central mbacke', 'carrefour touba'],
+  },
+  {
+    id: 'diourbel',
+    name: 'Diourbel Ville (Keur Gou Mag)',
+    region: 'Diourbel',
+    department: 'Diourbel',
+    x: 105,
+    y: 10,
+    description: 'Chef-lieu de région, Grande Mosquée historique et huilerie SONACOS',
+    popular: true,
+    keywords: ['keur gou mag', 'sonacos', 'diourbel escale', 'grande mosquee diourbel'],
+  },
+  {
+    id: 'bambey',
+    name: 'Bambey / Université Alioune Diop',
+    region: 'Diourbel',
+    department: 'Bambey',
+    x: 85,
+    y: 8,
+    description: 'Pôle universitaire et de recherche agronomique (ISRA / CNRA)',
+    popular: false,
+    keywords: ['uadb', 'universite bambey', 'cnra', 'isra'],
+  },
+
+  // ════════════════════════════════════════════════════════════════════════
+  // 4. RÉGION DE SAINT-LOUIS (Ndar, Richard-Toll, Dagana, Podor)
+  // ════════════════════════════════════════════════════════════════════════
+  {
+    id: 'saint_louis',
+    name: 'Saint-Louis (Île Ndar / Sor / Guet Ndar)',
+    region: 'Saint-Louis',
+    department: 'Saint-Louis',
+    x: 180,
+    y: 95,
+    description: 'Ancienne capitale de l’AOF, patrimoine mondial UNESCO, Pont Faidherbe et festival de Jazz',
+    popular: true,
+    keywords: ['ndar', 'pont faidherbe', 'sor', 'guet ndar', 'hydrobase', 'ugb', 'gaston berger'],
+  },
+  {
+    id: 'richard_toll',
+    name: 'Richard-Toll / CSS',
+    region: 'Saint-Louis',
+    department: 'Dagana',
+    x: 230,
+    y: 120,
+    description: 'Compagnie Sucrière Sénégalaise, cultures de canne à sucre et frontière mauritanienne',
+    popular: true,
+    keywords: ['css', 'sucre', 'chateau du baron roger', 'taouey', 'fleuve'],
+  },
+  {
+    id: 'dagana',
+    name: 'Dagana Ville',
+    region: 'Saint-Louis',
+    department: 'Dagana',
+    x: 260,
+    y: 110,
+    description: 'Ancien comptoir colonial sur le fleuve Sénégal, capitale historique du Walo',
+    popular: false,
+    keywords: ['walo', 'quais coloniaux', 'fort dagana'],
+  },
+  {
+    id: 'podor',
+    name: 'Podor / Ndioum',
+    region: 'Saint-Louis',
+    department: 'Podor',
+    x: 320,
+    y: 125,
+    description: 'Fort de Podor, quai sur le fleuve Sénégal, Fouta et festival Les Blues du Fleuve',
+    popular: true,
+    keywords: ['fort de podor', 'ndp', 'ndioum', 'fouta', 'blues du fleuve', 'tarha'],
+  },
+  {
+    id: 'ross_bethio',
+    name: 'Ross Béthio',
+    region: 'Saint-Louis',
+    department: 'Saint-Louis',
+    x: 205,
+    y: 105,
+    description: 'Grenier à riz de la vallée du fleuve Sénégal',
+    popular: false,
+    keywords: ['riz de la vallee', 'saed', 'casier rizicole'],
+  },
+
+  // ════════════════════════════════════════════════════════════════════════
+  // 5. RÉGION DE KAOLACK (Médina Baye, Bassin Arachidier)
+  // ════════════════════════════════════════════════════════════════════════
+  {
+    id: 'kaolack',
+    name: 'Kaolack Ville (Centre, Escale, Grand Marché)',
+    region: 'Kaolack',
+    department: 'Kaolack',
+    x: 130,
+    y: -35,
+    description: 'Capitale du bassin arachidier, deuxième plus grand marché couvert d’Afrique de l’Ouest',
+    popular: true,
+    keywords: ['marche kaolack', 'bras du saloum', 'salins du saloum', 'gare routiere kaolack'],
+  },
+  {
+    id: 'medina_baye',
+    name: 'Médina Baye (Kaolack)',
+    region: 'Kaolack',
+    department: 'Kaolack',
+    x: 132,
+    y: -33,
+    description: 'Cité spirituelle mondiale de Cheikh Ibrahima Niass (Baye Niass)',
+    popular: true,
+    keywords: ['baye niass', 'tijaniyya ibrahimiyya', 'grande mosquee medina baye', 'gamou baye'],
+  },
+  {
+    id: 'nioro_du_rip',
+    name: 'Nioro du Rip / Porokhane',
+    region: 'Kaolack',
+    department: 'Nioro du Rip',
+    x: 155,
+    y: -55,
+    description: 'Berceau de Maba Diakhou Bâ, Porokhane (Magal de Mame Diarra Bousso)',
+    popular: true,
+    keywords: ['porokhane', 'mame diarra bousso', 'rip', 'arachides'],
+  },
+  {
+    id: 'guinguineo',
+    name: 'Guinguinéo',
+    region: 'Kaolack',
+    department: 'Guinguinéo',
+    x: 120,
+    y: -20,
+    description: 'Nœud ferroviaire historique du centre du Sénégal',
+    popular: false,
+    keywords: ['gare ferroviaire', 'arachide'],
+  },
+
+  // ════════════════════════════════════════════════════════════════════════
+  // 6. RÉGION DE FATICK & DELTA DU SALOUM
+  // ════════════════════════════════════════════════════════════════════════
+  {
+    id: 'fatick',
+    name: 'Fatick Ville (Escale, Ndiaye Ndiaye)',
+    region: 'Fatick',
+    department: 'Fatick',
+    x: 100,
+    y: -25,
+    description: 'Berceau du royaume du Sine et des traditions sérères',
+    popular: true,
+    keywords: ['sine', 'royaume serere', 'ndiaye ndiaye', 'mbind ngor'],
+  },
+  {
+    id: 'foundiougne',
+    name: 'Foundiougne / Pont Nelson Mandela',
+    region: 'Fatick',
+    department: 'Foundiougne',
+    x: 110,
+    y: -40,
+    description: 'Porte d’entrée maritime du Saloum, plus grand pont du Sénégal',
+    popular: true,
+    keywords: ['pont nelson mandela', 'saloum', 'pirogues', 'bolongs'],
+  },
+  {
+    id: 'toubacouta',
+    name: 'Toubacouta / Sokone / Delta du Saloum',
+    region: 'Fatick',
+    department: 'Foundiougne',
+    x: 125,
+    y: -65,
+    description: 'Parc National du Delta du Saloum (UNESCO), mangroves, îles aux oiseaux et écotourisme',
+    popular: true,
+    keywords: ['parc delta saloum', 'sokone', 'mangrove', 'iles du saloum', 'ecotourisme'],
+  },
+  {
+    id: 'gossas',
+    name: 'Gossas',
+    region: 'Fatick',
+    department: 'Gossas',
+    x: 100,
+    y: -5,
+    description: 'Carrefour agricole et liaison vers Diourbel',
+    popular: false,
+    keywords: ['gossas escale', 'rn3'],
+  },
+
+  // ════════════════════════════════════════════════════════════════════════
+  // 7. RÉGION DE LOUGA (Djoloff, Kébémer, Dahra)
+  // ════════════════════════════════════════════════════════════════════════
+  {
+    id: 'louga',
+    name: 'Louga Ville (Centre, Santhiaba)',
+    region: 'Louga',
+    department: 'Louga',
+    x: 130,
+    y: 65,
+    description: 'Carrefour culturel du Ndiambour, festival FESFOP et gare ferroviaire',
+    popular: true,
+    keywords: ['ndiambour', 'fesfop', 'santhiaba louga', 'gare louga'],
+  },
+  {
+    id: 'kebemer',
+    name: 'Kébémer / Guéoul',
+    region: 'Louga',
+    department: 'Kébémer',
+    x: 95,
+    y: 50,
+    description: 'Capitale de l’artisanat du cuir et du meuble en bois, ville natale de Me Abdoulaye Wade',
+    popular: true,
+    keywords: ['artisanat', 'cuir', 'menuiserie', 'gueoul'],
+  },
+  {
+    id: 'dahra',
+    name: 'Dahra Djoloff / Linguère',
+    region: 'Louga',
+    department: 'Linguère',
+    x: 210,
+    y: 50,
+    description: 'Plus grand marché hebdomadaire à bétail (Luma de Dahra) et capitale historique du Djoloff',
+    popular: true,
+    keywords: ['luma dahra', 'marche betail', 'moutons', 'bovins', 'linguere', 'djoloff'],
+  },
+
+  // ════════════════════════════════════════════════════════════════════════
+  // 8. RÉGION DE MATAM (Fouta, Ourossogui, Kanel)
+  // ════════════════════════════════════════════════════════════════════════
+  {
+    id: 'matam',
+    name: 'Matam Ville (Bord du Fleuve / Soubalo)',
+    region: 'Matam',
+    department: 'Matam',
+    x: 380,
+    y: 110,
+    description: 'Chef-lieu de région sur les rives du fleuve Sénégal, quartier des pêcheurs Soubalo',
+    popular: true,
+    keywords: ['soubalo', 'fleuve senegal', 'fouta toro', 'tandondo'],
+  },
+  {
+    id: 'ourossogui',
+    name: 'Ourossogui Carrefour',
+    region: 'Matam',
+    department: 'Matam',
+    x: 370,
+    y: 105,
+    description: 'Poumon économique et carrefour routier majeur reliant Dakar, Saint-Louis et Tambacounda',
+    popular: true,
+    keywords: ['carrefour ourossogui', 'gare ourossogui', 'grand marche fouta'],
+  },
+  {
+    id: 'kanel',
+    name: 'Kanel / Thilogne / Agnam',
+    region: 'Matam',
+    department: 'Kanel',
+    x: 410,
+    y: 95,
+    description: 'Villes historiques du Daande Maayo et des grandes cultures maraîchères',
+    popular: false,
+    keywords: ['thilogne', 'agnam civol', 'daande maayo', 'semme', 'waounde'],
+  },
+  {
+    id: 'ranerou',
+    name: 'Ranérou Ferlo',
+    region: 'Matam',
+    department: 'Ranérou Ferlo',
+    x: 310,
+    y: 60,
+    description: 'Cœur du Ferlo sylvopastoral et réserves de faune',
+    popular: false,
+    keywords: ['ferlo', 'reserve faune', 'pastoralisme'],
+  },
+
+  // ════════════════════════════════════════════════════════════════════════
+  // 9. RÉGION DE KAFFRINE (Ndoucoumane)
+  // ════════════════════════════════════════════════════════════════════════
+  {
+    id: 'kaffrine',
+    name: 'Kaffrine Ville (Ndoucoumane)',
+    region: 'Kaffrine',
+    department: 'Kaffrine',
+    x: 180,
+    y: -30,
+    description: 'Capitale du Ndoucoumane, carrefour central sur la Route Nationale 1 (RN1)',
+    popular: true,
+    keywords: ['ndoucoumane', 'rn1', 'escale kaffrine', 'bassin agricole'],
+  },
+  {
+    id: 'koungheul',
+    name: 'Koungheul',
+    region: 'Kaffrine',
+    department: 'Koungheul',
+    x: 240,
+    y: -35,
+    description: 'Grand marché céréalier et zone de transit vers Tambacounda et le Mali',
+    popular: true,
+    keywords: ['marche cerealier', 'mais', 'mil', 'transit mali'],
+  },
+  {
+    id: 'birkelane',
+    name: 'Birkelane / Malem Hodar',
+    region: 'Kaffrine',
+    department: 'Birkelane',
+    x: 155,
+    y: -28,
+    description: 'Zones agricoles prospères et production d’arachide et pastèques',
+    popular: false,
+    keywords: ['malem hodar', 'pasteques', 'arachide'],
+  },
+
+  // ════════════════════════════════════════════════════════════════════════
+  // 10. RÉGION DE TAMBACOUNDA (Sénégal Oriental, Bakel)
+  // ════════════════════════════════════════════════════════════════════════
+  {
+    id: 'tambacounda',
+    name: 'Tambacounda Ville (Médinacoura / Dépôt)',
+    region: 'Tambacounda',
+    department: 'Tambacounda',
+    x: 340,
+    y: -50,
+    description: 'Capitale du Sénégal oriental, carrefour stratégique vers Mali, Guinée et parc Niokolo-Koba',
+    popular: true,
+    keywords: ['medinacoura', 'depot', 'quinzambougou', 'gare tamba', 'niokolo koba', 'rn1'],
+  },
+  {
+    id: 'bakel',
+    name: 'Bakel / Fort Faidherbe',
+    region: 'Tambacounda',
+    department: 'Bakel',
+    x: 460,
+    y: 40,
+    description: 'Ville historique des Trois Frontières (Sénégal, Mauritanie, Mali), Fort Faidherbe',
+    popular: true,
+    keywords: ['fort faidherbe', 'frontiere mali', 'trois frontieres', 'diawara', 'kidira'],
+  },
+  {
+    id: 'goudiry',
+    name: 'Goudiry / Kidira',
+    region: 'Tambacounda',
+    department: 'Goudiry',
+    x: 420,
+    y: -10,
+    description: 'Kidira poste frontière principal avec le Mali, grand couloir de fret routier',
+    popular: true,
+    keywords: ['kidira', 'frontiere mali', 'douane', 'fret camions'],
+  },
+  {
+    id: 'koumpentoum',
+    name: 'Koumpentoum',
+    region: 'Tambacounda',
+    department: 'Koumpentoum',
+    x: 280,
+    y: -40,
+    description: 'Bassin cotonnier (SODEFITEX) et carrefour sur l’axe Dakar-Bamako',
+    popular: false,
+    keywords: ['sodefitex', 'coton', 'dakar bamako'],
+  },
+
+  // ════════════════════════════════════════════════════════════════════════
+  // 11. RÉGION DE KÉDOUGOU (Pays Bassari, Cascades, Mines d'or)
+  // ════════════════════════════════════════════════════════════════════════
+  {
+    id: 'kedougou',
+    name: 'Kédougou Ville (Falémé / Centre)',
+    region: 'Kédougou',
+    department: 'Kédougou',
+    x: 470,
+    y: -120,
+    description: 'Plateau du pays Bassari et Bédik (UNESCO), rives du fleuve Gambie et collines verdoyantes',
+    popular: true,
+    keywords: ['pays bassari', 'fleuve gambie', 'dindefelo', 'bedik', 'tourisme ecologique'],
+  },
+  {
+    id: 'dindefelo',
+    name: 'Dindéfélo (Cascade & Réserve)',
+    region: 'Kédougou',
+    department: 'Kédougou',
+    x: 490,
+    y: -140,
+    description: 'Plus haute cascade du Sénégal (115m), réserve naturelle communautaire et chimpanzés',
+    popular: true,
+    keywords: ['cascade', 'reserve chimpanzes', 'ecotourisme', 'randonnee'],
+  },
+  {
+    id: 'saraya_mako',
+    name: 'Saraya / Mako / Sabodala',
+    region: 'Kédougou',
+    department: 'Saraya',
+    x: 520,
+    y: -100,
+    description: 'Grand bassin minier aurifère du Sénégal (mines d’or de Sabodala et Mako)',
+    popular: true,
+    keywords: ['mines or', 'sabodala', 'mako', 'faleme'],
+  },
+  {
+    id: 'salemata',
+    name: 'Salémata / Bandafassi',
+    region: 'Kédougou',
+    department: 'Salémata',
+    x: 440,
+    y: -130,
+    description: 'Cœur culturel des villages traditionnels Bassari et Peul',
+    popular: false,
+    keywords: ['bandafassi', 'villages perches', 'traditions'],
+  },
+
+  // ════════════════════════════════════════════════════════════════════════
+  // 12. RÉGION DE ZIGUINCHOR (Basse-Casamance, Cap Skirring, Bignona)
+  // ════════════════════════════════════════════════════════════════════════
+  {
+    id: 'ziguinchor',
+    name: 'Ziguinchor Ville (Escale / Boucotte / Port)',
+    region: 'Ziguinchor',
+    department: 'Ziguinchor',
+    x: 230,
+    y: -170,
+    description: 'Capitale de la Casamance, port maritime (ferry Aline Sitoé Diatta), Boucotte et Santhiaba',
+    popular: true,
+    keywords: ['escale', 'boucotte', 'port ziguinchor', 'ferry aline sitoe', 'fleuve casamance', 'marche saint maur'],
+  },
+  {
+    id: 'cap_skirring',
+    name: 'Cap Skirring / Kabrousse',
+    region: 'Ziguinchor',
+    department: 'Oussouye',
+    x: 200,
+    y: -195,
+    description: 'Plus belles plages de sable fin du Sénégal, Club Med, aéroport international et golf',
+    popular: true,
+    keywords: ['plages', 'club med', 'aeroport cap skirring', 'kabrousse', 'boucotte diembering'],
+  },
+  {
+    id: 'oussouye',
+    name: 'Oussouye (Royaume du Kassa)',
+    region: 'Ziguinchor',
+    department: 'Oussouye',
+    x: 215,
+    y: -185,
+    description: 'Capitale culturelle Diola, résidence du Roi d’Oussouye (Maan) et forêts sacrées',
+    popular: true,
+    keywords: ['roi oussouye', 'kassa', 'diola', 'foret sacree', 'artisanat'],
+  },
+  {
+    id: 'bignona',
+    name: 'Bignona (Fogny / Gare Routière)',
+    region: 'Ziguinchor',
+    department: 'Bignona',
+    x: 235,
+    y: -145,
+    description: 'Grand carrefour routier de Casamance reliant la Gambie, Dakar et la frontière sud',
+    popular: true,
+    keywords: ['fogny', 'gare routiere bignona', 'carrefour casamance', 'thionck essyl'],
+  },
+  {
+    id: 'kafountine',
+    name: 'Kafountine / Abéné',
+    region: 'Ziguinchor',
+    department: 'Bignona',
+    x: 180,
+    y: -125,
+    description: 'Grand port de pêche fumée, îles Karone, festival de danse d’Abéné et plages sauvages',
+    popular: true,
+    keywords: ['abene', 'poisson fume', 'iles karone', 'festival abene', 'plages'],
+  },
+
+  // ════════════════════════════════════════════════════════════════════════
+  // 13. RÉGION DE SÉDHIOU (Moyenne-Casamance, Pakao)
+  // ════════════════════════════════════════════════════════════════════════
+  {
+    id: 'sedhiou',
+    name: 'Sédhiou Ville (Fort Pinet-Laprade / Pakao)',
+    region: 'Sédhiou',
+    department: 'Sédhiou',
+    x: 280,
+    y: -160,
+    description: 'Capitale historique du Pakao, berceau du Kankourang, fleuve Casamance',
+    popular: true,
+    keywords: ['pakao', 'kankourang', 'fort pinet laprade', 'fleuve casamance'],
+  },
+  {
+    id: 'bounkiling',
+    name: 'Bounkiling / Transgambienne',
+    region: 'Sédhiou',
+    department: 'Bounkiling',
+    x: 260,
+    y: -120,
+    description: 'Carrefour clé sur la Route Transgambienne (RN4 / Pont de Farafenni)',
+    popular: true,
+    keywords: ['transgambienne', 'rn4', 'carrefour'],
+  },
+  {
+    id: 'goudomp',
+    name: 'Goudomp / Tanaff',
+    region: 'Sédhiou',
+    department: 'Goudomp',
+    x: 270,
+    y: -180,
+    description: 'Rive gauche de la Casamance, rizières et vergers de mangues',
+    popular: false,
+    keywords: ['tanaff', 'mangues', 'rizieres'],
+  },
+
+  // ════════════════════════════════════════════════════════════════════════
+  // 14. RÉGION DE KOLDA (Haute-Casamance, Fouladou, Marché de Diaobé)
+  // ════════════════════════════════════════════════════════════════════════
+  {
+    id: 'kolda',
+    name: 'Kolda Ville (Sikilo / Doumassou)',
+    region: 'Kolda',
+    department: 'Kolda',
+    x: 330,
+    y: -155,
+    description: 'Capitale du Fouladou, élevage bovin de renommée, Sikilo, Doumassou et fleuve Casamance',
+    popular: true,
+    keywords: ['fouladou', 'sikilo', 'doumassou', 'elevage', 'fleuve'],
+  },
+  {
+    id: 'velingara_diaobe',
+    name: 'Vélingara / Marché International de Diaobé',
+    region: 'Kolda',
+    department: 'Vélingara',
+    x: 400,
+    y: -145,
+    description: 'Diaobé : plus grand marché sous-régional hebdomadaire d’Afrique de l’Ouest (Guinée, Gambie, Mali)',
+    popular: true,
+    keywords: ['diaobe', 'marche diaobe', 'luma diaobe', 'velingara', 'carrefour sous regional'],
+  },
+  {
+    id: 'medina_yoro_foulah',
+    name: 'Médina Yoro Foulah',
+    region: 'Kolda',
+    department: 'Médina Yoro Foulah',
+    x: 310,
+    y: -130,
+    description: 'Cœur du pastoralisme et des forêts de Haute-Casamance',
+    popular: false,
+    keywords: ['pastoralisme', 'forets', 'fouladou'],
+  },
+];
+
+export const ZONES_BY_ID = ZONES.reduce<Record<string, Zone>>((acc, zone) => {
   acc[zone.id] = zone;
   return acc;
-}, {} as Record<ZoneId, Zone>);
+}, {});
 
-export function getZone(id: ZoneId): Zone {
-  return ZONES_BY_ID[id] || ZONES[0];
+/**
+ * Returns a Zone object for a given id, or creates a fallback zone for custom location names
+ */
+export function getZone(id: string): Zone {
+  if (ZONES_BY_ID[id]) {
+    return ZONES_BY_ID[id];
+  }
+  // If user typed a custom street or location, search fuzzy
+  const found = searchZones(id);
+  if (found.length > 0) {
+    return found[0];
+  }
+  // Default fallback to Dakar Plateau
+  return ZONES[0];
+}
+
+/**
+ * Search across all 14 regions by name, region, department, description or keywords
+ */
+export function searchZones(query: string, regionFilter?: string): Zone[] {
+  const q = query.trim().toLowerCase();
+  if (!q && !regionFilter) return ZONES;
+
+  return ZONES.filter((z) => {
+    if (regionFilter && regionFilter !== 'all' && z.region.toLowerCase() !== regionFilter.toLowerCase()) {
+      return false;
+    }
+    if (!q) return true;
+
+    if (z.name.toLowerCase().includes(q)) return true;
+    if (z.region.toLowerCase().includes(q)) return true;
+    if (z.department && z.department.toLowerCase().includes(q)) return true;
+    if (z.description && z.description.toLowerCase().includes(q)) return true;
+    if (z.keywords && z.keywords.some((k) => k.toLowerCase().includes(q))) return true;
+
+    return false;
+  });
+}
+
+/**
+ * Get all zones belonging to a specific region
+ */
+export function getZonesByRegion(region: string): Zone[] {
+  if (!region || region === 'all') return ZONES;
+  return ZONES.filter((z) => z.region.toLowerCase() === region.toLowerCase());
 }

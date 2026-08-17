@@ -16,15 +16,37 @@ export type ZoneId =
   | 'guediawaye'
   | 'thiaroye'
   | 'rufisque'
-  | 'aibd';
+  | 'aibd'
+  | 'keur_massar'
+  | 'yeumbeul'
+  | 'thies'
+  | 'mbour'
+  | 'saly'
+  | 'touba'
+  | 'diourbel'
+  | 'saint_louis'
+  | 'kaolack'
+  | 'ziguinchor'
+  | 'tambacounda'
+  | 'kolda'
+  | 'fatick'
+  | 'louga'
+  | 'matam'
+  | 'kaffrine'
+  | 'kedougou'
+  | 'sedhiou'
+  | (string & {});
 
 export interface Zone {
   id: ZoneId;
   name: string;
+  region: string;
+  department?: string;
   x: number; // km from Plateau
   y: number; // km from Plateau
   description?: string;
   popular?: boolean;
+  keywords?: string[];
 }
 
 export type CategoryId =
