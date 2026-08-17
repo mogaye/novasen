@@ -3,7 +3,8 @@
 import React, { useState, useMemo, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, normalizeIdentifier } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { IconShieldCheck } from '@/components/ui/Icons';
 
 // Validateur strict Sénégal (Email ou Numéro 9 chiffres 70,75,76,77,78)
@@ -105,6 +106,38 @@ function ConnexionContent() {
       return () => clearTimeout(timer);
     }
   }, [user, router, redirectPath]);
+
+  // Synchronisation en temps réel multi-appareils (Ex: Ordinateur qui attend quand le téléphone valide le lien/code)
+  useEffect(() => {
+    if (!identifier) return;
+
+    const { authEmail } = normalizeIdentifier(identifier);
+    const channelName = `auth-sync-${authEmail.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+
+    const channel = supabase.channel(channelName);
+    channel
+      .on('broadcast', { event: 'device_authenticated' }, async ({ payload }) => {
+        if (payload?.access_token && payload?.refresh_token) {
+          setSuccessMsg('✓ Confirmation validée depuis votre téléphone ! Connexion instantanée...');
+          try {
+            await supabase.auth.setSession({
+              access_token: payload.access_token,
+              refresh_token: payload.refresh_token,
+            });
+            setTimeout(() => {
+              router.push(redirectPath);
+            }, 400);
+          } catch (err) {
+            console.error('Cross-device session error:', err);
+          }
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [identifier, router, redirectPath]);
 
   // Gestion des inputs OTP à 6 chiffres
   const handleOtpChange = (index: number, val: string) => {

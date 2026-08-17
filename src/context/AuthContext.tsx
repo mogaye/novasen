@@ -64,6 +64,25 @@ export function normalizeIdentifier(identifier: string): { isPhone: boolean; for
   };
 }
 
+export function broadcastDeviceAuth(email: string, session: any) {
+  if (!email || !session?.access_token) return;
+  const channelName = `auth-sync-${email.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+  const ch = supabase.channel(channelName);
+  ch.subscribe((status) => {
+    if (status === 'SUBSCRIBED') {
+      ch.send({
+        type: 'broadcast',
+        event: 'device_authenticated',
+        payload: {
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+          user: session.user,
+        },
+      });
+    }
+  });
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -111,11 +130,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user?.id) {
           await fetchProfile(session.user.id);
+          // Broadcast to other waiting devices (e.g., computer while phone verifies)
+          if (session.user.email) {
+            broadcastDeviceAuth(session.user.email, session);
+          }
         } else {
           setProfile(null);
         }
