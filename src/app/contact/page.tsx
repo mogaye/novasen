@@ -23,17 +23,61 @@ export default function ContactPage() {
   const [phone, setPhone] = useState('');
   const [subject, setSubject] = useState('livraison');
   const [message, setMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSent, setIsSent] = useState(false);
+  const [lastWhatsAppUrl, setLastWhatsAppUrl] = useState('');
+
+  const PROFILE_LABELS: Record<string, string> = {
+    buyer: '🛍️ Acheteur',
+    seller: '🏪 Vendeur',
+    driver: '🛵 Chauffeur / Livreur',
+    partner: '🤝 Partenaire',
+  };
+
+  const SUBJECT_LABELS: Record<string, string> = {
+    livraison: '📦 Suivi ou problème sur une livraison en cours',
+    paiement: '💳 Question sur un paiement Wave / OM / Carte',
+    boutique: '🏪 Certification ou formule Boutique Vendeur',
+    chauffeur: '🛵 Inscription ou forfait Chauffeur / Livreur',
+    autre: '❓ Autre renseignement',
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    const formattedWhatsAppMsg = [
+      '🌟 *NOUVEAU MESSAGE DE CONTACT - NOVASEN* 🌟',
+      '━━━━━━━━━━━━━━━━━━━━',
+      `👤 *Nom complet* : ${fullName}`,
+      `📞 *Numéro de contact* : ${phone}`,
+      `🏷️ *Statut / Profil* : ${PROFILE_LABELS[profileType] || profileType}`,
+      `🎯 *Objet de la demande* : ${SUBJECT_LABELS[subject] || subject}`,
+      '━━━━━━━━━━━━━━━━━━━━',
+      '💬 *Détail du message* :',
+      `"${message}"`,
+      '━━━━━━━━━━━━━━━━━━━━',
+      `⏰ *Date d'envoi* : ${dateStr}`,
+      '📍 *Plateforme* : NovaSen • Marché & Logistique Dakar',
+    ].join('\n');
+
+    const targetUrl = `https://wa.me/221705908725?text=${encodeURIComponent(formattedWhatsAppMsg)}`;
+    setLastWhatsAppUrl(targetUrl);
+
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSent(true);
-      showSuccessToast('Votre message a été transmis directement à nos opérateurs dakarois !');
-    }, 1200);
+      showSuccessToast('Transmission vers votre WhatsApp en cours...');
+      // Ouvrir directement la discussion WhatsApp avec le message structuré
+      window.open(targetUrl, '_blank');
+    }, 600);
   };
 
   return (
@@ -157,26 +201,42 @@ export default function ContactPage() {
           </div>
 
           {isSent ? (
-            <div className="bg-emerald-50 border border-emerald-300 p-8 rounded-2xl text-center flex flex-col items-center gap-4 animate-fadeIn">
+            <div className="bg-emerald-50 border border-emerald-300 p-8 rounded-2xl text-center flex flex-col items-center gap-5 animate-fadeIn">
               <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center text-3xl shadow-md">
                 ✓
               </div>
-              <h3 className="text-xl font-bold text-emerald-900 font-heading">
-                Message transmis avec succès !
-              </h3>
-              <p className="text-sm text-emerald-800 max-w-md">
-                Merci {fullName || 'cher utilisateur'}. Notre équipe d’opérateurs a bien reçu votre demande et vous contactera au <strong>{phone || '+221'}</strong> dans les plus brefs délais.
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setIsSent(false);
-                  setMessage('');
-                }}
-              >
-                Envoyer un autre message
-              </Button>
+              <div className="flex flex-col gap-1">
+                <h3 className="text-xl font-bold text-emerald-900 font-heading">
+                  Message préparé et transmis !
+                </h3>
+                <p className="text-sm text-emerald-800 max-w-md">
+                  Merci <strong>{fullName || 'cher utilisateur'}</strong>. Toutes vos informations (Profil {PROFILE_LABELS[profileType]}, Téléphone {phone}, Objet et Message) ont été formatées et transmises sur WhatsApp.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                {lastWhatsAppUrl && (
+                  <a
+                    href={lastWhatsAppUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all"
+                  >
+                    <span>Ouvrir la discussion WhatsApp</span>
+                    <IconArrowRight className="w-4 h-4" />
+                  </a>
+                )}
+                <Button
+                  variant="outline"
+                  size="md"
+                  onClick={() => {
+                    setIsSent(false);
+                    setMessage('');
+                  }}
+                >
+                  Envoyer un autre message
+                </Button>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
