@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { ZONES } from '@/lib/zones';
 import { formatCFA } from '@/lib/format';
-import { RouteMap } from '@/components/RouteMap';
+import { GoogleRouteMap } from '@/components/GoogleRouteMap';
 import { Button } from '@/components/ui/Button';
 import {
   IconArrowLeft,
@@ -98,7 +98,7 @@ export default function OrderTrackingPage() {
             </div>
 
             <div className="h-72 sm:h-96 w-full rounded-[10px] overflow-hidden border border-[#DDCDB6]">
-              <RouteMap
+              <GoogleRouteMap
                 originId={origin.id}
                 destinationId={destination.id}
                 mode="colis"

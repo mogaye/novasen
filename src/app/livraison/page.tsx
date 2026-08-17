@@ -9,7 +9,7 @@ import { ZONES, ZONES_BY_ID } from '@/lib/zones';
 import { ZoneId, ParcelClass, PaymentMethod, DriverAssignment } from '@/lib/types';
 import { calculateFares, calculateTripMetrics } from '@/lib/fares';
 import { formatCFA, formatDistance, formatDuration } from '@/lib/format';
-import { RouteMap } from '@/components/RouteMap';
+import { GoogleRouteMap } from '@/components/GoogleRouteMap';
 import { CourierFound } from '@/components/CourierFound';
 import { LocationSearchInput } from '@/components/ui/LocationSearchInput';
 import { Button } from '@/components/ui/Button';
@@ -398,9 +398,11 @@ function LivraisonContent() {
 
             {/* Map Preview */}
             <div className="pt-2">
-              <RouteMap
+              <GoogleRouteMap
                 originId={originId}
                 destinationId={destinationId}
+                originCustomText={listing.neighborhood || ZONES_BY_ID[originId]?.name}
+                destinationCustomText={destinationName}
                 mode="colis"
                 vehicleType={parcelClass}
                 className="h-64 w-full"

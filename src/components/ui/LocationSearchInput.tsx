@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { ZONES, SENEGAL_REGIONS, searchZones } from '@/lib/zones';
 import { ZoneId } from '@/lib/types';
+import { getSenegalPlacePredictions, PlacePrediction } from '@/lib/googleMaps';
 import { IconMapPin, IconX, IconCheck, IconSearch, IconArrowRight } from './Icons';
 
 interface LocationSearchInputProps {
@@ -38,6 +39,7 @@ export function LocationSearchInput({
   const [query, setQuery] = useState(customText !== undefined ? customText : (currentZone?.name || ''));
   const [selectedRegionFilter, setSelectedRegionFilter] = useState<string>('all');
   const [isOpen, setIsOpen] = useState(false);
+  const [googlePredictions, setGooglePredictions] = useState<PlacePrediction[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -47,6 +49,23 @@ export function LocationSearchInput({
       setQuery(customText);
     }
   }, [customText]);
+
+  // Google Places autocomplete search when user types
+  useEffect(() => {
+    let active = true;
+    if (query.trim().length >= 2) {
+      getSenegalPlacePredictions(query.trim()).then((predictions) => {
+        if (active) {
+          setGooglePredictions(predictions);
+        }
+      });
+    } else {
+      setGooglePredictions([]);
+    }
+    return () => {
+      active = false;
+    };
+  }, [query]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -255,6 +274,35 @@ export function LocationSearchInput({
                   <span>↵</span>
                 </span>
               </button>
+            </div>
+          )}
+
+          {/* Google Places Predictions (if available) */}
+          {googlePredictions.length > 0 && (
+            <div className="bg-[#FAF6F0] p-2 border-b border-[#DDCDB6] flex flex-col gap-1">
+              <span className="text-[10px] uppercase font-bold text-[#1C3049] px-2 flex items-center gap-1.5">
+                <span>🗺️ Adresses Google Maps (Sénégal) :</span>
+              </span>
+              {googlePredictions.map((pred) => (
+                <button
+                  key={pred.placeId}
+                  type="button"
+                  onClick={() => {
+                    const match = ZONES.find((z) => pred.description.toLowerCase().includes(z.name.toLowerCase())) || currentZone || ZONES[0];
+                    handleSelect(match.id, pred.mainText || pred.description);
+                  }}
+                  className="w-full text-left p-2 rounded-lg hover:bg-[#E8DBC8] flex items-center justify-between text-xs font-semibold text-[#1C3049] transition-all cursor-pointer"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-sm shrink-0">📍</span>
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-bold truncate text-[#1C3049]">{pred.mainText}</span>
+                      <span className="text-[10px] text-[#7A6A5C] truncate">{pred.secondaryText}</span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-[#7A5133] font-bold shrink-0">Choisir →</span>
+                </button>
+              ))}
             </div>
           )}
 
