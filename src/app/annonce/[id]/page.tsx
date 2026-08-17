@@ -52,11 +52,28 @@ export default function ListingDetailPage() {
       return;
     }
 
+    const cleanId = String(id).trim();
+
+    // Check if ID is in blacklist of deleted listings
+    if (typeof window !== 'undefined') {
+      try {
+        const savedDeleted = localStorage.getItem('novasen_deleted_listing_ids');
+        if (savedDeleted) {
+          const parsed: string[] = JSON.parse(savedDeleted);
+          if (Array.isArray(parsed) && parsed.map((x) => String(x).trim()).includes(cleanId)) {
+            setListing(null);
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (e) {}
+    }
+
     let isMounted = true;
 
     async function loadListing() {
       // 1. Search in AppContext in-memory listings
-      const foundInMemory = listings.find((l) => String(l.id) === String(id));
+      const foundInMemory = listings.find((l) => String(l.id).trim() === cleanId);
       if (foundInMemory) {
         if (isMounted) {
           setListing(foundInMemory);
@@ -66,24 +83,13 @@ export default function ListingDetailPage() {
         return;
       }
 
-      // 2. Search in INITIAL_LISTINGS
-      const foundInInitial = INITIAL_LISTINGS.find((l) => String(l.id) === String(id));
-      if (foundInInitial) {
-        if (isMounted) {
-          setListing(foundInInitial);
-          setSelectedPhoto(foundInInitial.imageUrl || foundInInitial.images?.[0]);
-          setLoading(false);
-        }
-        return;
-      }
-
-      // 3. Search in LocalStorage cache
+      // 2. Search in LocalStorage cache
       if (typeof window !== 'undefined') {
         try {
           const cached = localStorage.getItem('novasen_custom_listings');
           if (cached) {
             const parsed: Listing[] = JSON.parse(cached);
-            const foundInCache = parsed.find((l) => String(l.id) === String(id));
+            const foundInCache = parsed.find((l) => String(l.id).trim() === cleanId);
             if (foundInCache) {
               if (isMounted) {
                 setListing(foundInCache);
@@ -96,12 +102,23 @@ export default function ListingDetailPage() {
         } catch (e) {}
       }
 
+      // 3. Search in INITIAL_LISTINGS
+      const foundInInitial = INITIAL_LISTINGS.find((l) => String(l.id).trim() === cleanId);
+      if (foundInInitial) {
+        if (isMounted) {
+          setListing(foundInInitial);
+          setSelectedPhoto(foundInInitial.imageUrl || foundInInitial.images?.[0]);
+          setLoading(false);
+        }
+        return;
+      }
+
       // 4. Fetch directly from Supabase by ID / UUID
       try {
         const { data, error } = await supabase
           .from('listings')
           .select('*')
-          .eq('id', id)
+          .eq('id', cleanId)
           .single();
 
         if (data && !error && isMounted) {

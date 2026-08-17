@@ -294,11 +294,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (savedCustom) localCustom = JSON.parse(savedCustom);
 
           const savedDeleted = localStorage.getItem('novasen_deleted_listing_ids');
-          if (savedDeleted) deletedIds = JSON.parse(savedDeleted);
+          if (savedDeleted) {
+            const parsed = JSON.parse(savedDeleted);
+            if (Array.isArray(parsed)) {
+              deletedIds = parsed.map((item) => String(item).trim());
+            }
+          }
         } catch (e) {}
       }
 
-      const isNotDeleted = (id: string | number) => !deletedIds.includes(String(id));
+      const isNotDeleted = (id: string | number) => {
+        const clean = String(id).trim();
+        return !deletedIds.includes(clean);
+      };
 
       const { data, error } = await supabase
         .from('listings')
@@ -308,40 +316,50 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       let combined: Listing[] = [];
 
       if (data && !error) {
-        const mapped: Listing[] = data.map((d: any) => ({
-          id: String(d.id),
-          title: d.title || 'Annonce NovaSen',
-          price: Number(d.price) || 0,
-          category: d.category || 'vehicules',
-          zoneId: (d.zone_id as ZoneId) || 'plateau',
-          neighborhood: d.address || d.zone_id || 'Dakar',
-          region: 'Dakar',
-          condition: d.condition || 'Bon état',
-          sellerName: d.phone || 'Vendeur NovaSen',
-          sellerSeniority: 'Membre certifié',
-          relativeDate: d.created_at ? new Date(d.created_at).toLocaleDateString('fr-FR') : "Aujourd'hui",
-          description: d.description || '',
-          isVerifiedShop: false,
-          isFeatured: d.is_featured || false,
-          imageUrl: d.images?.[0] || '',
-          images: d.images && d.images.length > 0 ? d.images : (d.imageUrl ? [d.imageUrl] : []),
-        }));
+        // Asynchronously clean up any orphaned deleted listings still in Supabase
+        const orphanedInSupabase = data.filter((d: any) => !isNotDeleted(d.id));
+        if (orphanedInSupabase.length > 0) {
+          for (const orphan of orphanedInSupabase) {
+            void supabase.from('listings').delete().eq('id', orphan.id);
+          }
+        }
+
+        const mapped: Listing[] = data
+          .filter((d: any) => isNotDeleted(d.id))
+          .map((d: any) => ({
+            id: String(d.id),
+            title: d.title || 'Annonce NovaSen',
+            price: Number(d.price) || 0,
+            category: d.category || 'vehicules',
+            zoneId: (d.zone_id as ZoneId) || 'plateau',
+            neighborhood: d.address || d.zone_id || 'Dakar',
+            region: 'Dakar',
+            condition: d.condition || 'Bon état',
+            sellerName: d.phone || 'Vendeur NovaSen',
+            sellerSeniority: 'Membre certifié',
+            relativeDate: d.created_at ? new Date(d.created_at).toLocaleDateString('fr-FR') : "Aujourd'hui",
+            description: d.description || '',
+            isVerifiedShop: false,
+            isFeatured: d.is_featured || false,
+            imageUrl: d.images?.[0] || '',
+            images: d.images && d.images.length > 0 ? d.images : (d.imageUrl ? [d.imageUrl] : []),
+          }));
 
         combined = [...mapped];
         for (const item of localCustom) {
-          if (!combined.some((c) => String(c.id) === String(item.id))) {
+          if (isNotDeleted(item.id) && !combined.some((c) => String(c.id).trim() === String(item.id).trim())) {
             combined.push(item);
           }
         }
         for (const init of INITIAL_LISTINGS) {
-          if (!combined.some((c) => String(c.id) === String(init.id))) {
+          if (isNotDeleted(init.id) && !combined.some((c) => String(c.id).trim() === String(init.id).trim())) {
             combined.push(init);
           }
         }
       } else {
-        combined = [...localCustom];
+        combined = localCustom.filter((item) => isNotDeleted(item.id));
         for (const init of INITIAL_LISTINGS) {
-          if (!combined.some((c) => String(c.id) === String(init.id))) {
+          if (isNotDeleted(init.id) && !combined.some((c) => String(c.id).trim() === String(init.id).trim())) {
             combined.push(init);
           }
         }
@@ -463,13 +481,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       if (typeof window !== 'undefined') {
         try {
+          // Clean from deleted IDs blacklist if it existed
+          const savedDeleted = localStorage.getItem('novasen_deleted_listing_ids');
+          if (savedDeleted) {
+            const parsed: string[] = JSON.parse(savedDeleted);
+            if (Array.isArray(parsed)) {
+              const updatedDeleted = parsed.filter((id) => String(id).trim() !== String(newListingItem.id).trim());
+              localStorage.setItem('novasen_deleted_listing_ids', JSON.stringify(updatedDeleted));
+            }
+          }
+
           const saved = localStorage.getItem('novasen_custom_listings');
           const list = saved ? JSON.parse(saved) : [];
           localStorage.setItem('novasen_custom_listings', JSON.stringify([newListingItem, ...list]));
         } catch (e) {}
       }
 
-      setListings((prev) => [newListingItem, ...prev.filter((l) => String(l.id) !== String(newListingItem.id))]);
+      setListings((prev) => [newListingItem, ...prev.filter((l) => String(l.id).trim() !== String(newListingItem.id).trim())]);
       setUserListingsCount((prev) => prev + 1);
 
       return { success: true, data: data || newListingItem };
@@ -480,6 +508,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateListing = async (listingId: string, updatedData: Partial<Listing>): Promise<{ success: boolean; error?: string }> => {
     try {
+      const cleanId = String(listingId).trim();
+
       // 1. Update in Supabase if online
       try {
         await supabase
@@ -496,7 +526,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             is_featured: updatedData.isFeatured,
             phone: updatedData.sellerName,
           })
-          .eq('id', listingId);
+          .eq('id', cleanId);
       } catch (e) {
         console.warn('Could not update in Supabase, updating locally', e);
       }
@@ -508,7 +538,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (saved) {
             const list: Listing[] = JSON.parse(saved);
             const updated = list.map((item) =>
-              String(item.id) === String(listingId) ? { ...item, ...updatedData } : item
+              String(item.id).trim() === cleanId ? { ...item, ...updatedData } : item
             );
             localStorage.setItem('novasen_custom_listings', JSON.stringify(updated));
           }
@@ -517,7 +547,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       // 3. Update memory state
       setListings((prev) =>
-        prev.map((item) => (String(item.id) === String(listingId) ? { ...item, ...updatedData } : item))
+        prev.map((item) => (String(item.id).trim() === cleanId ? { ...item, ...updatedData } : item))
       );
 
       showSuccessToast('Annonce mise à jour avec succès !');
@@ -529,13 +559,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const decrementListingStock = async (listingId: string, count: number = 1): Promise<{ success: boolean }> => {
     try {
-      const targetListing = listings.find((l) => String(l.id) === String(listingId));
+      const cleanId = String(listingId).trim();
+      const targetListing = listings.find((l) => String(l.id).trim() === cleanId);
       const currentSold = targetListing?.soldCount || 0;
       const newSold = currentSold + count;
 
       setListings((prev) =>
         prev.map((item) =>
-          String(item.id) === String(listingId)
+          String(item.id).trim() === cleanId
             ? { ...item, soldCount: newSold }
             : item
         )
@@ -547,7 +578,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (saved) {
             const list: Listing[] = JSON.parse(saved);
             const updated = list.map((item) =>
-              String(item.id) === String(listingId)
+              String(item.id).trim() === cleanId
                 ? { ...item, soldCount: newSold }
                 : item
             );
@@ -563,36 +594,44 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const deleteListing = async (listingId: string): Promise<{ success: boolean; error?: string }> => {
-    try {
-      // 1. Delete from Supabase if online
-      try {
-        await supabase.from('listings').delete().eq('id', listingId);
-      } catch (err) {
-        console.warn('Could not delete from Supabase, removing locally', err);
-      }
+    if (!listingId) return { success: false, error: 'Identifiant invalide' };
+    const cleanId = String(listingId).trim();
 
-      // 2. Add to deleted IDs blacklist & remove from custom listings
+    try {
+      // 1. Immediately remove from state in memory
+      setListings((prev) => prev.filter((item) => String(item.id).trim() !== cleanId));
+
+      // 2. Add to deleted IDs blacklist & remove from custom listings in localStorage
       if (typeof window !== 'undefined') {
         try {
           const savedDeleted = localStorage.getItem('novasen_deleted_listing_ids');
           const deletedList: string[] = savedDeleted ? JSON.parse(savedDeleted) : [];
-          if (!deletedList.includes(String(listingId))) {
-            deletedList.push(String(listingId));
+          if (!deletedList.map((id) => String(id).trim()).includes(cleanId)) {
+            deletedList.push(cleanId);
             localStorage.setItem('novasen_deleted_listing_ids', JSON.stringify(deletedList));
           }
 
           const saved = localStorage.getItem('novasen_custom_listings');
           if (saved) {
             const list: Listing[] = JSON.parse(saved);
-            const filtered = list.filter((item) => String(item.id) !== String(listingId));
+            const filtered = list.filter((item) => String(item.id).trim() !== cleanId);
             localStorage.setItem('novasen_custom_listings', JSON.stringify(filtered));
+            setUserListingsCount(filtered.length);
+          } else {
+            setUserListingsCount((prev) => Math.max(0, prev - 1));
           }
-        } catch (e) {}
+        } catch (e) {
+          console.error('LocalStorage error in deleteListing:', e);
+        }
       }
 
-      // 3. Update active listings state
-      setListings((prev) => prev.filter((item) => String(item.id) !== String(listingId)));
-      setUserListingsCount((prev) => Math.max(0, prev - 1));
+      // 3. Delete from Supabase in background
+      try {
+        await supabase.from('listings').delete().eq('id', cleanId);
+      } catch (err) {
+        console.warn('Could not delete from Supabase:', err);
+      }
+
       showSuccessToast('Annonce supprimée avec succès (1 place libérée sur votre quota)');
 
       return { success: true };
