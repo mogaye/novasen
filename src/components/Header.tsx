@@ -434,7 +434,9 @@ export function Header() {
                   <span className="text-lg">🛵</span>
                   <span>Devenir Livreur / Chauffeur</span>
                 </div>
-                <span className="text-[11px] text-[#1C3049]">Forfait 1 500 F</span>
+                <span className="text-[11px] bg-[#1C3049]/10 text-[#1C3049] px-2 py-0.5 rounded font-bold">
+                  1 500 F/j • 25 000 F/m
+                </span>
               </Link>
 
               <Link
