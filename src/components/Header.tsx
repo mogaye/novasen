@@ -224,7 +224,7 @@ export function Header() {
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            className="p-2 rounded-full bg-white text-[#573721] border border-[#DDCDB6] shadow-xs text-sm"
+            className="w-9 h-9 rounded-full bg-white/90 text-[#573721] border border-[#DDCDB6] shadow-xs flex items-center justify-center text-sm cursor-pointer hover:bg-white transition-all"
             title="Rechercher"
             aria-label="Rechercher"
           >
@@ -235,7 +235,7 @@ export function Header() {
           {user ? (
             <Link
               href="/compte"
-              className="p-2 rounded-full bg-[#E8DBC8] text-[#573721] border border-[#DDCDB6] shadow-xs text-sm"
+              className="w-9 h-9 rounded-full bg-[#E8DBC8] text-[#573721] border border-[#DDCDB6] shadow-xs flex items-center justify-center text-sm"
               title="Mon Espace"
             >
               <IconUser className="w-4 h-4 text-[#573721]" />
@@ -243,106 +243,50 @@ export function Header() {
           ) : (
             <Link
               href="/connexion"
-              className="px-2.5 py-1.5 rounded-full bg-[#7A5133] text-white font-bold text-xs shadow-xs"
+              className="px-3 py-1.5 rounded-full bg-[#7A5133] hover:bg-[#573721] text-white font-bold text-xs shadow-xs transition-all"
               title="Connexion"
             >
               Connexion
             </Link>
           )}
 
-          {/* Explicit Dropdown Menu Button */}
+          {/* Clean Menu Déroulant Toggle Button */}
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold shadow-xs cursor-pointer transition-all active:scale-95 ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold shadow-xs cursor-pointer transition-all active:scale-95 ${
               mobileMenuOpen
-                ? 'bg-[#7A5133] text-white border-[#7A5133]'
-                : 'bg-[#E8DBC8] hover:bg-[#DDCDB6] text-[#573721] border-[#DDCDB6]'
+                ? 'bg-[#573721] text-white border-[#573721]'
+                : 'bg-white hover:bg-[#E8DBC8] text-[#573721] border-[#DDCDB6]'
             }`}
             aria-expanded={mobileMenuOpen}
             aria-label="Menu déroulant"
           >
-            <span>{mobileMenuOpen ? '✕ Fermer' : '☰ Menu ▾'}</span>
+            {mobileMenuOpen ? (
+              <>
+                <IconX className="w-4 h-4 text-white" />
+                <span>Fermer</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4 text-[#573721]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                <span>Menu</span>
+              </>
+            )}
           </button>
         </div>
-      </div>
-
-      {/* Mobile Sub-Header Quick Links (Always visible horizontal scroll on mobile) */}
-      <div className="lg:hidden flex items-center gap-2 overflow-x-auto no-scrollbar px-4 py-2 bg-[#FAF6F0] border-t border-[#DDCDB6]/70 text-xs whitespace-nowrap shadow-inner">
-        <Link
-          href="/accueil"
-          onClick={() => setActiveService('market')}
-          className={`px-3 py-1 rounded-full font-bold transition-colors ${
-            pathname === '/accueil' || pathname === '/'
-              ? 'bg-[#573721] text-white shadow-xs'
-              : 'bg-white text-[#573721] border border-[#DDCDB6]'
-          }`}
-        >
-          🏠 Accueil
-        </Link>
-        <Link
-          href="/marche"
-          onClick={() => setActiveService('market')}
-          className={`px-3 py-1 rounded-full font-bold transition-colors ${
-            pathname.startsWith('/marche')
-              ? 'bg-[#7A5133] text-white shadow-xs'
-              : 'bg-white text-[#7A5133] border border-[#DDCDB6]'
-          }`}
-        >
-          🛍️ Marché
-        </Link>
-        <Link
-          href="/transport"
-          onClick={() => setActiveService('transport')}
-          className={`px-3 py-1 rounded-full font-bold transition-colors ${
-            pathname.startsWith('/transport')
-              ? 'bg-[#1C3049] text-white shadow-xs'
-              : 'bg-white text-[#1C3049] border border-[#DDCDB6]'
-          }`}
-        >
-          🚗 Colis & VTC
-        </Link>
-        <Link
-          href="/tarifs"
-          className={`px-3 py-1 rounded-full font-bold transition-colors flex items-center gap-1 ${
-            pathname === '/tarifs'
-              ? 'bg-gradient-to-r from-[#7A5133] to-[#573721] text-white shadow-xs'
-              : 'bg-[#E8DBC8] text-[#573721] border border-[#DDCDB6]'
-          }`}
-        >
-          <span>💳 Tarifs & Abonnements</span>
-          <span className="px-1 py-[1px] bg-amber-400 text-stone-900 text-[8px] font-black rounded-full uppercase">
-            Pro
-          </span>
-        </Link>
-        <Link
-          href="/vendeur"
-          className="px-3 py-1 rounded-full font-bold bg-white text-[#7A5133] border border-[#DDCDB6]"
-        >
-          🏪 Boutique
-        </Link>
-        <Link
-          href="/livreur"
-          className="px-3 py-1 rounded-full font-bold bg-white text-[#1C3049] border border-[#DDCDB6]"
-        >
-          🛵 Chauffeur
-        </Link>
-        <Link
-          href="/contact"
-          className="px-3 py-1 rounded-full font-bold bg-emerald-50 text-emerald-800 border border-emerald-200"
-        >
-          🎧 Assistance
-        </Link>
       </div>
 
       {/* Modern Mobile Drawer / Dropdown */}
       {mobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 top-[120px] z-50 bg-black/50 backdrop-blur-xs flex flex-col justify-start overflow-y-auto animate-fade-in"
+          className="lg:hidden fixed inset-0 top-20 z-50 bg-black/60 backdrop-blur-xs flex flex-col justify-start overflow-y-auto animate-fade-in"
           onClick={() => setMobileMenuOpen(false)}
         >
           <div
-            className="bg-[#F2E9DC] border-b border-[#DDCDB6] p-5 sm:p-6 flex flex-col gap-4 shadow-2xl"
+            className="bg-[#F2E9DC] border-b border-[#DDCDB6] p-5 flex flex-col gap-4 shadow-2xl rounded-b-3xl max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Dual Service Switcher */}
