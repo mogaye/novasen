@@ -241,6 +241,8 @@ export default function PricingPage() {
           title={selectedPlanForPayment.title}
           amount={selectedPlanForPayment.amount}
           description={selectedPlanForPayment.description}
+          planId={selectedPlanForPayment.planId}
+          planType={selectedPlanForPayment.type}
           onClose={() => setSelectedPlanForPayment(null)}
           onSuccess={() => {
             if (selectedPlanForPayment.type === 'seller') {

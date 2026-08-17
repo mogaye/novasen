@@ -55,11 +55,13 @@ export default function OrderTrackingPage() {
   const deliveryFare = activeOrder?.fare || 1850;
   const totalAmount = itemPrice + deliveryFare;
 
+  const isSubscription = paymentTitle.toLowerCase().includes('abonnement') || paymentTitle.toLowerCase().includes('formule') || Boolean(searchParams.get('plan'));
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-8">
       {/* Payment Success Alert */}
       {paymentSuccess && (
-        <div className="p-4 sm:p-5 bg-emerald-50 border-2 border-emerald-500 rounded-2xl flex items-center justify-between gap-4 shadow-sm animate-fade-in">
+        <div className="p-4 sm:p-5 bg-emerald-50 border-2 border-emerald-500 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-fade-in">
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xl font-bold shadow-xs shrink-0">
               ✓
@@ -69,13 +71,45 @@ export default function OrderTrackingPage() {
                 Paiement {paymentTitle} validé avec succès !
               </span>
               <span className="text-xs text-emerald-700">
-                Votre transaction PayDunya a bien été enregistrée et votre commande est prise en charge.
+                {isSubscription
+                  ? 'Votre formule d\'abonnement est validée. Vos quotas et privilèges sont actifs.'
+                  : 'Votre transaction PayDunya a bien été enregistrée et votre commande est prise en charge.'}
               </span>
             </div>
           </div>
-          <span className="hidden sm:inline-block px-3 py-1 bg-emerald-200 text-emerald-900 text-xs font-bold rounded-lg">
-            Payé Wave / OM
-          </span>
+          <div className="flex items-center gap-2">
+            {isSubscription ? (
+              <Link
+                href="/compte"
+                className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl transition shadow-xs whitespace-nowrap"
+              >
+                Aller sur Mon Compte ➔
+              </Link>
+            ) : (
+              <span className="px-3 py-1 bg-emerald-200 text-emerald-900 text-xs font-bold rounded-lg whitespace-nowrap">
+                Payé Wave / OM
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {isSubscription && (
+        <div className="bg-[#FAF7F2] border border-[#DDCDB6] p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
+          <div>
+            <h2 className="text-lg font-bold text-[#573721] font-heading">
+              Abonnement {paymentTitle} prêt à l&apos;emploi !
+            </h2>
+            <p className="text-xs text-[#7A6A5C] mt-1">
+              Vous pouvez maintenant publier vos annonces ou accepter des missions de transport sans limite.
+            </p>
+          </div>
+          <Link
+            href="/compte"
+            className="px-6 py-3 bg-[#7A5133] hover:bg-[#573721] text-white text-xs font-bold rounded-xl shadow-md transition"
+          >
+            Ouvrir mon tableau de bord
+          </Link>
         </div>
       )}
 

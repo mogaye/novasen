@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { SELLER_PLANS, DRIVER_PLANS, FEATURED_LISTING_PRICE } from '@/lib/plans';
 import { formatCFA } from '@/lib/format';
@@ -52,13 +53,37 @@ export default function AccountPage() {
     showSuccessToast,
   } = useApp();
 
-  const [activeProfileTab, setActiveProfileTab] = useState<'seller' | 'driver'>('seller');
+  const searchParams = useSearchParams();
+  const subscriptionSuccess = searchParams.get('subscription') === 'success';
+  const urlPlanId = searchParams.get('plan');
+  const urlPlanType = searchParams.get('type') as 'seller' | 'driver' | null;
+  const urlPlanName = searchParams.get('name') || 'Plan';
+
+  const [activeProfileTab, setActiveProfileTab] = useState<'seller' | 'driver'>(
+    urlPlanType === 'driver' ? 'driver' : 'seller'
+  );
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
   const [targetUpgradePlan, setTargetUpgradePlan] = useState<any>(null);
   const [confirmDeleteListingId, setConfirmDeleteListingId] = useState<string | null>(null);
   const [confirmDeleteTripId, setConfirmDeleteTripId] = useState<string | null>(null);
   const [showAddTripModal, setShowAddTripModal] = useState(false);
+  const [hasActivatedFromUrl, setHasActivatedFromUrl] = useState(false);
+
+  useEffect(() => {
+    if (subscriptionSuccess && !hasActivatedFromUrl) {
+      setHasActivatedFromUrl(true);
+      if (urlPlanType === 'driver' && urlPlanId) {
+        setDriverPlan(urlPlanId as any);
+        setActiveProfileTab('driver');
+        showSuccessToast(`Formule chauffeur ${urlPlanName} activée avec succès !`);
+      } else if (urlPlanId) {
+        setUserPlan(urlPlanId as any);
+        setActiveProfileTab('seller');
+        showSuccessToast(`Formule boutique ${urlPlanName} activée avec succès !`);
+      }
+    }
+  }, [subscriptionSuccess, urlPlanId, urlPlanType, urlPlanName, hasActivatedFromUrl, setDriverPlan, setUserPlan, showSuccessToast]);
 
   // New Driver Trip Form State
   const [newTripOrigin, setNewTripOrigin] = useState('Plateau / Centre-ville');
@@ -245,6 +270,28 @@ export default function AccountPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-10">
+      {/* Subscription Celebration Banner */}
+      {subscriptionSuccess && (
+        <div className="p-4 sm:p-6 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-2xl shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fadeIn">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-2xl font-bold shrink-0">
+              🎉
+            </div>
+            <div>
+              <h3 className="text-base sm:text-lg font-bold font-heading">
+                Félicitations ! Votre formule {urlPlanName} est active !
+              </h3>
+              <p className="text-xs sm:text-sm text-emerald-100">
+                Votre paiement PayDunya a bien été validé. Vos avantages, quotas et visibilité prioritaire sont immédiatement effectifs.
+              </p>
+            </div>
+          </div>
+          <div className="px-4 py-2 bg-white text-emerald-800 text-xs font-bold rounded-xl shadow-xs shrink-0 self-start sm:self-auto">
+            Statut : Abonné Actif ✓
+          </div>
+        </div>
+      )}
+
       {/* Auth Status Notification Bar */}
       {user ? (
         <div className="bg-[#FAF7F2] border border-[#DDCDB6] rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
@@ -1143,7 +1190,9 @@ export default function AccountPage() {
         <FakePaymentModal
           title={`Activation : ${targetUpgradePlan.name}`}
           amount={targetUpgradePlan.price}
-          description="Règlement factice sécurisé Wave / Orange Money pour la mise à jour immédiate de votre compte."
+          description="Règlement sécurisé PayDunya (Wave / Orange Money / CB) pour la mise à jour immédiate de votre compte."
+          planId={targetUpgradePlan.id}
+          planType={targetUpgradePlan.id === 'pass_jour' || targetUpgradePlan.id === 'abo_mensuel' || targetUpgradePlan.id === 'abo_annuel' ? 'driver' : 'seller'}
           onClose={() => {
             setPaymentModalOpen(false);
             setTargetUpgradePlan(null);
@@ -1151,7 +1200,7 @@ export default function AccountPage() {
           onSuccess={() => {
             if (targetUpgradePlan.id === 'boost') {
               showSuccessToast('Mise en avant activée pour 7 jours !');
-            } else if (targetUpgradePlan.id === 'pass_jour' || targetUpgradePlan.id === 'abo_mensuel') {
+            } else if (targetUpgradePlan.id === 'pass_jour' || targetUpgradePlan.id === 'abo_mensuel' || targetUpgradePlan.id === 'abo_annuel') {
               setDriverPlan(targetUpgradePlan.id);
               showSuccessToast(`Forfait Chauffeur ${targetUpgradePlan.name} activé avec succès !`);
             } else {

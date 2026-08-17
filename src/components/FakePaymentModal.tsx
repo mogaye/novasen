@@ -12,6 +12,10 @@ interface FakePaymentModalProps {
   description: string;
   onSuccess: () => void;
   onClose: () => void;
+  returnUrl?: string;
+  cancelUrl?: string;
+  planId?: string;
+  planType?: 'seller' | 'driver';
 }
 
 export function FakePaymentModal({
@@ -20,6 +24,10 @@ export function FakePaymentModal({
   description,
   onSuccess,
   onClose,
+  returnUrl,
+  cancelUrl,
+  planId,
+  planType,
 }: FakePaymentModalProps) {
   const [provider, setProvider] = useState<'wave' | 'orange_money' | 'card'>('wave');
   const [phone, setPhone] = useState('78 913 90 36');
@@ -45,6 +53,27 @@ export function FakePaymentModal({
       const origin = typeof window !== 'undefined' ? window.location.origin : '';
       const orderRef = `NOVA-${Date.now()}`;
       
+      // Determine appropriate return and cancel URLs
+      let finalReturnUrl = returnUrl;
+      if (!finalReturnUrl) {
+        if (planId && planType) {
+          finalReturnUrl = `${origin}/compte?subscription=success&plan=${encodeURIComponent(planId)}&type=${planType}&name=${encodeURIComponent(title)}`;
+        } else if (title.toLowerCase().includes('abonnement') || title.toLowerCase().includes('formule')) {
+          finalReturnUrl = `${origin}/compte?subscription=success&name=${encodeURIComponent(title)}`;
+        } else {
+          finalReturnUrl = `${origin}/suivi/${orderRef}?payment=success&title=${encodeURIComponent(title)}`;
+        }
+      }
+
+      let finalCancelUrl = cancelUrl;
+      if (!finalCancelUrl) {
+        if (planId || planType || title.toLowerCase().includes('abonnement') || title.toLowerCase().includes('formule')) {
+          finalCancelUrl = `${origin}/tarifs?payment=cancelled`;
+        } else {
+          finalCancelUrl = `${origin}/compte?payment=cancelled`;
+        }
+      }
+      
       // Appel de l'endpoint PayDunya
       const res = await fetch('/api/paydunya', {
         method: 'POST',
@@ -54,8 +83,8 @@ export function FakePaymentModal({
           itemPrice: Math.round(amount),
           refCommand: orderRef,
           description: description || `Paiement ${title}`,
-          returnUrl: `${origin}/suivi/${orderRef}?payment=success&title=${encodeURIComponent(title)}`,
-          cancelUrl: `${origin}/compte?payment=cancelled`,
+          returnUrl: finalReturnUrl,
+          cancelUrl: finalCancelUrl,
         }),
       });
 

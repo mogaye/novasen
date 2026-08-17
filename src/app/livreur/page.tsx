@@ -653,6 +653,8 @@ export default function DriverOnboardingPage() {
       {paymentModalOpen && (
         <FakePaymentModal
           onClose={() => setPaymentModalOpen(false)}
+          planId={selectedPlanId}
+          planType="driver"
           onSuccess={() => {
             setDriverPlan(selectedPlanId);
             updateDriverProfile({

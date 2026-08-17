@@ -591,6 +591,8 @@ export default function SellerOnboardingPage() {
       {paymentModalOpen && (
         <FakePaymentModal
           onClose={() => setPaymentModalOpen(false)}
+          planId={selectedPlanId}
+          planType="seller"
           onSuccess={() => {
             setUserPlan(selectedPlanId);
             setIsSellerRegistered(true);
