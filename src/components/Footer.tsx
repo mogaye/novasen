@@ -7,7 +7,7 @@ import { LogoWave, LogoOrangeMoney, LogoCard } from './PaymentLogos';
 
 export function Footer() {
   const pathname = usePathname();
-  if (pathname === '/connexion') {
+  if (pathname === '/connexion' || pathname.startsWith('/admin')) {
     return null;
   }
   return (

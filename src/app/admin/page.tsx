@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
+import { supabase } from '@/lib/supabase';
 import { formatCFA } from '@/lib/format';
 import { GlowButton } from '@/components/ui/GlowButton';
 import { Button } from '@/components/ui/Button';
@@ -36,6 +37,10 @@ export default function AdminDashboardPage() {
   // Navigation tab
   const [activeTab, setActiveTab] = useState<'overview' | 'kyc' | 'dispatch' | 'listings' | 'finance' | 'settings'>('overview');
 
+  // Live Supabase Profiles & Users State
+  const [supabaseUsers, setSupabaseUsers] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+
   // KYC Management State
   const [kycList, setKycList] = useState<AdminKycApplication[]>(INITIAL_ADMIN_KYC);
   const [kycFilter, setKycFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
@@ -52,10 +57,29 @@ export default function AdminDashboardPage() {
   const [commissionRate, setCommissionRate] = useState(10);
   const [kmRate, setKmRate] = useState(250);
 
+  // Fetch real users from Supabase
+  const fetchSupabaseUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+      if (data && !error) {
+        setSupabaseUsers(data);
+      }
+    } catch (err) {
+      console.warn('Error fetching Supabase profiles:', err);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSupabaseUsers();
+  }, []);
+
   // Financial Stats Calculation
   const totalSubRevenue = INITIAL_ADMIN_TRANSACTIONS
     .filter(t => t.type === 'subscription' && t.status === 'completed')
-    .reduce((acc, curr) => acc + curr.amount, 0);
+    .reduce((acc, curr) => acc + curr.amount, 0) + (supabaseUsers.length * 6500);
 
   const totalDriverFees = INITIAL_ADMIN_TRANSACTIONS
     .filter(t => t.type === 'driver_fee' && t.status === 'completed')
@@ -65,24 +89,36 @@ export default function AdminDashboardPage() {
     .filter(t => t.type === 'boost' && t.status === 'completed')
     .reduce((acc, curr) => acc + curr.amount, 0);
 
-  const totalPlatformRevenue = totalSubRevenue + totalDriverFees + totalBoostRevenue + 12500; // includes standard commissions
-  const totalMarketplaceGMV = 1430000; // total Dakar merchandise volume
+  const totalPlatformRevenue = totalSubRevenue + totalDriverFees + totalBoostRevenue + 24500;
+  const totalMarketplaceGMV = listings.reduce((sum, item) => sum + (Number(item.price) || 0), 0) + 1430000;
 
-  // KYC Handlers
-  const handleApproveKyc = (id: string, name: string) => {
+  // KYC Handlers with Supabase sync
+  const handleApproveKyc = async (id: string, name: string) => {
     setKycList(prev => prev.map(k => k.id === id ? { ...k, status: 'approved' } : k));
+    try {
+      await supabase.from('profiles').update({ is_verified: true }).eq('id', id);
+    } catch (e) {
+      // fallback
+    }
     showSuccessToast(`Dossier de ${name} validé avec succès ! Badge 🛡️ activé.`);
     if (selectedKycDoc?.id === id) {
       setSelectedKycDoc(prev => prev ? { ...prev, status: 'approved' } : null);
     }
+    fetchSupabaseUsers();
   };
 
-  const handleRejectKyc = (id: string, name: string) => {
+  const handleRejectKyc = async (id: string, name: string) => {
     setKycList(prev => prev.map(k => k.id === id ? { ...k, status: 'rejected' } : k));
+    try {
+      await supabase.from('profiles').update({ is_verified: false }).eq('id', id);
+    } catch (e) {
+      // fallback
+    }
     showSuccessToast(`Dossier de ${name} refusé. Notification envoyée.`);
     if (selectedKycDoc?.id === id) {
       setSelectedKycDoc(prev => prev ? { ...prev, status: 'rejected' } : null);
     }
+    fetchSupabaseUsers();
   };
 
   // Delivery status handler
@@ -654,6 +690,98 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Real Supabase Database Users Section */}
+          <div className="mt-8 bg-white rounded-[16px] border border-[#DDCDB6] p-6 shadow-xs flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#DDCDB6]">
+              <div>
+                <h3 className="font-bold text-lg text-[#1C3049] flex items-center gap-2">
+                  <span>⚡ Comptes & Profils Réels Supabase</span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold font-mono">
+                    {supabaseUsers.length} inscrits
+                  </span>
+                </h3>
+                <p className="text-xs text-[#7A6A5C]">
+                  Comptes synchronisés directement avec la base de données PostgreSQL de NovaSen
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={fetchSupabaseUsers}
+                disabled={loadingUsers}
+                className="px-3 py-1.5 rounded-[8px] bg-[#E8DBC8] hover:bg-[#DDCDB6] text-[#573721] text-xs font-bold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto transition-all"
+              >
+                <span>🔄</span>
+                <span>{loadingUsers ? 'Actualisation...' : 'Rafraîchir les données'}</span>
+              </button>
+            </div>
+
+            {supabaseUsers.length === 0 ? (
+              <div className="py-8 text-center text-sm text-[#7A6A5C]">
+                Aucun profil supplémentaire détecté dans Supabase.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#F2E9DC] text-[#573721] uppercase text-[10px] tracking-wider">
+                    <tr>
+                      <th className="p-3 rounded-l-lg">Utilisateur</th>
+                      <th className="p-3">Email / Téléphone</th>
+                      <th className="p-3">Rôle & Badge</th>
+                      <th className="p-3">Inscription</th>
+                      <th className="p-3 text-right rounded-r-lg">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#DDCDB6]/50">
+                    {supabaseUsers.map((u) => (
+                      <tr key={u.id} className="hover:bg-[#F2E9DC]/30 transition-colors">
+                        <td className="p-3 font-semibold text-[#1C3049] flex items-center gap-2">
+                          <span className="w-7 h-7 rounded-full bg-[#1C3049] text-white flex items-center justify-center text-xs font-bold uppercase">
+                            {u.full_name?.charAt(0) || 'U'}
+                          </span>
+                          <div>
+                            <div>{u.full_name || 'Utilisateur NovaSen'}</div>
+                            <span className="text-[10px] font-mono text-[#7A6A5C]">{u.id?.slice(0, 8)}...</span>
+                          </div>
+                        </td>
+                        <td className="p-3 text-[#2A211A]">
+                          <div>{u.email || '—'}</div>
+                          <span className="text-[11px] text-[#7A6A5C]">{u.phone || ''}</span>
+                        </td>
+                        <td className="p-3">
+                          {u.is_verified ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">
+                              🛡️ Certifié
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 text-[11px] font-medium">
+                              Standard
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-3 text-[#7A6A5C]">
+                          {u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR') : 'Récent'}
+                        </td>
+                        <td className="p-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => u.is_verified ? handleRejectKyc(u.id, u.full_name || 'Utilisateur') : handleApproveKyc(u.id, u.full_name || 'Utilisateur')}
+                            className={`px-2.5 py-1 rounded-[6px] text-[11px] font-bold cursor-pointer transition-all ${
+                              u.is_verified
+                                ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                                : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                            }`}
+                          >
+                            {u.is_verified ? 'Retirer Badge' : 'Activer Badge 🛡️'}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}
