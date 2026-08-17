@@ -152,7 +152,7 @@ export default function MyBoutiquePage() {
                 className="bg-[#7A5133] hover:bg-[#573721] h-10 text-xs"
               >
                 <IconStar className="w-4 h-4 text-[#E8DBC8]" />
-                <span>Débloquer 30 annonces (6 500 F)</span>
+                <span>Débloquer 30 annonces (8 500 F)</span>
               </Button>
             ) : (
               <GlowButton href="/publier" variant="market">
@@ -301,7 +301,7 @@ export default function MyBoutiquePage() {
                 className="px-4 py-2.5 rounded-[10px] bg-[#7A5133] hover:bg-[#573721] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <IconStar className="w-4 h-4 text-[#E8DBC8]" />
-                <span>Passer à Boutique Pro (6 500 F)</span>
+                <span>Passer à Boutique Pro (8 500 F)</span>
               </button>
             ) : (
               <Link
@@ -491,8 +491,8 @@ export default function MyBoutiquePage() {
       {/* ───────────────────────────────────────────────────────────── */}
       {paymentModalOpen && (
         <FakePaymentModal
-          title="Activation Boutique Pro (6 500 CFA / mois)"
-          amount={6500}
+          title="Activation Boutique Pro (8 500 CFA / mois)"
+          amount={8500}
           description="Passez à 30 annonces actives simultanées, badge Boutique Vérifiée et 1 Boost offert chaque mois."
           onClose={() => setPaymentModalOpen(false)}
           onSuccess={() => {

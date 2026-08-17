@@ -407,7 +407,7 @@ export default function PublishPage() {
               <div className="flex flex-col gap-1.5">
                 <span className="text-xs font-bold uppercase text-[#7A5133]">Recommandé</span>
                 <h3 className="font-bold text-lg font-heading text-[#573721]">Boutique Pro</h3>
-                <div className="text-xl font-bold text-[#1C3049]">{formatCFA(6500)} <span className="text-xs text-[#7A6A5C]">/ mois</span></div>
+                <div className="text-xl font-bold text-[#1C3049]">{formatCFA(8500)} <span className="text-xs text-[#7A6A5C]">/ mois</span></div>
                 <ul className="text-xs text-[#573721] space-y-1.5 pt-2">
                   <li className="flex items-center gap-1.5">✓ <strong>Jusqu'à 30 annonces</strong> actives</li>
                   <li className="flex items-center gap-1.5">✓ Badge officiel Boutique Vérifiée</li>
@@ -420,7 +420,7 @@ export default function PublishPage() {
                 className="w-full"
               >
                 <IconStar className="w-4 h-4 text-[#E8DBC8]" />
-                <span>Activer Boutique ({formatCFA(6500)})</span>
+                <span>Activer Boutique ({formatCFA(8500)})</span>
               </Button>
             </div>
 
@@ -458,8 +458,8 @@ export default function PublishPage() {
         {/* Upgrade Modal */}
         {upgradeModalOpen && (
           <FakePaymentModal
-            title="Activation Boutique Pro (6 500 CFA)"
-            amount={6500}
+            title="Activation Boutique Pro (8 500 CFA)"
+            amount={8500}
             description="Débloquez 30 annonces actives simultanées et le badge Boutique Vérifiée."
             onClose={() => setUpgradeModalOpen(false)}
             onSuccess={() => {

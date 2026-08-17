@@ -54,7 +54,7 @@ export default function AdminDashboardPage() {
   const [transactions, setTransactions] = useState<AdminFinancialTransaction[]>([]);
 
   // Platform Settings State
-  const [boutiqueFee, setBoutiqueFee] = useState(6500);
+  const [boutiqueFee, setBoutiqueFee] = useState(8500);
   const [driverFee, setDriverFee] = useState(1500);
   const [boostFee, setBoostFee] = useState(2500);
   const [commissionRate, setCommissionRate] = useState(10);
@@ -1082,7 +1082,7 @@ export default function AdminDashboardPage() {
             className="flex flex-col gap-6"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <Field label="Abonnement Mensuel Boutique Vendeur Pro (FCFA)" required helper="Actuellement fixé à 6 500 F CFA">
+              <Field label="Abonnement Mensuel Boutique Vendeur Pro (FCFA)" required helper="Actuellement fixé à 8 500 F CFA">
                 <input
                   type="number"
                   required

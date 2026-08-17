@@ -18,7 +18,7 @@ export const SELLER_PLANS: SellerPlan[] = [
   {
     id: 'boutique',
     name: 'Boutique Pro',
-    price: 6500,
+    price: 8500,
     maxActiveListings: 30,
     commissionRate: 0.06,
     featuredPerMonth: 1,

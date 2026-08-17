@@ -425,7 +425,7 @@ export function Header() {
                   Grille Tarifaire & Abonnements Pro
                 </h4>
                 <p className="text-[11px] text-[#E8DBC8] leading-tight">
-                  Boutique Vendeur (6 500 F) • Chauffeur (1 500 F) • Wave & OM
+                  Boutique Vendeur (8 500 F) • Chauffeur (1 500 F) • Wave & OM
                 </p>
               </div>
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white shrink-0 group-hover:translate-x-1 transition-transform">

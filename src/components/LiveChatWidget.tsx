@@ -62,7 +62,7 @@ export function LiveChatWidget() {
       } else if (lower.includes('livreur') || lower.includes('vtc') || lower.includes('chauffeur') || lower.includes('course')) {
         botReply = "Vous pouvez estimer votre trajet en 1 clic dans l'onglet 'Transport & Colis' ou réserver directement un chauffeur certifié avec paiement Wave/OM à l'arrivée !";
       } else if (lower.includes('tarif') || lower.includes('wave') || lower.includes('orange') || lower.includes('prix')) {
-        botReply = "La formule Boutique Pro est à 6 500 F CFA/mois et la formule Chauffeur Flotte est à 1 500 F CFA. Tous les paiements se font instantanément via Wave ou Orange Money.";
+        botReply = "La formule Boutique Pro est à 8 500 F CFA/mois et la formule Chauffeur Flotte est à 1 500 F CFA. Tous les paiements se font instantanément via Wave ou Orange Money.";
       } else if (lower.includes('boutique') || lower.includes('vendeur')) {
         botReply = "Vous pouvez activer votre vitrine boutique dans 'Devenir Vendeur Pro' pour obtenir votre bannière personnalisée, vos badges KYC et votre lien public partageable !";
       }

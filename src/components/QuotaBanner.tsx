@@ -34,7 +34,7 @@ export function QuotaBanner({ currentCount, maxCount, planName }: QuotaBannerPro
           </h4>
           <p className="text-xs sm:text-sm text-[#2A211A]/80 leading-relaxed max-w-xl">
             La formule Particulier est limitée à 3 annonces actives. Avec la formule{' '}
-            <strong className="text-[#573721]">Boutique (6 500 CFA / mois)</strong>, vous bénéficiez de{' '}
+            <strong className="text-[#573721]">Boutique (8 500 CFA / mois)</strong>, vous bénéficiez de{' '}
             <strong>30 annonces</strong>, du badge officiel <em>Boutique vérifiée</em> et d'une mise en avant offerte.
           </p>
         </div>
@@ -46,7 +46,7 @@ export function QuotaBanner({ currentCount, maxCount, planName }: QuotaBannerPro
           className="min-h-[48px] px-5 py-2.5 rounded-[4px] bg-[#7A5133] hover:bg-[#573721] text-white font-bold text-sm flex items-center justify-center gap-2 transition-colors border border-[#573721] shadow-xs"
         >
           <IconStar className="w-4 h-4 text-[#E8DBC8]" />
-          <span>Passer à Boutique ({formatCFA(6500)}/m)</span>
+          <span>Passer à Boutique ({formatCFA(8500)}/m)</span>
           <IconArrowRight className="w-4 h-4" />
         </Link>
       </div>
