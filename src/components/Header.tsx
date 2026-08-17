@@ -218,22 +218,64 @@ export function Header() {
           )}
         </div>
 
-        {/* Mobile Hamburger Button */}
-        <div className="flex sm:hidden items-center gap-2">
-          <Link
-            href="/publier"
-            className="px-3 py-2 rounded-[4px] bg-[var(--accent)] text-white text-xs font-bold"
-          >
-            Publier
-          </Link>
+        {/* Mobile / Tablet Header Controls (visible below lg) */}
+        <div className="flex lg:hidden items-center gap-2 shrink-0">
+          {/* Quick Search */}
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2.5 rounded-[4px] bg-[#E8DBC8] text-[#2A211A] border border-[#DDCDB6]"
-            aria-expanded={mobileMenuOpen}
-            aria-label="Menu principal"
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            className="p-2 rounded-full bg-white text-[#573721] border border-[#DDCDB6] shadow-xs text-sm"
+            title="Rechercher"
+            aria-label="Rechercher"
           >
-            {mobileMenuOpen ? <IconX className="w-6 h-6" /> : (
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            🔍
+          </button>
+
+          {/* Quick Favorites */}
+          <Link
+            href="/marche?favorites=true"
+            className="p-2 rounded-full bg-white text-[#573721] border border-[#DDCDB6] shadow-xs text-sm relative"
+            title="Favoris"
+          >
+            <span>❤️</span>
+            {useApp().favorites.length > 0 && (
+              <span className="absolute -top-1 -right-1 px-1 bg-[#7A5133] text-white text-[9px] font-bold rounded-full min-w-[16px] text-center">
+                {useApp().favorites.length}
+              </span>
+            )}
+          </Link>
+
+          {/* User Account / Login */}
+          {user ? (
+            <Link
+              href="/compte"
+              className="p-2 rounded-full bg-[#E8DBC8] text-[#573721] border border-[#DDCDB6] shadow-xs text-sm"
+              title="Mon Espace"
+            >
+              <IconUser className="w-4 h-4 text-[#573721]" />
+            </Link>
+          ) : (
+            <Link
+              href="/connexion"
+              className="px-2.5 py-1.5 rounded-full bg-[#7A5133] text-white font-bold text-xs shadow-xs"
+              title="Connexion"
+            >
+              Connexion
+            </Link>
+          )}
+
+          {/* Hamburger Menu Toggle */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-xl bg-[#E8DBC8] text-[#2A211A] border border-[#DDCDB6] shadow-xs flex items-center justify-center cursor-pointer"
+            aria-expanded={mobileMenuOpen}
+            aria-label="Ouvrir le menu principal"
+          >
+            {mobileMenuOpen ? (
+              <IconX className="w-5 h-5 text-[#573721]" />
+            ) : (
+              <svg className="w-5 h-5 text-[#573721]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             )}
@@ -241,25 +283,31 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Modern Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="sm:hidden fixed inset-0 top-20 z-50 bg-black/40 backdrop-blur-xs flex flex-col justify-start">
+        <div
+          className="lg:hidden fixed inset-0 top-20 z-50 bg-black/50 backdrop-blur-xs flex flex-col justify-start overflow-y-auto animate-fade-in"
+          onClick={() => setMobileMenuOpen(false)}
+        >
           <div
-            className="bg-[#F2E9DC] border-b border-[#DDCDB6] p-6 flex flex-col gap-4 shadow-xl animate-fade-in"
+            className="bg-[#F2E9DC] border-b border-[#DDCDB6] p-5 sm:p-6 flex flex-col gap-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="grid grid-cols-2 gap-2 bg-[#E8DBC8] p-1 rounded-[6px] border border-[#DDCDB6]">
+            {/* Dual Service Switcher */}
+            <div className="grid grid-cols-2 gap-2 bg-[#E8DBC8] p-1 rounded-xl border border-[#DDCDB6]">
               <Link
                 href="/marche"
                 onClick={() => {
                   setActiveService('market');
                   setMobileMenuOpen(false);
                 }}
-                className={`py-2 text-center text-xs font-bold rounded-[4px] block transition-colors ${
-                  isMarket ? 'bg-[#7A5133] text-white shadow-xs' : 'text-[#573721]'
+                className={`py-2.5 text-center text-xs font-bold rounded-lg block transition-all ${
+                  isMarket
+                    ? 'bg-[#7A5133] text-white shadow-xs'
+                    : 'text-[#573721] hover:bg-[#DDCDB6]'
                 }`}
               >
-                Acheter & Vendre (Marché)
+                🛍️ Le Marché Dakar
               </Link>
               <Link
                 href="/transport"
@@ -267,87 +315,169 @@ export function Header() {
                   setActiveService('transport');
                   setMobileMenuOpen(false);
                 }}
-                className={`py-2 text-center text-xs font-bold rounded-[4px] block transition-colors ${
-                  !isMarket ? 'bg-[#1C3049] text-white shadow-xs' : 'text-[#1C3049]'
+                className={`py-2.5 text-center text-xs font-bold rounded-lg block transition-all ${
+                  !isMarket
+                    ? 'bg-[#1C3049] text-white shadow-xs'
+                    : 'text-[#1C3049] hover:bg-[#DDCDB6]'
                 }`}
               >
-                Faire Transporter
+                🚗 Transport & Colis
               </Link>
             </div>
 
-            <nav className="flex flex-col gap-2 divide-y divide-[#DDCDB6]/50">
+            {/* Prominent Tarifs & Abonnements Pro Card */}
+            <Link
+              href="/tarifs"
+              onClick={() => setMobileMenuOpen(false)}
+              className="bg-gradient-to-r from-[#7A5133] to-[#573721] text-white p-4 rounded-2xl shadow-md border border-[#A3744B] flex items-center justify-between group hover:scale-[1.01] transition-transform"
+            >
+              <div className="flex flex-col gap-1">
+                <div className="inline-flex items-center gap-1.5">
+                  <span className="px-2 py-0.5 rounded-full bg-amber-400 text-stone-900 text-[10px] font-black uppercase tracking-wider">
+                    ★ Formules & Abonnements
+                  </span>
+                </div>
+                <h4 className="font-bold text-sm text-white">
+                  Grille Tarifaire & Abonnements Pro
+                </h4>
+                <p className="text-[11px] text-[#E8DBC8] leading-tight">
+                  Boutique Vendeur (6 500 F) • Chauffeur (1 500 F) • Wave & OM
+                </p>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white shrink-0 group-hover:translate-x-1 transition-transform">
+                →
+              </div>
+            </Link>
+
+            {/* Full Navigation List */}
+            <nav className="flex flex-col gap-1 divide-y divide-[#DDCDB6]/60">
               <Link
                 href="/accueil"
                 onClick={() => setMobileMenuOpen(false)}
-                className="py-3 text-base font-bold text-[#573721] flex items-center justify-between"
+                className={`py-3 text-sm sm:text-base font-bold flex items-center justify-between ${
+                  pathname === '/accueil' ? 'text-[#7A5133]' : 'text-[#2A211A]'
+                }`}
               >
-                <span>🏠 Accueil NovaSen</span>
-                <span className="text-xs bg-[#E8DBC8] text-[#573721] px-2 py-0.5 rounded-full font-bold">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🏠</span>
+                  <span>Accueil NovaSen</span>
+                </div>
+                <span className="text-[11px] bg-[#E8DBC8] text-[#573721] px-2 py-0.5 rounded-full font-bold">
                   2 Univers
                 </span>
               </Link>
+
               <Link
                 href="/marche"
                 onClick={() => {
                   setActiveService('market');
                   setMobileMenuOpen(false);
                 }}
-                className="py-3 text-base font-semibold text-[#2A211A] flex items-center justify-between"
+                className={`py-3 text-sm sm:text-base font-semibold flex items-center justify-between ${
+                  pathname.startsWith('/marche') ? 'text-[#7A5133] font-bold' : 'text-[#2A211A]'
+                }`}
               >
-                <span>🛍️ Le Marché (Petites Annonces)</span>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🛍️</span>
+                  <span>Le Marché (Petites Annonces)</span>
+                </div>
                 <span className="text-xs text-[#7A6A5C]">40 offres</span>
               </Link>
+
               <Link
                 href="/transport"
-                className="py-3 text-base font-semibold text-[#1C3049] flex items-center justify-between"
+                onClick={() => {
+                  setActiveService('transport');
+                  setMobileMenuOpen(false);
+                }}
+                className={`py-3 text-sm sm:text-base font-semibold flex items-center justify-between ${
+                  pathname.startsWith('/transport') ? 'text-[#1C3049] font-bold' : 'text-[#1C3049]'
+                }`}
               >
-                <span>Transport Passagers & Colis</span>
-                <span className="text-xs text-[#1C3049] font-bold">Dakar</span>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🚗</span>
+                  <span>Transport Passagers & Colis</span>
+                </div>
+                <span className="text-[11px] bg-[#1C3049]/10 text-[#1C3049] px-2 py-0.5 rounded-full font-bold">
+                  Dakar & Régions
+                </span>
               </Link>
+
               <Link
                 href="/tarifs"
-                className="py-3 text-base font-medium text-[#2A211A]"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`py-3 text-sm sm:text-base font-semibold flex items-center justify-between ${
+                  pathname === '/tarifs' ? 'text-[#7A5133] font-bold' : 'text-[#2A211A]'
+                }`}
               >
-                Grilles Tarifaires Vendeurs & Chauffeurs
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">💳</span>
+                  <span>Grille Tarifaire (Abonnements)</span>
+                </div>
+                <span className="text-xs text-[#7A5133] font-bold">Voir prix</span>
               </Link>
+
               <Link
                 href="/vendeur"
-                className="py-3 text-base font-medium text-[#7A5133]"
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-3 text-sm sm:text-base font-medium text-[#7A5133] flex items-center justify-between"
               >
-                Ouvrir une Boutique Vendeur
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🏪</span>
+                  <span>Ouvrir une Boutique Vendeur Pro</span>
+                </div>
+                <span className="text-[11px] text-[#7A5133]">Formule Pro</span>
               </Link>
+
               <Link
                 href="/livreur"
-                className="py-3 text-base font-medium text-[#1C3049]"
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-3 text-sm sm:text-base font-medium text-[#1C3049] flex items-center justify-between"
               >
-                Devenir Livreur / Chauffeur
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🛵</span>
+                  <span>Devenir Livreur / Chauffeur</span>
+                </div>
+                <span className="text-[11px] text-[#1C3049]">Forfait 1 500 F</span>
               </Link>
+
               <Link
                 href="/compte"
-                className="py-3 text-base font-medium text-[#2A211A] flex items-center justify-between"
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-3 text-sm sm:text-base font-medium text-[#2A211A] flex items-center justify-between"
               >
-                <span>Mon Espace & Quota</span>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">👤</span>
+                  <span>Mon Espace Personnel</span>
+                </div>
                 <span className="text-xs bg-[#E8DBC8] px-2 py-0.5 rounded text-[#573721] font-semibold">
                   {userPlan.toUpperCase()}
                 </span>
               </Link>
+
               <Link
                 href="/contact"
                 onClick={() => setMobileMenuOpen(false)}
-                className="py-3 text-base font-bold text-emerald-800 flex items-center justify-between"
+                className="py-3 text-sm sm:text-base font-bold text-emerald-800 flex items-center justify-between"
               >
-                <span>🎧 Assistance & Opérateurs Directs</span>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🎧</span>
+                  <span>Assistance Opérateurs & WhatsApp</span>
+                </div>
                 <span className="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">
                   24/7
                 </span>
               </Link>
             </nav>
 
+            {/* Primary Action Button */}
             <Link
               href="/publier"
-              className="w-full text-center py-3.5 rounded-[4px] bg-[var(--accent)] text-white font-semibold shadow-md"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full text-center py-3.5 rounded-xl bg-gradient-to-r from-[#7A5133] to-[#573721] text-white font-bold text-sm shadow-md hover:brightness-105 transition-all flex items-center justify-center gap-2"
             >
-              Déposer une annonce gratuite
+              <IconPlus className="w-4 h-4 text-white" />
+              <span>Déposer une annonce gratuite</span>
             </Link>
           </div>
           <div className="flex-1" onClick={() => setMobileMenuOpen(false)} />

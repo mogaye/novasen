@@ -21,10 +21,10 @@ export function WhatsAppSupport() {
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end">
+    <div className="fixed bottom-20 lg:bottom-5 right-4 sm:right-5 z-40 flex flex-col items-end">
       {/* Interactive Popup Modal */}
       {isOpen && (
-        <div className="mb-3 w-[320px] sm:w-[360px] bg-white rounded-[16px] border border-[#DDCDB6] shadow-2xl overflow-hidden flex flex-col animate-scale-up">
+        <div className="mb-3 w-[calc(100vw-2rem)] max-w-[340px] sm:w-[360px] bg-white rounded-[16px] border border-[#DDCDB6] shadow-2xl overflow-hidden flex flex-col animate-scale-up">
           {/* Header */}
           <div className="bg-[#1C3049] text-white p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
