@@ -82,8 +82,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [userListingsCount, setUserListingsCount] = useState<number>(0);
   const [featuredRemaining, setFeaturedRemaining] = useState<number>(0);
   
-  const [isSellerRegistered, setIsSellerRegistered] = useState<boolean>(false);
+  const [isSellerRegistered, setIsSellerRegisteredState] = useState<boolean>(true);
   const [sellerShopName, setSellerShopName] = useState<string>('');
+
+  const setIsSellerRegistered = (registered: boolean) => {
+    setIsSellerRegisteredState(registered);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('novasen_seller_registered', registered ? 'true' : 'false');
+      } catch (e) {}
+    }
+  };
 
   // Persist userPlan & driverPlan
   const setUserPlan = (plan: SellerPlanId) => {
@@ -107,6 +116,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
+        const savedSellerReg = localStorage.getItem('novasen_seller_registered');
+        if (savedSellerReg !== null) {
+          setIsSellerRegisteredState(savedSellerReg === 'true');
+        }
+        const savedShopName = localStorage.getItem('novasen_seller_shop_name');
+        if (savedShopName) {
+          setSellerShopName(savedShopName);
+        }
         const savedUserPlan = localStorage.getItem('novasen_user_plan') as SellerPlanId | null;
         if (savedUserPlan && SELLER_PLANS.some((p) => p.id === savedUserPlan)) {
           setUserPlanState(savedUserPlan);

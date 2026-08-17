@@ -47,13 +47,16 @@ export default function PublishPage() {
   } = useApp();
 
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [featuredPaymentModalOpen, setFeaturedPaymentModalOpen] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+
   const planConfig = SELLER_PLANS.find((p) => p.id === userPlan) || SELLER_PLANS[0];
   const isQuotaReached = planConfig.maxActiveListings !== -1 && userListingsCount >= planConfig.maxActiveListings;
 
   // Quick onboarding gate state for new sellers
   const [quickSellerName, setQuickSellerName] = useState('Boutique Teranga');
   const [quickZoneId, setQuickZoneId] = useState<ZoneId>('medina');
-  const [quickPhone, setQuickPhone] = useState('77 645 28 19');
+  const [quickPhone, setQuickPhone] = useState('78 913 90 36');
   const [quickPayout, setQuickPayout] = useState<'wave' | 'orange_money'>('wave');
   const [agreeTerms, setAgreeTerms] = useState(true);
 
@@ -142,43 +145,78 @@ export default function PublishPage() {
     showSuccessToast('Profil Vendeur activé avec 3 annonces gratuites !');
   };
 
+  const doPublish = async (featuredStatus: boolean) => {
+    if (isQuotaReached) return;
+    setIsPublishing(true);
+
+    try {
+      const res = await addListing({
+        title: title || 'Nouvel article en vente',
+        price: Number(price) || 0,
+        category,
+        zoneId,
+        neighborhood: ZONES.find((z) => z.id === zoneId)?.name || 'Dakar',
+        condition,
+        description: brand ? `[Marque: ${brand}] ${description}` : description,
+        sellerName: sellerName || quickSellerName || 'Vendeur Vérifié',
+        quantity: Math.max(1, Number(quantity) || 1),
+        soldCount: 0,
+        isFeatured: featuredStatus,
+        imageUrl: uploadedPhotos[0] || undefined,
+        images: uploadedPhotos.length > 0 ? uploadedPhotos : undefined,
+        ...(category === 'vehicules'
+          ? {
+              year: Number(year),
+              transmission,
+              fuel,
+              mileage: Number(mileage),
+              consumption: Number(consumption),
+              eligiblePassengers,
+              eligibleParcels,
+              vehicleType,
+            }
+          : {}),
+      });
+
+      if (res.success) {
+        setSubmitted(true);
+        showSuccessToast(
+          featuredStatus
+            ? '★ Annonce mise en avant (1 000 F payés) et publiée avec succès !'
+            : 'Votre annonce a été publiée avec succès !'
+        );
+      } else {
+        alert(res.error || 'Erreur lors de la publication de votre annonce.');
+      }
+    } catch (err: any) {
+      console.error('Erreur publication:', err);
+      alert('Une erreur est survenue lors de la publication.');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isQuotaReached) return;
-
-    const res = await addListing({
-      title: title || 'Nouvel article en vente',
-      price: Number(price) || 0,
-      category,
-      zoneId,
-      neighborhood: ZONES.find((z) => z.id === zoneId)?.name || 'Dakar',
-      condition,
-      description: brand ? `[Marque: ${brand}] ${description}` : description,
-      sellerName: sellerName || quickSellerName || 'Vendeur Vérifié',
-      quantity: Math.max(1, Number(quantity) || 1),
-      soldCount: 0,
-      isFeatured,
-      imageUrl: uploadedPhotos[0] || undefined,
-      images: uploadedPhotos.length > 0 ? uploadedPhotos : undefined,
-      ...(category === 'vehicules'
-        ? {
-            year: Number(year),
-            transmission,
-            fuel,
-            mileage: Number(mileage),
-            consumption: Number(consumption),
-            eligiblePassengers,
-            eligibleParcels,
-            vehicleType,
-          }
-        : {}),
-    });
-
-    if (res.success) {
-      setSubmitted(true);
-      showSuccessToast('Votre annonce a été publiée avec succès !');
+    if (!title.trim()) {
+      alert('Veuillez saisir un titre pour votre annonce.');
+      setStep(2);
+      return;
     }
+    if (!price || Number(price) <= 0) {
+      alert('Veuillez indiquer un prix valide.');
+      setStep(2);
+      return;
+    }
+
+    if (isFeatured) {
+      // Déclencher obligatoirement le paiement des 1000 FCFA
+      setFeaturedPaymentModalOpen(true);
+      return;
+    }
+
+    await doPublish(false);
   };
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -345,6 +383,12 @@ export default function PublishPage() {
             <span className="text-[#7A6A5C]">Photos publiées :</span>
             <strong className="text-[#573721]">{uploadedPhotos.length} photo(s)</strong>
           </div>
+          {isFeatured && (
+            <div className="flex justify-between bg-amber-100/60 -mx-5 px-5 py-1.5 border-y border-amber-200">
+              <span className="text-amber-900 font-semibold">Mise en avant VIP :</span>
+              <strong className="text-amber-800">★ Active pour 7 jours (1 000 F payés)</strong>
+            </div>
+          )}
           <div className="flex justify-between">
             <span className="text-[#7A6A5C]">Livraison & Encaissement COD :</span>
             <strong className="text-[#1C3049]">Disponible immédiatement</strong>
@@ -902,7 +946,24 @@ export default function PublishPage() {
                 <IconArrowLeft className="w-4 h-4" />
                 <span>Retour aux photos</span>
               </Button>
-              <Button variant="primary" onClick={() => setStep(3)}>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  if (!title.trim()) {
+                    alert('Veuillez saisir un titre pour votre article.');
+                    return;
+                  }
+                  if (!price || Number(price) <= 0) {
+                    alert('Veuillez indiquer un prix valide en FCFA.');
+                    return;
+                  }
+                  if (!description.trim()) {
+                    alert('Veuillez ajouter une description de votre article.');
+                    return;
+                  }
+                  setStep(3);
+                }}
+              >
                 <span>Continuer vers la finalisation</span>
                 <IconArrowRight className="w-4 h-4" />
               </Button>
@@ -940,25 +1001,42 @@ export default function PublishPage() {
             </div>
 
             {/* Boost Listing Option */}
-            <div className="bg-white p-5 rounded-[8px] border border-[#C9A882] flex items-start gap-4">
-              <input
-                type="checkbox"
-                id="feat-check"
-                checked={isFeatured}
-                onChange={(e) => setIsFeatured(e.target.checked)}
-                className="w-5 h-5 rounded text-[#7A5133] mt-0.5 cursor-pointer"
-              />
-              <label htmlFor="feat-check" className="cursor-pointer flex-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm text-[#573721] flex items-center gap-1.5">
-                    <IconStar className="w-4 h-4 text-[#7A5133]" />
-                    <span>Mettre en avant cette annonce (+1 000 CFA pour 7 jours)</span>
-                  </span>
-                </div>
-                <p className="text-xs text-[#7A6A5C] mt-1">
-                  Apparaît en tête des résultats de recherche avec le badge exclusif « En avant ».
-                </p>
-              </label>
+            <div className={`p-5 rounded-[12px] border-2 transition-all ${
+              isFeatured 
+                ? 'border-[#7A5133] bg-[#E8DBC8]/40 ring-2 ring-[#7A5133]/20' 
+                : 'border-[#DDCDB6] bg-white hover:border-[#C9A882]'
+            }`}>
+              <div className="flex items-start gap-4">
+                <input
+                  type="checkbox"
+                  id="feat-check"
+                  checked={isFeatured}
+                  onChange={(e) => setIsFeatured(e.target.checked)}
+                  className="w-5 h-5 rounded text-[#7A5133] mt-1 cursor-pointer accent-[#7A5133]"
+                />
+                <label htmlFor="feat-check" className="cursor-pointer flex-1 flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <span className="font-bold text-sm text-[#573721] flex items-center gap-1.5">
+                      <IconStar className="w-4 h-4 text-[#7A5133]" />
+                      <span>★ Mettre en avant cette annonce (+1 000 CFA pour 7 jours)</span>
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#7A5133] text-white">
+                      Option VIP 7 jours
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#7A6A5C]">
+                    Apparaît en tête des résultats de recherche avec le badge exclusif « En avant » et multiplie la visibilité de votre produit.
+                  </p>
+                  {isFeatured && (
+                    <div className="mt-2 p-3 rounded-[8px] bg-amber-50 border border-amber-300 text-xs text-amber-900 flex items-center gap-2.5">
+                      <span className="text-base">💳</span>
+                      <span>
+                        Paiement sécurisé de <strong>1 000 F CFA</strong> via <strong>Wave</strong> ou <strong>Orange Money</strong> requis lors de la validation.
+                      </span>
+                    </div>
+                  )}
+                </label>
+              </div>
             </div>
 
             <div className="flex justify-between items-center pt-4 border-t border-[#DDCDB6] flex-wrap gap-3">
@@ -977,16 +1055,47 @@ export default function PublishPage() {
                     </Button>
                   </Link>
                 </div>
+              ) : isFeatured ? (
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={() => setFeaturedPaymentModalOpen(true)}
+                  disabled={isPublishing}
+                  className="bg-[#7A5133] hover:bg-[#573721] text-white shadow-md flex items-center gap-2"
+                >
+                  <IconStar className="w-4 h-4 text-[#E8DBC8]" />
+                  <span>Payer 1 000 CFA & Mettre en avant</span>
+                  <IconArrowRight className="w-4 h-4" />
+                </Button>
               ) : (
-                <Button type="submit" variant="primary">
-                  <span>Confirmer et publier l’annonce</span>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={isPublishing}
+                  className="bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm flex items-center gap-2"
+                >
                   <IconCheck className="w-4 h-4" />
+                  <span>{isPublishing ? 'Publication en cours...' : 'Confirmer et publier gratuitement'}</span>
                 </Button>
               )}
             </div>
           </div>
         )}
       </form>
+
+      {/* Modal Paiement Mise en avant (1 000 FCFA) */}
+      {featuredPaymentModalOpen && (
+        <FakePaymentModal
+          title="Mise en avant Annonce (1 000 CFA)"
+          amount={1000}
+          description={`Paiement de la mise en avant 7 jours pour l'article : ${title || 'Nouvel article'}`}
+          onClose={() => setFeaturedPaymentModalOpen(false)}
+          onSuccess={async () => {
+            setFeaturedPaymentModalOpen(false);
+            await doPublish(true);
+          }}
+        />
+      )}
     </div>
   );
 }
