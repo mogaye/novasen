@@ -299,25 +299,25 @@ export function DoorSplit() {
           </div>
         ) : (
           /* ─────────────────────────────────────────────────────────────── */
-          /* PANEL B : LA LIVRAISON (Colis & Coursiers Indépendants) */
+          /* PANEL B : LA LIVRAISON (Annuaire des Livreurs par Zone) */
           /* ─────────────────────────────────────────────────────────────── */
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8 items-center animate-fade-in">
-            {/* Left Calculator & Route Form */}
+            {/* Left Courier Search Form */}
             <div className="lg:col-span-7 flex flex-col gap-6 relative z-30">
               <div className="flex flex-col gap-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#1C3049]">
-                  Logistique Colis & Coursiers en direct
+                  Livreurs Indépendants • Contact Direct
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-bold font-heading text-[#1C3049] tracking-tight">
-                  Expédiez vos plis & colis partout à Dakar
+                  Trouvez un livreur disponible dans votre quartier
                 </h2>
-                <p className="text-sm text-[#7A6A5C]">
-                  Estimation instantanée de la distance et de la durée. Mise en relation directe avec nos livreurs indépendants certifiés sans commission.
+                <p className="text-sm text-[#7A6A5C] leading-relaxed">
+                  Consultez les annonces de livreurs à proximité. Convenez directement du tarif de livraison avec votre coursier par WhatsApp ou appel. 0% de commission intermédiaire.
                 </p>
               </div>
 
               <form onSubmit={handleTransportSubmit} className="flex flex-col gap-4">
-                {/* Vehicle Selector */}
+                {/* Vehicle Quick Selector */}
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
@@ -339,7 +339,7 @@ export function DoorSplit() {
                         : 'bg-[#F2E9DC] text-[#7A6A5C] hover:text-[#2A211A] border border-[#DDCDB6]'
                     }`}
                   >
-                    <span>🚗 Voiture / Break</span>
+                    <span>🚗 Voiture Break</span>
                   </button>
                   <button
                     type="button"
@@ -357,49 +357,38 @@ export function DoorSplit() {
                 {/* Location Search Inputs */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <LocationSearchInput
-                    label="Lieu de collecte (Départ)"
+                    label="Quartier de départ (Expéditeur)"
                     value={originId}
                     customText={originName}
                     onChange={(id, name) => {
                       setOriginId(id);
                       setOriginName(name);
                     }}
-                    placeholder="Ville, quartier ou rue de collecte..."
+                    placeholder="Ex: Médina, Plateau, Grand Yoff..."
                     accentColor="transport"
                   />
 
                   <LocationSearchInput
-                    label="Lieu de livraison (Arrivée)"
+                    label="Quartier d'arrivée (Destinataire)"
                     value={destinationId}
                     customText={destinationName}
                     onChange={(id, name) => {
                       setDestinationId(id);
                       setDestinationName(name);
                     }}
-                    placeholder="Ville, quartier ou rue de destination..."
+                    placeholder="Ex: Almadies, Pikine, Rufisque..."
                     accentColor="transport"
                   />
                 </div>
 
-                {/* Trip Stats and CTA */}
+                {/* CTA Bar */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-[#F2E9DC] rounded-[10px] border border-[#DDCDB6]">
-                  <div className="flex items-center gap-4 text-xs">
+                  <div className="flex items-center gap-3 text-xs">
+                    <span className="text-xl">📍</span>
                     <div>
-                      <span className="text-[#7A6A5C] block">Distance :</span>
+                      <span className="text-[#7A6A5C] block">Secteur ciblé :</span>
                       <strong className="text-sm font-bold text-[#1C3049]">
-                        {formatDistance(tripMetrics.distanceKm)}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-[#7A6A5C] block">Durée estimée :</span>
-                      <strong className="text-sm font-bold text-[#1C3049]">
-                        {formatDuration(tripMetrics.durationMinutes)}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-[#7A6A5C] block">Repère indicatif :</span>
-                      <strong className="text-base font-bold font-heading tabular-nums text-[#1C3049]">
-                        {formatCFA(fares.parcelFares[parcelClass])}
+                        {originName} ➔ {destinationName}
                       </strong>
                     </div>
                   </div>
@@ -410,7 +399,7 @@ export function DoorSplit() {
                     size="md"
                     className="w-full sm:w-auto shrink-0"
                   >
-                    <span>Trouver un livreur</span>
+                    <span>Voir les livreurs disponibles</span>
                     <IconArrowRight className="w-4 h-4 text-[#C9A882]" />
                   </GlowButton>
                 </div>
@@ -429,21 +418,18 @@ export function DoorSplit() {
                 {/* Floating Badge Top Left */}
                 <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-[8px] shadow-md border border-[#DDCDB6] text-xs font-bold text-[#1C3049] flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Réseau de livreurs certifiés Dakar</span>
+                  <span>Livreurs certifiés & actifs</span>
                 </div>
 
                 {/* Floating Bottom Card */}
                 <div className="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md p-4 rounded-[12px] border border-white/20 text-white flex items-center justify-between">
                   <div className="flex flex-col">
-                    <span className="text-xs text-[#E8DBC8] font-medium">Livraison Express NovaSen</span>
-                    <span className="text-sm font-bold">{originName} → {destinationName}</span>
-                    <span className="text-xs text-white/80">Livreur disponible à proximité</span>
+                    <span className="text-xs text-[#E8DBC8] font-medium">Annuaire Livreurs NovaSen</span>
+                    <span className="text-sm font-bold">{originName} et banlieue</span>
+                    <span className="text-xs text-white/80">Tarifs libres fixés en direct</span>
                   </div>
-                  {/* RULE OF COLOR: Dark Blue on amount */}
-                  <div className="bg-white px-3 py-1.5 rounded-[8px] shadow-sm">
-                    <span className="text-sm font-bold font-heading tabular-nums text-[#1C3049]">
-                      {formatCFA(fares.parcelFares[parcelClass])}
-                    </span>
+                  <div className="bg-emerald-600 px-3 py-1.5 rounded-[8px] shadow-sm text-white text-xs font-bold">
+                    0% Commission
                   </div>
                 </div>
               </div>
