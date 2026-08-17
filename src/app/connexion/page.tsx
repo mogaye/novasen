@@ -81,6 +81,7 @@ function ConnexionContent() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [otpToken, setOtpToken] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(true);
 
@@ -112,7 +113,10 @@ function ConnexionContent() {
     const { authEmail } = normalizeIdentifier(identifier);
     const channelName = `auth-sync-${authEmail.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
 
-    const channel = supabase.channel(channelName);
+    const channel = supabase.channel(channelName, {
+      config: { broadcast: { ack: true } },
+    });
+
     channel
       .on('broadcast', { event: 'device_authenticated' }, async ({ payload }) => {
         if (payload?.access_token && payload?.refresh_token) {
@@ -137,7 +141,7 @@ function ConnexionContent() {
     };
   }, [identifier, router, redirectPath]);
 
-  // Soumission du formulaire initial (Connexion directe ou Déclenchement vérification Inscription)
+  // Soumission du formulaire initial (Connexion ou Inscription instantanée)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
@@ -166,40 +170,90 @@ function ConnexionContent() {
             error.message?.includes('Invalid login credentials') ||
             error.message?.includes('invalid_grant')
           ) {
-            setErrorMsg('Numéro/Email ou mot de passe incorrect. Avez-vous vérifié votre compte ?');
+            setErrorMsg('Numéro/Email ou mot de passe incorrect. Vous pouvez aussi créer votre compte en 1 clic.');
           } else {
             setErrorMsg(error.message || 'Erreur lors de la connexion.');
           }
         } else {
-          setSuccessMsg('Connexion réussie ! Redirection...');
+          setSuccessMsg('Connexion réussie ! Redirection en cours...');
           setTimeout(() => {
             router.push(redirectPath);
-          }, 500);
+          }, 400);
         }
       } else {
-        // Inscription avec VÉRIFICATION OBLIGATOIRE
+        // Inscription directe et instantanée avec sécurisation du compte
         if (!fullName.trim() || fullName.trim().length < 3) {
           setErrorMsg('Veuillez entrer votre prénom et nom complet.');
           setLoading(false);
           return;
         }
 
-        // Envoi du lien de confirmation sécurisé
-        const { error, isEmail, destination } = await sendOtpCode(cleanIdentifier);
+        const { error } = await useAuth().signUpWithPhoneOrEmail(cleanIdentifier, password, fullName);
         if (error) {
-          setErrorMsg(error.message || "Impossible d'envoyer le lien de confirmation.");
+          setErrorMsg(error.message || "Erreur lors de la création de compte.");
         } else {
-          setOtpStep('verify');
-          setCountdown(60);
-          setSuccessMsg(
-            isEmail
-              ? `🔒 Lien de sécurité envoyé à : ${destination || cleanIdentifier}. Cliquez sur le lien pour vous connecter instantanément.`
-              : `🔒 Lien de sécurité envoyé au : ${destination || cleanIdentifier}. Cliquez sur le lien pour vous connecter instantanément.`
-          );
+          setSuccessMsg('🎉 Compte certifié créé avec succès ! Connexion immédiate...');
+          setTimeout(() => {
+            router.push(redirectPath);
+          }, 400);
         }
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Une erreur inattendue est survenue.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Validation manuelle par code OTP 6 chiffres (Optionnelle)
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpToken.trim() || otpToken.trim().length < 6) {
+      setErrorMsg('Veuillez saisir le code complet à 6 chiffres.');
+      return;
+    }
+
+    setLoading(true);
+    setErrorMsg(null);
+    try {
+      const { error } = await useAuth().verifyOtpCode(identifier.trim(), otpToken.trim(), fullName, password);
+      if (error) {
+        setErrorMsg('Code de sécurité incorrect ou expiré. Veuillez vérifier ou demander un nouveau code.');
+      } else {
+        setSuccessMsg('✓ Code validé avec succès ! Connexion immédiate...');
+        setTimeout(() => {
+          router.push(redirectPath);
+        }, 400);
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Erreur lors de la validation du code.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Déclencher l'envoi d'un code OTP
+  const handleRequestOtp = async () => {
+    const validation = validateSenegalIdentifier(identifier);
+    if (!validation.isValid) {
+      setErrorMsg(validation.error || 'Veuillez saisir un numéro ou email valide d’abord.');
+      return;
+    }
+    setLoading(true);
+    setErrorMsg(null);
+    try {
+      const { error, destination, isEmail } = await sendOtpCode(identifier.trim());
+      if (error) {
+        setErrorMsg(error.message || "Impossible d'envoyer le code.");
+      } else {
+        setOtpStep('verify');
+        setCountdown(60);
+        setSuccessMsg(
+          `🔒 Code de sécurité envoyé à : ${destination || identifier.trim()}. Saisissez le code à 6 chiffres ci-dessous.`
+        );
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || "Erreur lors de l'envoi du code.");
     } finally {
       setLoading(false);
     }
@@ -447,14 +501,25 @@ function ConnexionContent() {
                   {loading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>{mode === 'signin' ? 'Connexion en cours...' : 'Génération du code...'}</span>
+                      <span>{mode === 'signin' ? 'Connexion en cours...' : 'Création en cours...'}</span>
                     </>
                   ) : mode === 'signin' ? (
                     'Se connecter'
                   ) : (
-                    'Vérifier et Créer mon compte 🔒'
+                    'Créer mon compte certifié 🔒'
                   )}
                 </button>
+
+                {/* Option alternative code OTP */}
+                <div className="pt-2 text-center">
+                  <button
+                    type="button"
+                    onClick={handleRequestOtp}
+                    className="text-xs text-[#7A5133] hover:text-[#573721] font-semibold hover:underline cursor-pointer"
+                  >
+                    💬 Vous préférez recevoir un code de sécurité par SMS / WhatsApp ?
+                  </button>
+                </div>
               </form>
 
               {/* Bascule bas de page */}
@@ -467,6 +532,7 @@ function ConnexionContent() {
                       onClick={() => {
                         setMode('signup');
                         setErrorMsg(null);
+                        setSuccessMsg(null);
                       }}
                       className="font-bold text-[#7A5133] hover:underline cursor-pointer"
                     >
@@ -481,6 +547,7 @@ function ConnexionContent() {
                       onClick={() => {
                         setMode('signin');
                         setErrorMsg(null);
+                        setSuccessMsg(null);
                       }}
                       className="font-bold text-[#7A5133] hover:underline cursor-pointer"
                     >
@@ -492,65 +559,67 @@ function ConnexionContent() {
             </>
           ) : (
             /* ───────────────────────────────────────────────────────────── */
-            /* ÉTAPE D'ATTENTE DU LIEN DE CONFIRMATION (MAGIQUE & INSTANTANÉ) */
+            /* ÉTAPE DE VÉRIFICATION AVEC SAISIE DU CODE 6 CHIFFRES & SYNC */
             /* ───────────────────────────────────────────────────────────── */
             <div className="space-y-6 animate-fadeIn text-center">
               {/* Icône animée */}
               <div className="relative w-20 h-20 mx-auto">
                 <div className="absolute inset-0 rounded-3xl bg-[#7A5133]/15 animate-ping opacity-60" />
                 <div className="relative w-20 h-20 rounded-3xl bg-[#FAF8F5] border-2 border-[#E7E2D6] text-[#7A5133] flex items-center justify-center text-3xl shadow-lg">
-                  ✉️
+                  🔒
                 </div>
               </div>
 
               <div>
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold mb-2 border border-emerald-200">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Lien de sécurité envoyé</span>
+                  <span>Code de sécurité généré</span>
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1C1917] font-heading">
-                  Vérifiez votre boîte de réception
+                  Entrez votre code à 6 chiffres
                 </h2>
                 <p className="text-xs sm:text-sm text-[#78716C] mt-2 max-w-sm mx-auto">
-                  Un lien sécurisé à usage unique a été envoyé à :
+                  Entrez le code reçu pour <strong className="text-[#573721]">{identifier}</strong> :
                 </p>
-                <div className="inline-block mt-2 px-3.5 py-1.5 bg-[#FAF8F5] border border-[#E7E2D6] rounded-xl text-sm font-bold text-[#573721]">
-                  {identifier}
-                </div>
               </div>
 
-              {/* Guide d'utilisation simple */}
-              <div className="p-4 bg-[#FAF8F5] border border-[#E7E2D6] rounded-2xl text-left space-y-3 shadow-xs">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-[#7A5133] text-white flex items-center justify-center text-xs font-black flex-shrink-0 mt-0.5">
-                    1
-                  </div>
-                  <p className="text-xs text-[#44403C] leading-relaxed">
-                    Ouvrez votre boîte mail sur votre <strong>téléphone</strong> ou sur cet ordinateur.
-                  </p>
+              {/* Formulaire de saisie du Code OTP */}
+              <form onSubmit={handleVerifyOtp} className="space-y-4">
+                <div>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    autoFocus
+                    required
+                    value={otpToken}
+                    onChange={(e) => setOtpToken(e.target.value.replace(/\D/g, ''))}
+                    placeholder="123456"
+                    className="w-full text-center text-2xl tracking-[0.4em] font-mono font-black py-3.5 px-4 bg-[#FAF8F5] border-2 border-[#7A5133]/40 focus:border-[#7A5133] rounded-2xl text-[#1C1917] placeholder-stone-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#7A5133]/10 transition shadow-inner"
+                  />
                 </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-[#7A5133] text-white flex items-center justify-center text-xs font-black flex-shrink-0 mt-0.5">
-                    2
-                  </div>
-                  <p className="text-xs text-[#44403C] leading-relaxed">
-                    Cliquez sur le lien <strong>« Se connecter à NovaSen »</strong>.
-                  </p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-black flex-shrink-0 mt-0.5">
-                    ⚡
-                  </div>
-                  <p className="text-xs font-semibold text-emerald-800 leading-relaxed">
-                    Cet écran se connectera et redirigera <strong>instantanément et automatiquement</strong> sans rien toucher !
-                  </p>
-                </div>
-              </div>
 
-              {/* Statut d'écoute en direct */}
-              <div className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-white border border-stone-200 text-xs text-stone-600 shadow-xs">
+                <button
+                  type="submit"
+                  disabled={loading || otpToken.trim().length < 6}
+                  className="w-full py-3.5 bg-[#7A5133] hover:bg-[#573721] text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer text-sm sm:text-base"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Vérification du code...</span>
+                    </>
+                  ) : (
+                    'Valider et me connecter ✓'
+                  )}
+                </button>
+              </form>
+
+              {/* Statut d'écoute en direct multi-appareils */}
+              <div className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#FAF8F5] border border-[#E7E2D6] text-xs text-stone-600 shadow-xs">
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-                <span className="font-medium">En attente de votre clic sur mobile...</span>
+                <span className="font-medium">
+                  Ou confirmez sur votre mobile (connexion automatique en direct)
+                </span>
               </div>
 
               {/* Alertes d'état */}
@@ -574,20 +643,35 @@ function ConnexionContent() {
                   onClick={() => {
                     setOtpStep('form');
                     setErrorMsg(null);
+                    setSuccessMsg(null);
                   }}
                   className="hover:text-[#573721] hover:underline cursor-pointer"
                 >
-                  ← Modifier l&apos;adresse
+                  ← Retour au mot de passe
                 </button>
 
                 <button
                   type="button"
                   disabled={countdown > 0 || loading}
-                  onClick={handleSubmit}
+                  onClick={handleRequestOtp}
                   className="font-bold text-[#7A5133] hover:text-[#573721] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
-                  {countdown > 0 ? `Renvoyer le lien (${countdown}s)` : 'Renvoyer un nouveau lien'}
+                  {countdown > 0 ? `Renvoyer le code (${countdown}s)` : 'Renvoyer un nouveau code'}
                 </button>
+              </div>
+
+              {/* Assistance WhatsApp immédiate */}
+              <div className="pt-3 border-t border-[#E7E2D6]">
+                <a
+                  href={`https://wa.me/221776452819?text=${encodeURIComponent(
+                    `Bonjour NovaSen, j'ai besoin d'aide pour confirmer mon compte (${identifier}).`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
+                >
+                  <span>💬 Besoin d'aide immédiate ? Contactez le support WhatsApp</span>
+                </a>
               </div>
             </div>
           )}

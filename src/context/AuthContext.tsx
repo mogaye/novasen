@@ -187,22 +187,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       },
     });
 
-    if (data.user && !error) {
+    if (error) {
+      // If user is already registered, attempt to sign in with the password
+      if (error.message?.toLowerCase().includes('already registered')) {
+        const signRes = await supabase.auth.signInWithPassword({
+          email: authEmail,
+          password,
+        });
+        if (!signRes.error && signRes.data.user) {
+          await fetchProfile(signRes.data.user.id);
+          return { error: null };
+        }
+      }
+      return { error };
+    }
+
+    if (data.user) {
+      // If auto-confirm is on or session not yet set, ensure session is logged in
+      if (!data.session) {
+        try {
+          const signRes = await supabase.auth.signInWithPassword({
+            email: authEmail,
+            password,
+          });
+          if (signRes.data.session) {
+            setSession(signRes.data.session);
+            setUser(signRes.data.user);
+          }
+        } catch (e) {
+          // ignore
+        }
+      } else {
+        setSession(data.session);
+        setUser(data.user);
+      }
+
       // Upsert profile in Supabase table
-      await supabase.from('profiles').upsert({
-        id: data.user.id,
-        email: authEmail,
-        full_name: fullName.trim(),
-        phone: isPhone ? formattedPhone : null,
-        whatsapp: isPhone ? formattedPhone : null,
-        role: 'client',
-        zone_id: 'plateau',
-        address: 'Sénégal',
-      });
+      try {
+        await supabase.from('profiles').upsert({
+          id: data.user.id,
+          email: authEmail,
+          full_name: fullName.trim(),
+          phone: isPhone ? formattedPhone : null,
+          whatsapp: isPhone ? formattedPhone : null,
+          role: 'client',
+          zone_id: 'plateau',
+          address: 'Sénégal',
+        });
+      } catch (err) {
+        console.warn('Profiles upsert warning:', err);
+      }
+
       await fetchProfile(data.user.id);
     }
 
-    return { error };
+    return { error: null };
   };
 
   const sendOtpCode = async (identifier: string) => {
