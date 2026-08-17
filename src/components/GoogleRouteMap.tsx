@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ZoneId } from '@/lib/types';
 import { getZone, ZONES } from '@/lib/zones';
 import { loadGoogleMaps, GOOGLE_MAPS_API_KEY } from '@/lib/googleMaps';
@@ -30,6 +31,11 @@ export function GoogleRouteMap({
   const [useFallback, setUseFallback] = useState(!GOOGLE_MAPS_API_KEY);
   const [distanceInfo, setDistanceInfo] = useState<{ distanceText?: string; durationText?: string } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const originZone = getZone(originId) || ZONES[0];
   const destZone = getZone(destinationId) || ZONES[15];
@@ -128,6 +134,18 @@ export function GoogleRouteMap({
     };
   }, [originQuery, destQuery]);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isModalOpen]);
+
   // Initialize Fullscreen Modal Map when opened
   useEffect(() => {
     if (!isModalOpen || !GOOGLE_MAPS_API_KEY) return;
@@ -181,7 +199,6 @@ export function GoogleRouteMap({
       }
     }
 
-    // Small delay to ensure DOM modal element is painted
     const timer = setTimeout(initModalMap, 100);
 
     return () => {
@@ -267,12 +284,18 @@ export function GoogleRouteMap({
         </div>
       </div>
 
-      {/* FULLSCREEN MODAL / POPUP DIALOG */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fade-in">
-          <div className="bg-white w-full max-w-5xl h-[90vh] rounded-2xl shadow-2xl border-2 border-[#DDCDB6] flex flex-col overflow-hidden">
+      {/* FULLSCREEN PORTAL MODAL DIALOG */}
+      {mounted && isModalOpen && typeof document !== 'undefined' && createPortal(
+        <div
+          onClick={() => setIsModalOpen(false)}
+          className="fixed inset-0 z-[999999] bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fade-in"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white w-full max-w-6xl h-[92vh] rounded-2xl shadow-2xl border-2 border-[#DDCDB6] flex flex-col overflow-hidden relative animate-scale-up"
+          >
             {/* Modal Header */}
-            <div className="p-4 sm:p-5 bg-[#FAF6F0] border-b border-[#DDCDB6] flex items-center justify-between gap-4 flex-wrap">
+            <div className="p-4 sm:p-5 bg-[#FAF6F0] border-b border-[#DDCDB6] flex items-center justify-between gap-4 flex-wrap shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-xl bg-[#1C3049] text-white flex items-center justify-center text-xl shadow-xs shrink-0">
                   🗺️
@@ -314,7 +337,7 @@ export function GoogleRouteMap({
             </div>
 
             {/* Modal Body: Large Map + Trajectory Details */}
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 min-h-0 bg-[#F2E9DC]">
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 min-h-0 bg-[#F2E9DC] overflow-hidden">
               {/* Left/Main Map Container (2 Cols on desktop) */}
               <div className="lg:col-span-2 relative h-full min-h-[350px] border-b lg:border-b-0 lg:border-r border-[#DDCDB6]">
                 {useFallback ? (
@@ -401,7 +424,7 @@ export function GoogleRouteMap({
             </div>
 
             {/* Modal Footer */}
-            <div className="p-3 sm:p-4 bg-[#FAF6F0] border-t border-[#DDCDB6] flex items-center justify-between">
+            <div className="p-3 sm:p-4 bg-[#FAF6F0] border-t border-[#DDCDB6] flex items-center justify-between shrink-0">
               <span className="text-xs text-[#7A6A5C] font-medium hidden sm:inline">
                 🇸🇳 Service de Livraison et Transport NovaSen Dakar & 14 Régions
               </span>
@@ -414,7 +437,8 @@ export function GoogleRouteMap({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
