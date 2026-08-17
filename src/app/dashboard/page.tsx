@@ -307,19 +307,21 @@ export default function DashboardPage() {
 
           <div className="bg-white p-6 rounded-[16px] border border-[#DDCDB6] shadow-xs flex flex-col justify-between gap-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs uppercase tracking-wider font-bold text-[#7A6A5C]">Ventes & Encaissements</span>
+              <span className="text-xs uppercase tracking-wider font-bold text-[#7A6A5C]">Mes Ventes & Encaissements</span>
               <IconTrendingUp className="w-4 h-4 text-[#1C3049]" />
             </div>
             <div>
               <div className="text-2xl sm:text-3xl font-bold font-heading tabular-nums text-[#1C3049]">
-                {formatCFA(245000)}
+                {formatCFA(0)}
               </div>
               <p className="text-xs text-[#7A6A5C] mt-1">
-                Reversé sur Wave ({sellerProfile.phone})
+                {userListingsCount > 0
+                  ? `${userListingsCount} article(s) en vente • En attente de commandes`
+                  : 'Aucune commande enregistrée pour le moment'}
               </p>
             </div>
-            <div className="pt-2 border-t border-[#DDCDB6]/60 text-xs text-emerald-700 font-semibold flex items-center gap-1">
-              <IconCheck className="w-3.5 h-3.5" /> 8 commandes livrées
+            <div className="pt-2 border-t border-[#DDCDB6]/60 text-xs text-[#7A6A5C] flex items-center gap-1">
+              <span>Reversement direct sur Wave / OM ({sellerProfile.phone || 'Non renseigné'})</span>
             </div>
           </div>
         </div>
@@ -355,32 +357,32 @@ export default function DashboardPage() {
             </div>
             <div>
               <div className="text-2xl sm:text-3xl font-bold font-heading tabular-nums text-[#1C3049]">
-                128 <span className="text-sm font-normal text-[#7A6A5C]">courses</span>
+                0 <span className="text-sm font-normal text-[#7A6A5C]">course</span>
               </div>
               <p className="text-xs text-[#7A6A5C] mt-1">
-                Note moyenne : <strong className="text-amber-600 font-bold">★ 4.98 / 5</strong>
+                Nouveau profil chauffeur • Prêt pour les courses
               </p>
             </div>
             <div className="pt-2 border-t border-[#DDCDB6]/60 text-xs text-[#7A6A5C]">
-              Zone principale : Médina & Plateau
+              Zone principale : Dakar & Banlieue
             </div>
           </div>
 
           <div className="bg-white p-6 rounded-[16px] border border-[#DDCDB6] shadow-xs flex flex-col justify-between gap-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs uppercase tracking-wider font-bold text-[#7A6A5C]">Gains du Jour</span>
+              <span className="text-xs uppercase tracking-wider font-bold text-[#7A6A5C]">Mes Gains Personnels</span>
               <IconTrendingUp className="w-4 h-4 text-emerald-700" />
             </div>
             <div>
               <div className="text-2xl sm:text-3xl font-bold font-heading tabular-nums text-emerald-700">
-                {formatCFA(18500)}
+                {formatCFA(0)}
               </div>
               <p className="text-xs text-[#7A6A5C] mt-1">
-                5 livraisons de colis achevées aujourd'hui
+                0 course validée aujourd'hui
               </p>
             </div>
             <div className="pt-2 border-t border-[#DDCDB6]/60 text-xs text-[#7A6A5C]">
-              Reversement instantané Wave
+              Reversement instantané Wave & Orange Money
             </div>
           </div>
 
