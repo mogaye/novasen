@@ -562,66 +562,65 @@ function ConnexionContent() {
             </>
           ) : (
             /* ───────────────────────────────────────────────────────────── */
-            /* ÉTAPE DE VÉRIFICATION AVEC SAISIE DU CODE 6 CHIFFRES & SYNC */
+            /* ÉTAPE DE VÉRIFICATION PAR LIEN EMAIL & SYNCHRONISATION EN DIRECT */
             /* ───────────────────────────────────────────────────────────── */
             <div className="space-y-6 animate-fadeIn text-center">
-              {/* Icône animée */}
+              {/* Icône animée de boîte mail */}
               <div className="relative w-20 h-20 mx-auto">
                 <div className="absolute inset-0 rounded-3xl bg-[#7A5133]/15 animate-ping opacity-60" />
                 <div className="relative w-20 h-20 rounded-3xl bg-[#FAF8F5] border-2 border-[#E7E2D6] text-[#7A5133] flex items-center justify-center text-3xl shadow-lg">
-                  🔒
+                  ✉️
                 </div>
               </div>
 
               <div>
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold mb-2 border border-emerald-200">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Code de sécurité généré</span>
+                  <span>Email de confirmation envoyé</span>
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1C1917] font-heading">
-                  Entrez votre code à 6 chiffres
+                  Vérifiez votre boîte mail
                 </h2>
                 <p className="text-xs sm:text-sm text-[#78716C] mt-2 max-w-sm mx-auto">
-                  Entrez le code reçu pour <strong className="text-[#573721]">{identifier}</strong> :
+                  Un lien de sécurité sécurisé a été envoyé à : <strong className="text-[#573721] block mt-0.5">{identifier}</strong>
                 </p>
               </div>
 
-              {/* Formulaire de saisie du Code OTP */}
-              <form onSubmit={handleVerifyOtp} className="space-y-4">
-                <div>
-                  <input
-                    type="text"
-                    maxLength={6}
-                    autoFocus
-                    required
-                    value={otpToken}
-                    onChange={(e) => setOtpToken(e.target.value.replace(/\D/g, ''))}
-                    placeholder="123456"
-                    className="w-full text-center text-2xl tracking-[0.4em] font-mono font-black py-3.5 px-4 bg-[#FAF8F5] border-2 border-[#7A5133]/40 focus:border-[#7A5133] rounded-2xl text-[#1C1917] placeholder-stone-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#7A5133]/10 transition shadow-inner"
-                  />
+              {/* Bloc d'instructions pas à pas */}
+              <div className="bg-[#FAF8F5] border-2 border-[#E7E2D6] rounded-2xl p-5 text-left space-y-3.5 shadow-xs">
+                <div className="flex items-start gap-3">
+                  <span className="w-6 h-6 rounded-full bg-[#7A5133] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                    1
+                  </span>
+                  <p className="text-xs sm:text-sm text-[#44403C] leading-snug">
+                    Ouvrez votre boîte de réception <strong>(et vérifiez vos spams / courriers indésirables)</strong>.
+                  </p>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={loading || otpToken.trim().length < 6}
-                  className="w-full py-3.5 bg-[#7A5133] hover:bg-[#573721] text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer text-sm sm:text-base"
-                >
-                  {loading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Vérification du code...</span>
-                    </>
-                  ) : (
-                    'Valider et me connecter ✓'
-                  )}
-                </button>
-              </form>
+                <div className="flex items-start gap-3">
+                  <span className="w-6 h-6 rounded-full bg-[#7A5133] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                    2
+                  </span>
+                  <p className="text-xs sm:text-sm text-[#44403C] leading-snug">
+                    Cliquez sur le bouton <strong>« Confirmer mon accès »</strong> ou sur le lien présent dans le mail.
+                  </p>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <span className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                    ✓
+                  </span>
+                  <p className="text-xs sm:text-sm text-[#44403C] leading-snug">
+                    Cette page se mettra à jour <strong>automatiquement</strong> dès que vous aurez validé l&apos;email !
+                  </p>
+                </div>
+              </div>
 
               {/* Statut d'écoute en direct multi-appareils */}
-              <div className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#FAF8F5] border border-[#E7E2D6] text-xs text-stone-600 shadow-xs">
+              <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 shadow-xs">
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-                <span className="font-medium">
-                  Ou confirmez sur votre mobile (connexion automatique en direct)
+                <span className="font-semibold">
+                  En attente de votre clic sur le lien reçu par email...
                 </span>
               </div>
 
@@ -648,9 +647,9 @@ function ConnexionContent() {
                     setErrorMsg(null);
                     setSuccessMsg(null);
                   }}
-                  className="hover:text-[#573721] hover:underline cursor-pointer"
+                  className="hover:text-[#573721] hover:underline cursor-pointer font-semibold"
                 >
-                  ← Retour au mot de passe
+                  ← Modifier mon email
                 </button>
 
                 <button
@@ -659,7 +658,7 @@ function ConnexionContent() {
                   onClick={handleRequestOtp}
                   className="font-bold text-[#7A5133] hover:text-[#573721] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
-                  {countdown > 0 ? `Renvoyer le code (${countdown}s)` : 'Renvoyer un nouveau code'}
+                  {countdown > 0 ? `Renvoyer l'email (${countdown}s)` : "Renvoyer l'email de confirmation"}
                 </button>
               </div>
 
