@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { IconCar, IconPackage, IconPlus, IconUser, IconX } from './ui/Icons';
 import { GlowButton } from './ui/GlowButton';
 import { GlobalSearchModal } from './GlobalSearchModal';
+import { Logo } from './ui/Logo';
 
 export function Header() {
   const pathname = usePathname();
@@ -130,21 +131,11 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
         {/* Brand & Mode Switcher */}
         <div className="flex items-center gap-4 lg:gap-5 shrink-0">
-          <Link
+          <Logo
             href="/accueil"
-            className="flex flex-col group cursor-pointer focus:outline-none shrink-0"
+            size="md"
             onClick={() => setActiveService('market')}
-            title="Page d'accueil NovaSen"
-          >
-            <div className="flex items-center gap-1.5">
-              <span className="text-2xl sm:text-[1.65rem] font-bold tracking-tight text-[#573721] font-heading whitespace-nowrap">
-                Nova<span className={isMarket ? 'text-[#7A5133]' : 'text-[#1C3049]'}>Sen</span>
-              </span>
-            </div>
-            <span className="text-[0.65rem] sm:text-[0.68rem] text-[#7A6A5C] tracking-wide whitespace-nowrap">
-              Marché & Transport
-            </span>
-          </Link>
+          />
 
           {/* Quick Dual Service Pill Switch */}
           <div className="hidden md:flex items-center bg-[#E8DBC8] p-1 rounded-full border border-[#DDCDB6] shadow-xs shrink-0">

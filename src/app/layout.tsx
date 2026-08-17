@@ -59,6 +59,11 @@ export const metadata: Metadata = {
   applicationName: 'NovaSen',
   generator: 'Next.js',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/images/logo_embleme.jpg',
+    shortcut: '/images/logo_embleme.jpg',
+    apple: '/images/logo_embleme.jpg',
+  },
   openGraph: {
     type: 'website',
     locale: 'fr_SN',
@@ -69,7 +74,7 @@ export const metadata: Metadata = {
       'Achetez, vendez et faites livrer à Dakar et dans tout le Sénégal avec paiement Wave, Orange Money et Cash à la livraison.',
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=1200&auto=format&fit=crop&q=80',
+        url: '/images/logo_principal.jpg',
         width: 1200,
         height: 630,
         alt: 'NovaSen Sénégal - Marché et Transport Express',
@@ -80,7 +85,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'NovaSen • Marché & Logistique de Transport au Sénégal',
     description: 'La 1ère plateforme intégrant marché et livraison express au Sénégal.',
-    images: ['https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=1200&auto=format&fit=crop&q=80'],
+    images: ['/images/logo_principal.jpg'],
   },
   robots: {
     index: true,
@@ -106,7 +111,7 @@ const jsonLdSchema = {
   '@type': 'Organization',
   name: 'NovaSen Technologies',
   url: 'https://novasen.sn',
-  logo: 'https://novasen.sn/logo.png',
+  logo: 'https://novasen.sn/images/logo_principal.jpg',
   description: 'Plateforme technologique de petites annonces et de logistique de transport au Sénégal.',
   address: {
     '@type': 'PostalAddress',

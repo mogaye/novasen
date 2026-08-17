@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LogoWave, LogoOrangeMoney, LogoCard } from './PaymentLogos';
+import { Logo } from './ui/Logo';
 
 export function Footer() {
   const pathname = usePathname();
@@ -16,14 +17,12 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold tracking-tight text-white font-heading">
-                Nova<span className="text-[#C9A882]">Sen</span>
-              </span>
-              <span className="px-2 py-0.5 rounded-[4px] bg-[#1C3049] text-[#E8DBC8] text-[0.7rem] font-semibold uppercase tracking-wider border border-[#C9A882]/30">
-                Sénégal
-              </span>
-            </div>
+            <Logo
+              href="/accueil"
+              theme="dark"
+              size="md"
+              variant="horizontal"
+            />
             <p className="text-sm text-[#E8DBC8]/80 leading-relaxed">
               La première plateforme sénégalaise réunissant les petites annonces et le transport à la demande comme bras logistique direct.
             </p>

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth, normalizeIdentifier } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { IconShieldCheck } from '@/components/ui/Icons';
+import { Logo } from '@/components/ui/Logo';
 
 // Validateur strict Sénégal (Email ou Numéro 9 chiffres 70,75,76,77,78)
 function validateSenegalIdentifier(id: string): { isValid: boolean; isEmail: boolean; error?: string } {
@@ -298,19 +299,7 @@ function ConnexionContent() {
       <div className="w-full lg:w-1/2 min-h-screen flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-16 xl:px-24 py-8 sm:py-12 bg-white z-10">
         {/* Top bar avec Logo */}
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-11 h-11 rounded-2xl bg-[#7A5133] text-white flex items-center justify-center font-black text-xl shadow-md group-hover:scale-105 transition-transform">
-              N
-            </div>
-            <div>
-              <span className="text-2xl font-black text-[#573721] tracking-tight font-heading">
-                Nova<span className="text-[#7A5133]">Sen</span>
-              </span>
-              <span className="block text-[10px] uppercase font-bold tracking-widest text-[#7A6A5C]">
-                Sénégal
-              </span>
-            </div>
-          </Link>
+          <Logo href="/" size="md" />
 
           <Link
             href="/"
