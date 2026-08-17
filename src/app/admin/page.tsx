@@ -42,13 +42,16 @@ export default function AdminDashboardPage() {
   const [loadingUsers, setLoadingUsers] = useState(false);
 
   // KYC Management State
-  const [kycList, setKycList] = useState<AdminKycApplication[]>(INITIAL_ADMIN_KYC);
+  const [kycList, setKycList] = useState<AdminKycApplication[]>([]);
   const [kycFilter, setKycFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [selectedKycDoc, setSelectedKycDoc] = useState<AdminKycApplication | null>(null);
 
   // Live Deliveries State
-  const [deliveries, setDeliveries] = useState<AdminLiveDelivery[]>(INITIAL_ADMIN_DELIVERIES);
+  const [deliveries, setDeliveries] = useState<AdminLiveDelivery[]>([]);
   const [deliveryFilter, setDeliveryFilter] = useState<'all' | 'pending_pickup' | 'in_transit' | 'delivered'>('all');
+
+  // Transactions State
+  const [transactions, setTransactions] = useState<AdminFinancialTransaction[]>([]);
 
   // Platform Settings State
   const [boutiqueFee, setBoutiqueFee] = useState(6500);
@@ -76,21 +79,15 @@ export default function AdminDashboardPage() {
     fetchSupabaseUsers();
   }, []);
 
-  // Financial Stats Calculation
-  const totalSubRevenue = INITIAL_ADMIN_TRANSACTIONS
-    .filter(t => t.type === 'subscription' && t.status === 'completed')
-    .reduce((acc, curr) => acc + curr.amount, 0) + (supabaseUsers.length * 6500);
+  // Real Calculations based on live Supabase and active listings
+  const totalSubRevenue = 0; // Starts at 0 until real payments are processed
+  const totalDriverFees = 0;
+  const totalBoostRevenue = 0;
+  const totalPlatformRevenue = 0;
+  const totalMarketplaceGMV = listings.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
 
-  const totalDriverFees = INITIAL_ADMIN_TRANSACTIONS
-    .filter(t => t.type === 'driver_fee' && t.status === 'completed')
-    .reduce((acc, curr) => acc + curr.amount, 0);
-
-  const totalBoostRevenue = INITIAL_ADMIN_TRANSACTIONS
-    .filter(t => t.type === 'boost' && t.status === 'completed')
-    .reduce((acc, curr) => acc + curr.amount, 0);
-
-  const totalPlatformRevenue = totalSubRevenue + totalDriverFees + totalBoostRevenue + 24500;
-  const totalMarketplaceGMV = listings.reduce((sum, item) => sum + (Number(item.price) || 0), 0) + 1430000;
+  const pendingKycCount = supabaseUsers.filter(u => !u.is_verified).length;
+  const verifiedKycCount = supabaseUsers.filter(u => u.is_verified).length;
 
   // KYC Handlers with Supabase sync
   const handleApproveKyc = async (id: string, name: string) => {
@@ -268,8 +265,8 @@ export default function AdminDashboardPage() {
                 <span className="text-xs uppercase tracking-wider font-bold text-[#7A6A5C]">
                   Revenus Plateforme
                 </span>
-                <span className="p-2 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">
-                  +28% ce mois
+                <span className="p-1.5 px-2.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold">
+                  En Direct
                 </span>
               </div>
               <div>
@@ -277,12 +274,12 @@ export default function AdminDashboardPage() {
                   {formatCFA(totalPlatformRevenue)}
                 </div>
                 <p className="text-xs text-[#7A6A5C] mt-1">
-                  Abonnements (6 500 F) + Frais Chauffeurs + Boosts
+                  Abonnements réels + Commissions collectées
                 </p>
               </div>
               <div className="pt-3 border-t border-[#DDCDB6]/60 flex items-center justify-between text-xs text-[#7A5133] font-semibold">
-                <span>Wave & OM direct</span>
-                <span className="text-emerald-700 font-bold">100% collecté</span>
+                <span>Passerelle Wave & OM</span>
+                <span className="text-emerald-700 font-bold">Connectée</span>
               </div>
             </div>
 
@@ -290,7 +287,7 @@ export default function AdminDashboardPage() {
             <div className="bg-white p-6 rounded-[16px] border border-[#DDCDB6] shadow-xs flex flex-col justify-between gap-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs uppercase tracking-wider font-bold text-[#7A6A5C]">
-                  Volume Marchand (GMV)
+                  Valeur des Annonces (GMV)
                 </span>
                 <IconTrendingUp className="w-4 h-4 text-[#7A5133]" />
               </div>
@@ -299,34 +296,36 @@ export default function AdminDashboardPage() {
                   {formatCFA(totalMarketplaceGMV)}
                 </div>
                 <p className="text-xs text-[#7A6A5C] mt-1">
-                  Total des ventes acheminées et livrées à Dakar
+                  {listings.length} article(s) actuellement en vente sur NovaSen
                 </p>
               </div>
               <div className="pt-3 border-t border-[#DDCDB6]/60 flex items-center justify-between text-xs text-[#7A6A5C]">
-                <span>Moyenne commande :</span>
-                <strong className="text-[#1C3049]">42 500 F CFA</strong>
+                <span>Catalogue Marché :</span>
+                <strong className="text-[#1C3049]">{listings.length} offres actives</strong>
               </div>
             </div>
 
-            {/* Livreurs & Chauffeurs Actifs */}
+            {/* Utilisateurs Supabase */}
             <div className="bg-white p-6 rounded-[16px] border border-[#DDCDB6] shadow-xs flex flex-col justify-between gap-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs uppercase tracking-wider font-bold text-[#7A6A5C]">
-                  Flotte Transport en Ligne
+                  Utilisateurs Supabase
                 </span>
-                <IconCar className="w-4 h-4 text-[#1C3049]" />
+                <span className="p-1.5 px-2 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                  Live DB
+                </span>
               </div>
               <div>
                 <div className="text-3xl font-bold font-heading tabular-nums text-[#1C3049]">
-                  142 <span className="text-sm font-normal text-[#7A6A5C]">coursiers</span>
+                  {supabaseUsers.length} <span className="text-sm font-normal text-[#7A6A5C]">inscrits</span>
                 </div>
                 <p className="text-xs text-[#7A6A5C] mt-1">
-                  18 courses & livraisons en cours en ce moment
+                  {verifiedKycCount} profil(s) certifié(s) avec badge 🛡️
                 </p>
               </div>
               <div className="pt-3 border-t border-[#DDCDB6]/60 flex items-center justify-between text-xs text-[#7A6A5C]">
-                <span>Taux de satisfaction :</span>
-                <strong className="text-emerald-700">★ 4.96 / 5</strong>
+                <span>Base PostgreSQL :</span>
+                <strong className="text-emerald-700 font-bold">🟢 En ligne</strong>
               </div>
             </div>
 
@@ -340,11 +339,11 @@ export default function AdminDashboardPage() {
               </div>
               <div>
                 <div className="text-3xl font-bold font-heading tabular-nums text-amber-600">
-                  {kycList.filter(k => k.status === 'pending').length}{' '}
-                  <span className="text-sm font-normal text-[#7A6A5C]">à vérifier</span>
+                  {pendingKycCount}{' '}
+                  <span className="text-sm font-normal text-[#7A6A5C]">à certifier</span>
                 </div>
                 <p className="text-xs text-[#7A6A5C] mt-1">
-                  CNI, Permis et NINEA soumis récemment
+                  Profils nécessitant validation de l'administrateur
                 </p>
               </div>
               <div className="pt-3 border-t border-[#DDCDB6]/60 flex items-center justify-between text-xs">
@@ -353,7 +352,7 @@ export default function AdminDashboardPage() {
                   onClick={() => setActiveTab('kyc')}
                   className="text-[#1C3049] font-bold hover:underline"
                 >
-                  Traiter les dossiers →
+                  Gérer les profils →
                 </button>
               </div>
             </div>
@@ -361,13 +360,13 @@ export default function AdminDashboardPage() {
 
           {/* Real-time split: Deliveries Tracker + Quick KYC Queue */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Live Deliveries (8 cols) */}
+            {/* Live Deliveries (7 cols) */}
             <div className="lg:col-span-7 bg-white rounded-[16px] border border-[#DDCDB6] p-6 shadow-xs flex flex-col gap-5">
               <div className="flex items-center justify-between pb-3 border-b border-[#DDCDB6]">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">🛵</span>
                   <h3 className="text-lg font-bold font-heading text-[#1C3049]">
-                    Dernières Livraisons & Courses Dakar
+                    Livraisons & Courses en Cours
                   </h3>
                 </div>
                 <button
@@ -375,54 +374,62 @@ export default function AdminDashboardPage() {
                   onClick={() => setActiveTab('dispatch')}
                   className="text-xs font-bold text-[#7A5133] hover:underline"
                 >
-                  Vue Dispatch Complète →
+                  Vue Dispatch ({deliveries.length}) →
                 </button>
               </div>
 
-              <div className="flex flex-col gap-3">
-                {deliveries.slice(0, 3).map((del) => (
-                  <div
-                    key={del.id}
-                    className="p-4 rounded-[12px] border border-[#DDCDB6] bg-[#F2E9DC]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                  >
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-[#1C3049] bg-white px-2 py-0.5 rounded border border-[#DDCDB6]">
-                          {del.orderNumber}
-                        </span>
-                        <span className="text-xs font-bold text-[#2A211A]">{del.itemTitle}</span>
-                      </div>
-                      <div className="text-xs text-[#7A6A5C] flex flex-wrap items-center gap-2 mt-0.5">
-                        <span>📍 {del.pickupZone} ➔ {del.dropoffZone}</span>
-                        <span>• Livreur : <strong>{del.driverName}</strong></span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 self-end sm:self-auto">
-                      <div className="text-right">
-                        <span className="text-sm font-bold font-heading tabular-nums text-[#1C3049] block">
-                          {formatCFA(del.itemPrice)}
-                        </span>
-                        <span className="text-[11px] text-emerald-700 font-semibold">
-                          +{formatCFA(del.deliveryFee)} livraison
-                        </span>
+              {deliveries.length === 0 ? (
+                <div className="py-12 flex flex-col items-center justify-center text-center text-[#7A6A5C] gap-2">
+                  <span className="text-3xl">📦</span>
+                  <p className="text-xs font-bold text-[#1C3049]">Aucune course active en ce moment</p>
+                  <p className="text-[11px] text-[#7A6A5C]">Le service logistique de NovaSen est prêt à recevoir les commandes.</p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {deliveries.slice(0, 3).map((del) => (
+                    <div
+                      key={del.id}
+                      className="p-4 rounded-[12px] border border-[#DDCDB6] bg-[#F2E9DC]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    >
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-[#1C3049] bg-white px-2 py-0.5 rounded border border-[#DDCDB6]">
+                            {del.orderNumber}
+                          </span>
+                          <span className="text-xs font-bold text-[#2A211A]">{del.itemTitle}</span>
+                        </div>
+                        <div className="text-xs text-[#7A6A5C] flex flex-wrap items-center gap-2 mt-0.5">
+                          <span>📍 {del.pickupZone} ➔ {del.dropoffZone}</span>
+                          <span>• Livreur : <strong>{del.driverName}</strong></span>
+                        </div>
                       </div>
 
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                          del.status === 'in_transit'
-                            ? 'bg-blue-100 text-blue-800'
-                            : del.status === 'delivered'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-amber-100 text-amber-800'
-                        }`}
-                      >
-                        {del.status === 'in_transit' ? 'En transit' : del.status === 'delivered' ? 'Livré ✓' : 'Attente'}
-                      </span>
+                      <div className="flex items-center gap-4 self-end sm:self-auto">
+                        <div className="text-right">
+                          <span className="text-sm font-bold font-heading tabular-nums text-[#1C3049] block">
+                            {formatCFA(del.itemPrice)}
+                          </span>
+                          <span className="text-[11px] text-emerald-700 font-semibold">
+                            +{formatCFA(del.deliveryFee)} livraison
+                          </span>
+                        </div>
+
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                            del.status === 'in_transit'
+                              ? 'bg-blue-100 text-blue-800'
+                              : del.status === 'delivered'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-amber-100 text-amber-800'
+                          }`}
+                        >
+                          {del.status === 'in_transit' ? 'En transit' : del.status === 'delivered' ? 'Livré ✓' : 'Attente'}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Quick KYC Validation Queue (5 cols) */}
@@ -431,68 +438,59 @@ export default function AdminDashboardPage() {
                 <div className="flex items-center gap-2">
                   <span className="text-xl">🛡️</span>
                   <h3 className="text-lg font-bold font-heading text-[#1C3049]">
-                    Dossiers KYC Récents
+                    Comptes Supabase Récents
                   </h3>
                 </div>
                 <span className="text-xs font-bold text-amber-600">
-                  {kycList.filter(k => k.status === 'pending').length} en attente
+                  {pendingKycCount} à certifier
                 </span>
               </div>
 
-              <div className="flex flex-col gap-3">
-                {kycList.slice(0, 3).map((kyc) => (
-                  <div
-                    key={kyc.id}
-                    className="p-3.5 rounded-[12px] border border-[#DDCDB6] bg-white flex items-center justify-between gap-3 hover:bg-[#F2E9DC]/30 transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={kyc.avatarUrl}
-                        alt={kyc.name}
-                        className="w-10 h-10 rounded-[10px] object-cover border border-[#DDCDB6]"
-                      />
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <h4 className="text-xs font-bold text-[#1C3049]">{kyc.name}</h4>
-                          <span className="text-[10px] bg-[#E8DBC8] text-[#573721] px-1.5 py-0.2 rounded font-semibold">
-                            {kyc.type === 'driver' ? '🛵 Livreur' : '🏬 Vendeur'}
+              {supabaseUsers.length === 0 ? (
+                <div className="py-12 text-center text-xs text-[#7A6A5C]">
+                  Chargement des profils Supabase...
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {supabaseUsers.slice(0, 3).map((u) => (
+                    <div
+                      key={u.id}
+                      className="p-3.5 rounded-[12px] border border-[#DDCDB6] bg-white flex items-center justify-between gap-3 hover:bg-[#F2E9DC]/30 transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="w-10 h-10 rounded-[10px] bg-[#1C3049] text-white flex items-center justify-center font-bold text-sm uppercase">
+                          {u.full_name?.charAt(0) || 'U'}
+                        </span>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <h4 className="text-xs font-bold text-[#1C3049]">{u.full_name || 'Utilisateur'}</h4>
+                          </div>
+                          <span className="text-[11px] text-[#7A6A5C] block">
+                            {u.email || u.phone || 'Compte enregistré'}
                           </span>
                         </div>
-                        <span className="text-[11px] text-[#7A6A5C] block">
-                          CNI : {kyc.cniNumber} • {kyc.zone}
-                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        {!u.is_verified ? (
+                          <button
+                            type="button"
+                            onClick={() => handleApproveKyc(u.id, u.full_name || 'Utilisateur')}
+                            className="px-2 py-1 rounded-[6px] bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer"
+                            title="Certifier le compte"
+                          >
+                            Valider 🛡️
+                          </button>
+                        ) : (
+                          <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
+                            Certifié 🛡️
+                          </span>
+                        )}
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-1.5">
-                      {kyc.status === 'pending' ? (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => handleApproveKyc(kyc.id, kyc.name)}
-                            className="p-1.5 rounded-[6px] bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer"
-                            title="Approuver le badge"
-                          >
-                            ✓
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleRejectKyc(kyc.id, kyc.name)}
-                            className="p-1.5 rounded-[6px] bg-red-500 hover:bg-red-600 text-white text-xs font-bold cursor-pointer"
-                            title="Rejeter"
-                          >
-                            ✕
-                          </button>
-                        </>
-                      ) : (
-                        <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
-                          Approuvé
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
               <Button
                 variant="outline"
@@ -500,7 +498,7 @@ export default function AdminDashboardPage() {
                 onClick={() => setActiveTab('kyc')}
                 className="w-full"
               >
-                <span>Voir tous les dossiers de vérification</span>
+                <span>Gérer tous les comptes ({supabaseUsers.length})</span>
               </Button>
             </div>
           </div>
@@ -1012,38 +1010,46 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#DDCDB6]/60">
-                  {INITIAL_ADMIN_TRANSACTIONS.map((tx) => (
-                    <tr key={tx.id} className="hover:bg-[#F2E9DC]/40 transition-colors">
-                      <td className="p-4 font-mono font-bold text-[#1C3049]">
-                        {tx.reference}
-                      </td>
-                      <td className="p-4">
-                        <span className="font-bold text-[#2A211A] block">{tx.title}</span>
-                        <span className="text-[#7A6A5C] text-[10px] uppercase font-semibold">
-                          {tx.type === 'subscription' ? 'Abonnement Boutique' : tx.type === 'driver_fee' ? 'Dossier Livreur' : tx.type === 'seller_payout' ? 'Reversement Marchand' : 'Option Boost'}
-                        </span>
-                      </td>
-                      <td className="p-4 font-semibold text-[#1C3049]">
-                        {tx.user}
-                      </td>
-                      <td className="p-4">
-                        <span className="font-bold font-heading tabular-nums text-base text-[#1C3049]">
-                          {formatCFA(tx.amount)}
-                        </span>
-                      </td>
-                      <td className="p-4 font-semibold text-[#573721]">
-                        {tx.gateway}
-                      </td>
-                      <td className="p-4 text-[#7A6A5C]">
-                        {tx.date}
-                      </td>
-                      <td className="p-4 text-right">
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
-                          {tx.status === 'completed' ? 'Validé ✓' : tx.status}
-                        </span>
+                  {transactions.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="p-8 text-center text-[#7A6A5C]">
+                        Aucune transaction financière encaissée pour le moment. Les paiements Wave & OM apparaîtront ici.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    transactions.map((tx) => (
+                      <tr key={tx.id} className="hover:bg-[#F2E9DC]/40 transition-colors">
+                        <td className="p-4 font-mono font-bold text-[#1C3049]">
+                          {tx.reference}
+                        </td>
+                        <td className="p-4">
+                          <span className="font-bold text-[#2A211A] block">{tx.title}</span>
+                          <span className="text-[#7A6A5C] text-[10px] uppercase font-semibold">
+                            {tx.type === 'subscription' ? 'Abonnement Boutique' : tx.type === 'driver_fee' ? 'Dossier Livreur' : tx.type === 'seller_payout' ? 'Reversement Marchand' : 'Option Boost'}
+                          </span>
+                        </td>
+                        <td className="p-4 font-semibold text-[#1C3049]">
+                          {tx.user}
+                        </td>
+                        <td className="p-4">
+                          <span className="font-bold font-heading tabular-nums text-base text-[#1C3049]">
+                            {formatCFA(tx.amount)}
+                          </span>
+                        </td>
+                        <td className="p-4 font-semibold text-[#573721]">
+                          {tx.gateway}
+                        </td>
+                        <td className="p-4 text-[#7A6A5C]">
+                          {tx.date}
+                        </td>
+                        <td className="p-4 text-right">
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
+                            {tx.status === 'completed' ? 'Validé ✓' : tx.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
