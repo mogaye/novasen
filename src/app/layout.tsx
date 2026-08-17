@@ -109,10 +109,9 @@ const jsonLdSchema = {
   description: 'Plateforme technologique de petites annonces et de logistique de transport au Sénégal.',
   address: {
     '@type': 'PostalAddress',
-    streetAddress: 'Avenue Léopold Sédar Senghor, Plateau',
+    streetAddress: 'Dakar',
     addressLocality: 'Dakar',
     addressRegion: 'Dakar',
-    postalCode: '10000',
     addressCountry: 'SN',
   },
   contactPoint: {
