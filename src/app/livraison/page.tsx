@@ -23,6 +23,22 @@ import {
 } from '@/components/ui/Icons';
 import { LogoWave, LogoOrangeMoney, LogoCard } from '@/components/PaymentLogos';
 
+const fallbackListing = {
+  id: 'tel-1',
+  title: 'Article / Colis NovaSen',
+  price: 15000,
+  category: 'telephones' as const,
+  zoneId: 'plateau' as ZoneId,
+  neighborhood: 'Dakar Plateau',
+  condition: 'Neuf' as const,
+  sellerName: 'Boutique Partenaire',
+  sellerSeniority: 'Membre vérifié',
+  quantity: 10,
+  soldCount: 0,
+  isFeatured: false,
+  imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&auto=format&fit=crop&q=80',
+};
+
 function LivraisonContent() {
   const searchParams = useSearchParams();
   const annonceId = searchParams.get('annonceId') || 'tel-1';
@@ -33,7 +49,7 @@ function LivraisonContent() {
 
   useEffect(() => {
     const found = listings.find((l) => String(l.id) === String(annonceId)) ||
-      INITIAL_LISTINGS.find((l) => String(l.id) === String(annonceId));
+      (INITIAL_LISTINGS && INITIAL_LISTINGS.find((l) => String(l.id) === String(annonceId)));
     if (found) {
       setActiveListing(found);
     } else {
@@ -50,21 +66,22 @@ function LivraisonContent() {
           }
         } catch (e) {}
       }
-      setActiveListing(INITIAL_LISTINGS[0]);
+      const initial = (INITIAL_LISTINGS && INITIAL_LISTINGS[0]) || (listings && listings[0]) || fallbackListing;
+      setActiveListing(initial);
     }
   }, [annonceId, listings]);
 
-  const listing = activeListing || listings.find((l) => String(l.id) === String(annonceId)) || INITIAL_LISTINGS[0];
+  const listing = activeListing || listings.find((l) => String(l.id) === String(annonceId)) || (listings && listings[0]) || (INITIAL_LISTINGS && INITIAL_LISTINGS[0]) || fallbackListing;
 
-  const originId: ZoneId = (listing.zoneId as ZoneId) || 'plateau';
+  const originId: ZoneId = (listing?.zoneId as ZoneId) || 'plateau';
   const [destinationId, setDestinationId] = useState<ZoneId>('pointe');
   const [destinationName, setDestinationName] = useState(ZONES_BY_ID['pointe']?.name || 'Point E');
 
   // Default parcel vehicle based on category
   const defaultParcelClass: ParcelClass =
-    listing.category === 'immobilier' || listing.category === 'vehicules'
+    listing?.category === 'immobilier' || listing?.category === 'vehicules'
       ? 'voiture'
-      : listing.category === 'maison'
+      : listing?.category === 'maison'
       ? 'camionnette'
       : 'moto';
 
@@ -77,12 +94,12 @@ function LivraisonContent() {
   const [isOrdering, setIsOrdering] = useState(false);
   const [assignedDriver, setAssignedDriver] = useState<DriverAssignment | null>(null);
 
-  const availableStock = Math.max(0, (listing.quantity ?? 1) - (listing.soldCount ?? 0));
+  const availableStock = Math.max(0, ((listing?.quantity ?? 1) - (listing?.soldCount ?? 0)));
 
   const fares = calculateFares(originId, destinationId);
   const tripMetrics = calculateTripMetrics(originId, destinationId);
   const deliveryFare = fares.parcelFares[parcelClass];
-  const totalAmount = enableCod ? (listing.price || 0) * selectedQuantity + deliveryFare : deliveryFare;
+  const totalAmount = enableCod ? (listing?.price || 0) * selectedQuantity + deliveryFare : deliveryFare;
 
   const handleOrderDelivery = async (e: React.FormEvent) => {
     e.preventDefault();
