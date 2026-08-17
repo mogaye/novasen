@@ -10,6 +10,7 @@ import {
   ZoneId,
   SellerProfile,
   DriverProfile,
+  DriverTrip,
 } from '@/lib/types';
 import { INITIAL_LISTINGS } from '@/lib/listings';
 import { INITIAL_DRIVERS } from '@/lib/drivers';
@@ -38,6 +39,10 @@ interface AppContextType {
   listings: Listing[];
   fetchListings: () => Promise<void>;
   addListing: (listingData: Partial<Listing>) => Promise<{ success: boolean; error?: string; isQuotaReached?: boolean; data?: any }>;
+  deleteListing: (listingId: string) => Promise<{ success: boolean; error?: string }>;
+  driverTrips: DriverTrip[];
+  addDriverTrip: (tripData: Partial<DriverTrip>) => Promise<{ success: boolean; error?: string }>;
+  deleteDriverTrip: (tripId: string) => Promise<{ success: boolean; error?: string }>;
   userPlan: SellerPlanId;
   setUserPlan: (plan: SellerPlanId) => void;
   driverPlan: DriverPlanId;
@@ -133,17 +138,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
 
   const [driverProfile, setDriverProfile] = useState<DriverProfile>({
-    id: 'drv-user',
+    id: 'drv-current',
     fullName: 'Mon Profil Chauffeur',
-    fleetName: '',
     avatarUrl: '',
     coverUrl: '',
     phone: '',
     whatsapp: '',
     email: '',
-    vehicleType: 'moto',
-    vehicleModel: '',
-    licensePlate: '',
+    vehicleType: 'voiture',
+    vehicleModel: 'Véhicule VTC Dakar',
+    licensePlate: 'DK-0000-XX',
     cniNumber: '',
     driverLicenseNumber: '',
     carteGriseNumber: '',
@@ -151,14 +155,67 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     baseZoneId: 'plateau',
     rating: 5.0,
     totalDeliveries: 0,
-    isVerified: false,
+    isVerified: true,
     payoutMethod: 'wave',
     payoutNumber: '',
     activityTypes: {
-      passengers: false,
+      passengers: true,
       parcels: true,
     },
   });
+
+  const INITIAL_DRIVER_TRIPS: DriverTrip[] = [
+    {
+      id: 'trip-1',
+      driverId: 'drv-1',
+      driverName: 'Mamadou Lamine Diop',
+      driverPhone: '+221 77 512 84 90',
+      driverWhatsapp: '+221 77 512 84 90',
+      originZone: 'Plateau / Centre-ville',
+      destinationZone: 'Almadies / Ngor / Virage',
+      departureTime: 'Départ à 14h30',
+      vehicleType: 'voiture',
+      vehicleModel: 'Toyota Corolla Climatisée',
+      tripType: 'passagers',
+      price: 3500,
+      availableSeats: 3,
+      status: 'active',
+      createdAt: "Aujourd'hui",
+    },
+    {
+      id: 'trip-2',
+      driverId: 'drv-2',
+      driverName: 'Cheikhna Ndiaye',
+      driverPhone: '+221 78 913 90 36',
+      driverWhatsapp: '+221 70 590 87 25',
+      originZone: 'Médina / Tilène',
+      destinationZone: 'Guédiawaye / Pikine',
+      departureTime: 'Départ immédiat',
+      vehicleType: 'moto',
+      vehicleModel: 'Honda Dio 110cc (Top Case)',
+      tripType: 'colis',
+      price: 2000,
+      maxWeightKg: 15,
+      status: 'active',
+      createdAt: "Aujourd'hui",
+    },
+  ];
+
+  const [driverTrips, setDriverTrips] = useState<DriverTrip[]>(INITIAL_DRIVER_TRIPS);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedTrips = localStorage.getItem('novasen_driver_trips');
+        if (savedTrips) {
+          const parsed = JSON.parse(savedTrips);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setDriverTrips(parsed);
+          }
+        }
+      } catch (e) {}
+    }
+  }, []);
 
   const [drivers, setDrivers] = useState<DriverProfile[]>(INITIAL_DRIVERS);
   const [activeOrder, setActiveOrder] = useState<OrderItem | null>(null);
@@ -399,6 +456,105 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const deleteListing = async (listingId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      // 1. Delete from Supabase if online
+      try {
+        await supabase.from('listings').delete().eq('id', listingId);
+      } catch (err) {
+        console.warn('Could not delete from Supabase, removing locally', err);
+      }
+
+      // 2. Remove from local custom listings storage
+      if (typeof window !== 'undefined') {
+        try {
+          const saved = localStorage.getItem('novasen_custom_listings');
+          if (saved) {
+            const list: Listing[] = JSON.parse(saved);
+            const filtered = list.filter((item) => String(item.id) !== String(listingId));
+            localStorage.setItem('novasen_custom_listings', JSON.stringify(filtered));
+          }
+        } catch (e) {}
+      }
+
+      // 3. Update active listings state
+      setListings((prev) => prev.filter((item) => String(item.id) !== String(listingId)));
+      setUserListingsCount((prev) => Math.max(0, prev - 1));
+      showSuccessToast('Annonce supprimée avec succès (1 place libérée sur votre quota)');
+
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error?.message || 'Erreur lors de la suppression' };
+    }
+  };
+
+  const addDriverTrip = async (tripData: Partial<DriverTrip>): Promise<{ success: boolean; error?: string }> => {
+    try {
+      if (driverPlan === 'none') {
+        return {
+          success: false,
+          error: 'Vous devez avoir un forfait chauffeur actif (Pass 1 500 F/jour ou Abonnement 25 000 F/mois) pour publier une annonce de trajet.',
+        };
+      }
+
+      const newTrip: DriverTrip = {
+        id: `trip-${Date.now()}`,
+        driverId: driverProfile.id || 'drv-me',
+        driverName: driverProfile.fullName || 'Chauffeur NovaSen',
+        driverPhone: driverProfile.phone || '+221 78 913 90 36',
+        driverWhatsapp: driverProfile.whatsapp || '+221 70 590 87 25',
+        originZone: tripData.originZone || 'Dakar Plateau',
+        destinationZone: tripData.destinationZone || 'Almadies',
+        departureTime: tripData.departureTime || 'Départ dans 30 min',
+        vehicleType: tripData.vehicleType || 'voiture',
+        vehicleModel: driverProfile.vehicleModel || tripData.vehicleModel || 'Véhicule VTC',
+        tripType: tripData.tripType || 'mixte',
+        price: Number(tripData.price) || 3000,
+        availableSeats: tripData.availableSeats || 3,
+        maxWeightKg: tripData.maxWeightKg || 20,
+        status: 'active',
+        createdAt: "Aujourd'hui",
+      };
+
+      setDriverTrips((prev) => [newTrip, ...prev]);
+
+      if (typeof window !== 'undefined') {
+        try {
+          const saved = localStorage.getItem('novasen_driver_trips');
+          const list = saved ? JSON.parse(saved) : [];
+          localStorage.setItem('novasen_driver_trips', JSON.stringify([newTrip, ...list]));
+        } catch (e) {}
+      }
+
+      showSuccessToast('Annonce de trajet publiée avec succès !');
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Erreur publication trajet' };
+    }
+  };
+
+  const deleteDriverTrip = async (tripId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      setDriverTrips((prev) => prev.filter((t) => String(t.id) !== String(tripId)));
+
+      if (typeof window !== 'undefined') {
+        try {
+          const saved = localStorage.getItem('novasen_driver_trips');
+          if (saved) {
+            const list: DriverTrip[] = JSON.parse(saved);
+            const filtered = list.filter((t) => String(t.id) !== String(tripId));
+            localStorage.setItem('novasen_driver_trips', JSON.stringify(filtered));
+          }
+        } catch (e) {}
+      }
+
+      showSuccessToast('Annonce de trajet supprimée avec succès');
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Erreur suppression trajet' };
+    }
+  };
+
   const createOrder = async (orderData: Partial<OrderItem>): Promise<{ success: boolean; orderId?: string; error?: string }> => {
     try {
       const { data: userData } = await supabase.auth.getUser();
@@ -449,6 +605,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         listings,
         fetchListings,
         addListing,
+        deleteListing,
+        driverTrips,
+        addDriverTrip,
+        deleteDriverTrip,
         userPlan,
         setUserPlan,
         driverPlan,

@@ -135,6 +135,14 @@ export function Header() {
             Passagers & Colis
           </Link>
           <Link
+            href="/boutique"
+            className={`hover:text-[#7A5133] transition-colors py-1 whitespace-nowrap ${
+              pathname === '/boutique' ? 'text-[#7A5133] font-bold border-b-2 border-[#7A5133]' : ''
+            }`}
+          >
+            Ma Boutique
+          </Link>
+          <Link
             href="/tarifs"
             className={`hover:text-[#573721] transition-colors py-1 whitespace-nowrap ${
               pathname === '/tarifs' ? 'text-[#573721] font-bold border-b-2 border-[#573721]' : ''
@@ -411,6 +419,22 @@ export function Header() {
                   <span>Grille Tarifaire (Abonnements)</span>
                 </div>
                 <span className="text-xs text-[#7A5133] font-bold">Voir prix</span>
+              </Link>
+
+              <Link
+                href="/boutique"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`py-3 text-sm sm:text-base font-semibold flex items-center justify-between ${
+                  pathname === '/boutique' ? 'text-[#7A5133] font-bold' : 'text-[#573721]'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🏬</span>
+                  <span>Ma Boutique (Gestion Annonces)</span>
+                </div>
+                <span className="text-[11px] bg-[#E8DBC8] text-[#573721] px-2 py-0.5 rounded font-bold">
+                  Mes Annonces
+                </span>
               </Link>
 
               <Link

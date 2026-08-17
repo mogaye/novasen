@@ -216,3 +216,22 @@ export interface ReviewItem {
   verifiedBuyer?: boolean;
 }
 
+export interface DriverTrip {
+  id: string;
+  driverId: string;
+  driverName: string;
+  driverPhone: string;
+  driverWhatsapp?: string;
+  originZone: string;
+  destinationZone: string;
+  departureTime: string;
+  vehicleType: 'moto' | 'voiture' | 'camionnette';
+  vehicleModel: string;
+  tripType: 'passagers' | 'colis' | 'mixte';
+  price: number;
+  availableSeats?: number;
+  maxWeightKg?: number;
+  status: 'active' | 'completed' | 'cancelled';
+  createdAt: string;
+}
+

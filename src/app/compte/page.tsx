@@ -21,12 +21,21 @@ import {
   IconClock,
   IconArrowRight,
   IconPhone,
+  IconTrash,
+  IconMapPin,
+  IconAlertCircle,
 } from '@/components/ui/Icons';
 import { useAuth } from '@/context/AuthContext';
+import { DriverTrip } from '@/lib/types';
 
 export default function AccountPage() {
   const { user, profile, signOut } = useAuth();
   const {
+    listings,
+    deleteListing,
+    driverTrips,
+    addDriverTrip,
+    deleteDriverTrip,
     userPlan,
     setUserPlan,
     driverPlan,
@@ -44,6 +53,18 @@ export default function AccountPage() {
   const [activeProfileTab, setActiveProfileTab] = useState<'seller' | 'driver'>('seller');
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [targetUpgradePlan, setTargetUpgradePlan] = useState<any>(null);
+  const [confirmDeleteListingId, setConfirmDeleteListingId] = useState<string | null>(null);
+  const [confirmDeleteTripId, setConfirmDeleteTripId] = useState<string | null>(null);
+  const [showAddTripModal, setShowAddTripModal] = useState(false);
+
+  // New Driver Trip Form State
+  const [newTripOrigin, setNewTripOrigin] = useState('Plateau / Centre-ville');
+  const [newTripDestination, setNewTripDestination] = useState('Almadies / Ngor / Virage');
+  const [newTripTime, setNewTripTime] = useState('Départ dans 30 min');
+  const [newTripType, setNewTripType] = useState<'passagers' | 'colis' | 'mixte'>('passagers');
+  const [newTripPrice, setNewTripPrice] = useState(3000);
+  const [newTripSeats, setNewTripSeats] = useState(3);
+  const [newTripVehicle, setNewTripVehicle] = useState('Voiture Climatisée');
 
   // Editable Seller State
   const [sellerShopName, setSellerShopName] = useState(sellerProfile.shopName);
@@ -169,6 +190,45 @@ export default function AccountPage() {
         id: 'boost',
       });
       setPaymentModalOpen(true);
+    }
+  };
+
+  const handleConfirmDeleteListing = async () => {
+    if (confirmDeleteListingId) {
+      await deleteListing(confirmDeleteListingId);
+      setConfirmDeleteListingId(null);
+    }
+  };
+
+  const handleConfirmDeleteTrip = async () => {
+    if (confirmDeleteTripId) {
+      await deleteDriverTrip(confirmDeleteTripId);
+      setConfirmDeleteTripId(null);
+    }
+  };
+
+  const handlePublishTrip = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (driverPlan === 'none') {
+      showSuccessToast('Veuillez activer votre forfait chauffeur (Pass 1 500 F ou Abonnement 25 000 F)');
+      setTargetUpgradePlan(DRIVER_PLANS[0]);
+      setPaymentModalOpen(true);
+      setShowAddTripModal(false);
+      return;
+    }
+
+    const res = await addDriverTrip({
+      originZone: newTripOrigin,
+      destinationZone: newTripDestination,
+      departureTime: newTripTime,
+      tripType: newTripType,
+      price: Number(newTripPrice),
+      availableSeats: newTripSeats,
+      vehicleModel: newTripVehicle,
+    });
+
+    if (res.success) {
+      setShowAddTripModal(false);
     }
   };
 
@@ -427,10 +487,91 @@ export default function AccountPage() {
               </div>
             </div>
 
+            {/* ─── SECTION MES ANNONCES VENDEUR ─── */}
+            <div className="mt-4 pt-6 border-t border-[#DDCDB6] flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-bold font-heading text-[#573721] flex items-center gap-2">
+                    <span>📦 Mes Annonces en Ligne</span>
+                    <span className="text-xs px-2.5 py-0.5 rounded bg-[#E8DBC8] text-[#573721] font-bold">
+                      {userListingsCount} / {currentSellerPlan.maxActiveListings === -1 ? '∞' : `${currentSellerPlan.maxActiveListings} max`}
+                    </span>
+                  </h3>
+                  <p className="text-xs text-[#7A6A5C]">
+                    Supprimez une annonce pour libérer immédiatement une place sur votre quota ou ajoutez-en de nouvelles.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/boutique"
+                    className="px-3 py-2 rounded-[8px] bg-[#FAF8F5] hover:bg-[#E8DBC8] text-[#573721] text-xs font-bold border border-[#DDCDB6] transition-all"
+                  >
+                    🏬 Espace Ma Boutique
+                  </Link>
+                  <Link
+                    href="/publier"
+                    className="px-3.5 py-2 rounded-[8px] bg-[#7A5133] hover:bg-[#573721] text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs"
+                  >
+                    <IconPlus className="w-4 h-4" />
+                    <span>+ Publier une annonce</span>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Listings Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {listings.slice(0, 6).map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-[#FAF8F5] rounded-[12px] border border-[#DDCDB6] p-3.5 flex flex-col justify-between gap-3 shadow-xs hover:border-[#7A5133] transition-all"
+                  >
+                    <div className="flex gap-3">
+                      <img
+                        src={item.imageUrl || (item.images && item.images[0]) || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&auto=format&fit=crop&q=80'}
+                        alt={item.title}
+                        className="w-16 h-16 rounded-[8px] object-cover shrink-0 bg-[#E8DBC8]"
+                      />
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[10px] font-bold uppercase text-[#7A5133] tracking-wider truncate">
+                          {item.category}
+                        </span>
+                        <h4 className="font-bold text-[#573721] text-xs line-clamp-1">
+                          {item.title}
+                        </h4>
+                        <span className="text-xs font-bold text-[#1C3049] mt-1">
+                          {formatCFA(item.price)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-[#DDCDB6]/60 text-xs">
+                      <Link
+                        href={`/annonce/${item.id}`}
+                        target="_blank"
+                        className="text-[#1C3049] hover:underline font-bold"
+                      >
+                        👁️ Voir
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteListingId(item.id)}
+                        className="text-red-600 hover:text-red-800 font-bold flex items-center gap-1 cursor-pointer"
+                      >
+                        <IconTrash className="w-3.5 h-3.5" />
+                        <span>Supprimer</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <div className="flex justify-end pt-2">
               <Button type="submit" variant="primary">
                 <IconCheck className="w-4 h-4" />
-                <span>Enregistrer les modifications boutique</span>
+                <span>Enregistrer les coordonnées de la boutique</span>
               </Button>
             </div>
           </form>
@@ -477,8 +618,8 @@ export default function AccountPage() {
                 </div>
                 <div className="text-white flex flex-col">
                   <span className="text-lg sm:text-2xl font-bold font-heading">{driverFullName}</span>
-                  <span className="text-xs text-[#E8DBC8]">
-                    {driverVehicle} • Immatriculation : {driverPlate}
+                  <span className="text-xs text-blue-200">
+                    {driverVehicle} • Immat: {driverPlate}
                   </span>
                 </div>
               </div>
@@ -496,11 +637,12 @@ export default function AccountPage() {
                 />
               </Field>
 
-              <Field label="Enseigne / Nom de Flotte" helper="Ex: Diallo Express">
+              <Field label="Flotte / Enseigne (Optionnel)" helper="Ex: Taxi Express Dakar">
                 <input
                   type="text"
                   value={driverFleetName}
                   onChange={(e) => setDriverFleetName(e.target.value)}
+                  placeholder="Indépendant ou nom de groupement"
                   className={inputClass}
                 />
               </Field>
@@ -515,7 +657,7 @@ export default function AccountPage() {
                 />
               </Field>
 
-              <Field label="WhatsApp Professionnel direct" required helper="Pour être contacté instantanément">
+              <Field label="WhatsApp Professionnel" required helper="Contact direct pour courses">
                 <div className="relative">
                   <input
                     type="text"
@@ -530,7 +672,7 @@ export default function AccountPage() {
                 </div>
               </Field>
 
-              <Field label="Véhicule de livraison" required>
+              <Field label="Modèle du Véhicule" required>
                 <input
                   type="text"
                   required
@@ -540,16 +682,94 @@ export default function AccountPage() {
                 />
               </Field>
 
-              <div className="flex flex-col justify-end">
-                <Link
-                  href={`/chauffeur/${driverProfile.id}`}
-                  target="_blank"
-                  className="w-full min-h-[48px] px-4 rounded-[8px] bg-[#E8DBC8] hover:bg-[#DDCDB6] text-[#1C3049] font-bold text-xs flex items-center justify-center gap-2 border border-[#DDCDB6] transition-all"
-                >
-                  <span>👁️ Voir ma vitrine publique livreur</span>
-                  <IconArrowRight className="w-4 h-4" />
-                </Link>
+              <Field label="Immatriculation" required>
+                <input
+                  type="text"
+                  required
+                  value={driverPlate}
+                  onChange={(e) => setDriverPlate(e.target.value)}
+                  className={inputClass}
+                />
+              </Field>
+            </div>
+
+            {/* ─── SECTION MES ANNONCES DE TRAJETS CHAUFFEUR ─── */}
+            <div className="mt-4 pt-6 border-t border-[#DDCDB6] flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-bold font-heading text-[#1C3049] flex items-center gap-2">
+                    <span>🛵 Mes Annonces de Trajets & Disponibilités</span>
+                    <span className="text-xs px-2.5 py-0.5 rounded bg-[#1C3049] text-white font-bold">
+                      {driverTrips.length} active(s)
+                    </span>
+                  </h3>
+                  <p className="text-xs text-[#7A6A5C]">
+                    Publiez vos départs ou trajets réguliers pour recevoir directement des réservations de passagers ou de colis.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddTripModal(true)}
+                    className="px-3.5 py-2 rounded-[8px] bg-[#1C3049] hover:bg-[#13223A] text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  >
+                    <IconPlus className="w-4 h-4" />
+                    <span>+ Publier un trajet</span>
+                  </button>
+                </div>
               </div>
+
+              {/* Driver Trips Grid */}
+              {driverTrips.length === 0 ? (
+                <div className="p-8 text-center bg-[#FAF8F5] border border-[#DDCDB6] rounded-[12px]">
+                  <p className="text-xs text-[#7A6A5C]">Vous n'avez aucun trajet actif actuellement.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {driverTrips.map((trip) => (
+                    <div
+                      key={trip.id}
+                      className="bg-[#FAF8F5] rounded-[12px] border border-[#DDCDB6] p-4 flex flex-col justify-between gap-3 shadow-xs hover:border-[#1C3049] transition-all"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#1C3049] bg-blue-100 text-blue-800 px-2 py-0.5 rounded w-fit">
+                            {trip.tripType === 'passagers' ? 'Passagers VTC' : trip.tripType === 'colis' ? 'Colis Express' : 'Mixte Passagers & Colis'}
+                          </span>
+                          <div className="font-bold text-sm text-[#1C3049] flex items-center gap-1.5 mt-1">
+                            <span>{trip.originZone}</span>
+                            <span className="text-[#7A6A5C]">➔</span>
+                            <span>{trip.destinationZone}</span>
+                          </div>
+                          <p className="text-xs text-[#7A6A5C]">
+                            🕒 {trip.departureTime} • {trip.vehicleModel}
+                          </p>
+                        </div>
+
+                        <span className="text-sm font-bold text-[#1C3049] bg-white px-2.5 py-1 rounded border border-[#DDCDB6] shadow-xs">
+                          {formatCFA(trip.price)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-[#DDCDB6]/60 text-xs">
+                        <span className="text-[#7A6A5C]">
+                          {trip.availableSeats ? `${trip.availableSeats} place(s) dispo` : `${trip.maxWeightKg || 15} kg max`}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteTripId(trip.id)}
+                          className="text-red-600 hover:text-red-800 font-bold flex items-center gap-1 cursor-pointer"
+                        >
+                          <IconTrash className="w-3.5 h-3.5" />
+                          <span>Supprimer le trajet</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end pt-2">
@@ -663,6 +883,221 @@ export default function AccountPage() {
         </div>
       </div>
 
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* MODAL CONFIRMATION SUPPRESSION ANNONCE VENDEUR */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {confirmDeleteListingId && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-[20px] border border-[#DDCDB6] p-6 sm:p-8 max-w-md w-full shadow-2xl flex flex-col gap-5">
+            <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xl font-bold mx-auto">
+              <IconTrash className="w-6 h-6" />
+            </div>
+
+            <div className="text-center flex flex-col gap-2">
+              <h3 className="text-lg font-bold font-heading text-[#573721]">
+                Supprimer cette annonce ?
+              </h3>
+              <p className="text-xs text-[#7A6A5C] leading-relaxed">
+                Cette action supprimera définitivement l'annonce du Marché NovaSen et <strong>libérera immédiatement 1 place</strong> sur votre quota de publication.
+              </p>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="secondary"
+                onClick={() => setConfirmDeleteListingId(null)}
+                className="flex-1"
+              >
+                <span>Annuler</span>
+              </Button>
+
+              <button
+                type="button"
+                onClick={handleConfirmDeleteListing}
+                className="flex-1 py-2.5 px-4 rounded-[8px] bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <IconTrash className="w-4 h-4" />
+                <span>Oui, supprimer</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* MODAL CONFIRMATION SUPPRESSION TRAJET CHAUFFEUR */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {confirmDeleteTripId && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-[20px] border border-[#DDCDB6] p-6 sm:p-8 max-w-md w-full shadow-2xl flex flex-col gap-5">
+            <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xl font-bold mx-auto">
+              <IconTrash className="w-6 h-6" />
+            </div>
+
+            <div className="text-center flex flex-col gap-2">
+              <h3 className="text-lg font-bold font-heading text-[#1C3049]">
+                Supprimer cette annonce de trajet ?
+              </h3>
+              <p className="text-xs text-[#7A6A5C] leading-relaxed">
+                Cette action retirera votre trajet des disponibilités visibles par les passagers et expéditeurs de colis.
+              </p>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="secondary"
+                onClick={() => setConfirmDeleteTripId(null)}
+                className="flex-1"
+              >
+                <span>Annuler</span>
+              </Button>
+
+              <button
+                type="button"
+                onClick={handleConfirmDeleteTrip}
+                className="flex-1 py-2.5 px-4 rounded-[8px] bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <IconTrash className="w-4 h-4" />
+                <span>Oui, supprimer</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* MODAL AJOUT RAPIDE TRAJET CHAUFFEUR */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {showAddTripModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-[20px] border border-[#DDCDB6] p-6 sm:p-8 max-w-lg w-full shadow-2xl flex flex-col gap-5 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#DDCDB6] pb-4">
+              <div className="flex flex-col">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#1C3049]">Transport & VTC</span>
+                <h3 className="text-xl font-bold font-heading text-[#1C3049]">
+                  Publier une annonce de trajet
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddTripModal(false)}
+                className="text-[#7A6A5C] hover:text-[#1C3049] text-xl font-bold p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handlePublishTrip} className="flex flex-col gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Field label="Zone de départ (Origine)" required>
+                  <input
+                    type="text"
+                    required
+                    value={newTripOrigin}
+                    onChange={(e) => setNewTripOrigin(e.target.value)}
+                    placeholder="Ex: Plateau, Médina..."
+                    className={inputClass}
+                  />
+                </Field>
+
+                <Field label="Zone d'arrivée (Destination)" required>
+                  <input
+                    type="text"
+                    required
+                    value={newTripDestination}
+                    onChange={(e) => setNewTripDestination(e.target.value)}
+                    placeholder="Ex: Almadies, Aéroport..."
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Field label="Heure ou délai de départ" required>
+                  <input
+                    type="text"
+                    required
+                    value={newTripTime}
+                    onChange={(e) => setNewTripTime(e.target.value)}
+                    placeholder="Ex: Départ dans 30 min, 14h30..."
+                    className={inputClass}
+                  />
+                </Field>
+
+                <Field label="Type d'offre" required>
+                  <select
+                    value={newTripType}
+                    onChange={(e: any) => setNewTripType(e.target.value)}
+                    className={inputClass}
+                  >
+                    <option value="passagers">Passagers VTC</option>
+                    <option value="colis">Colis Express</option>
+                    <option value="mixte">Mixte Passagers & Colis</option>
+                  </select>
+                </Field>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Field label="Tarif proposé (FCFA)" required>
+                  <input
+                    type="number"
+                    required
+                    min={500}
+                    step={500}
+                    value={newTripPrice}
+                    onChange={(e) => setNewTripPrice(Number(e.target.value))}
+                    className={inputClass}
+                  />
+                </Field>
+
+                <Field label="Places dispo ou Poids max" required>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    value={newTripSeats}
+                    onChange={(e) => setNewTripSeats(Number(e.target.value))}
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+
+              <Field label="Véhicule utilisé" required>
+                <input
+                  type="text"
+                  required
+                  value={newTripVehicle}
+                  onChange={(e) => setNewTripVehicle(e.target.value)}
+                  placeholder="Ex: Toyota Corolla climatisée, Scooter Honda..."
+                  className={inputClass}
+                />
+              </Field>
+
+              <div className="flex gap-3 pt-3 border-t border-[#DDCDB6]">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setShowAddTripModal(false)}
+                  className="flex-1"
+                >
+                  Annuler
+                </Button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 px-4 rounded-[8px] bg-[#1C3049] hover:bg-[#13223A] text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <IconCheck className="w-4 h-4" />
+                  <span>Publier l'annonce de trajet</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* MODAL PAIEMENT WAVE / ORANGE MONEY (UPGRADE) */}
+      {/* ───────────────────────────────────────────────────────────── */}
       {paymentModalOpen && targetUpgradePlan && (
         <FakePaymentModal
           title={`Activation : ${targetUpgradePlan.name}`}
@@ -675,6 +1110,9 @@ export default function AccountPage() {
           onSuccess={() => {
             if (targetUpgradePlan.id === 'boost') {
               showSuccessToast('Mise en avant activée pour 7 jours !');
+            } else if (targetUpgradePlan.id === 'pass_jour' || targetUpgradePlan.id === 'abo_mensuel') {
+              setDriverPlan(targetUpgradePlan.id);
+              showSuccessToast(`Forfait Chauffeur ${targetUpgradePlan.name} activé avec succès !`);
             } else {
               setUserPlan(targetUpgradePlan.id);
               showSuccessToast(`Formule ${targetUpgradePlan.name} activée avec succès !`);
