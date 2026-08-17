@@ -64,16 +64,14 @@ function ConnexionContent() {
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get('redirect') || '/marche';
 
-  const { signInWithIdentifier, sendOtpCode, verifyOtpCode, user } = useAuth();
+  const { signInWithIdentifier, sendOtpCode, user } = useAuth();
 
   // Mode: 'signin' ou 'signup'
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   
-  // Étape de vérification de sécurité par code (OTP)
+  // Étape d'attente de validation du lien de sécurité
   const [otpStep, setOtpStep] = useState<'form' | 'verify'>('form');
-  const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
   const [countdown, setCountdown] = useState(0);
-  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -139,37 +137,6 @@ function ConnexionContent() {
     };
   }, [identifier, router, redirectPath]);
 
-  // Gestion des inputs OTP à 6 chiffres
-  const handleOtpChange = (index: number, val: string) => {
-    const cleanVal = val.replace(/\D/g, '');
-    const newCode = [...otpCode];
-
-    if (cleanVal.length > 1) {
-      // Si collé
-      const pasted = cleanVal.slice(0, 6).split('');
-      pasted.forEach((char, i) => {
-        if (i < 6) newCode[i] = char;
-      });
-      setOtpCode(newCode);
-      const nextIdx = Math.min(pasted.length, 5);
-      otpInputRefs.current[nextIdx]?.focus();
-      return;
-    }
-
-    newCode[index] = cleanVal;
-    setOtpCode(newCode);
-
-    if (cleanVal && index < 5) {
-      otpInputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
-      otpInputRefs.current[index - 1]?.focus();
-    }
-  };
-
   // Soumission du formulaire initial (Connexion directe ou Déclenchement vérification Inscription)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -217,61 +184,22 @@ function ConnexionContent() {
           return;
         }
 
-        // Envoi du code de confirmation sécurisé
+        // Envoi du lien de confirmation sécurisé
         const { error, isEmail, destination } = await sendOtpCode(cleanIdentifier);
         if (error) {
-          setErrorMsg(error.message || "Impossible d'envoyer le code de vérification.");
+          setErrorMsg(error.message || "Impossible d'envoyer le lien de confirmation.");
         } else {
           setOtpStep('verify');
           setCountdown(60);
           setSuccessMsg(
             isEmail
-              ? `🔒 Code de sécurité envoyé à : ${destination || cleanIdentifier}. Veuillez saisir les 6 chiffres.`
-              : `🔒 Code de sécurité envoyé au : ${destination || cleanIdentifier}. Veuillez saisir les 6 chiffres.`
+              ? `🔒 Lien de sécurité envoyé à : ${destination || cleanIdentifier}. Cliquez sur le lien pour vous connecter instantanément.`
+              : `🔒 Lien de sécurité envoyé au : ${destination || cleanIdentifier}. Cliquez sur le lien pour vous connecter instantanément.`
           );
-          setTimeout(() => {
-            otpInputRefs.current[0]?.focus();
-          }, 150);
         }
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Une erreur inattendue est survenue.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Validation du code OTP à 6 chiffres
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg(null);
-    setSuccessMsg(null);
-
-    const token = otpCode.join('').trim();
-    if (token.length < 6) {
-      setErrorMsg('Veuillez saisir les 6 chiffres du code reçu.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const { error } = await verifyOtpCode(
-        identifier.trim(),
-        token,
-        fullName.trim(),
-        password.trim()
-      );
-
-      if (error) {
-        setErrorMsg('Code incorrect ou expiré. Veuillez vérifier et réessayer.');
-      } else {
-        setSuccessMsg('✓ Identité et compte certifiés avec succès ! Connexion...');
-        setTimeout(() => {
-          router.push(redirectPath);
-        }, 600);
-      }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Erreur lors de la vérification.');
     } finally {
       setLoading(false);
     }
@@ -564,85 +492,92 @@ function ConnexionContent() {
             </>
           ) : (
             /* ───────────────────────────────────────────────────────────── */
-            /* ÉTAPE DE VÉRIFICATION DU CODE OTP (6 CHIFFRES) */
+            /* ÉTAPE D'ATTENTE DU LIEN DE CONFIRMATION (MAGIQUE & INSTANTANÉ) */
             /* ───────────────────────────────────────────────────────────── */
-            <form onSubmit={handleVerifyOtp} className="space-y-6 animate-fadeIn">
-              <div className="text-center">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto mb-3 text-2xl font-black shadow-inner">
-                  🔢
+            <div className="space-y-6 animate-fadeIn text-center">
+              {/* Icône animée */}
+              <div className="relative w-20 h-20 mx-auto">
+                <div className="absolute inset-0 rounded-3xl bg-[#7A5133]/15 animate-ping opacity-60" />
+                <div className="relative w-20 h-20 rounded-3xl bg-[#FAF8F5] border-2 border-[#E7E2D6] text-[#7A5133] flex items-center justify-center text-3xl shadow-lg">
+                  ✉️
                 </div>
-                <h2 className="text-2xl font-extrabold text-[#1C1917] font-heading">
-                  Vérification de sécurité
+              </div>
+
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold mb-2 border border-emerald-200">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Lien de sécurité envoyé</span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1C1917] font-heading">
+                  Vérifiez votre boîte de réception
                 </h2>
-                <p className="text-xs sm:text-sm text-[#78716C] mt-2">
-                  Un code à 6 chiffres a été envoyé pour certifier que vous êtes bien le propriétaire de :
+                <p className="text-xs sm:text-sm text-[#78716C] mt-2 max-w-sm mx-auto">
+                  Un lien sécurisé à usage unique a été envoyé à :
                 </p>
-                <div className="inline-block mt-2 px-3 py-1 bg-[#FAF8F5] border border-[#E7E2D6] rounded-lg text-sm font-bold text-[#573721]">
+                <div className="inline-block mt-2 px-3.5 py-1.5 bg-[#FAF8F5] border border-[#E7E2D6] rounded-xl text-sm font-bold text-[#573721]">
                   {identifier}
                 </div>
               </div>
 
-              {/* Alertes d'état OTP */}
+              {/* Guide d'utilisation simple */}
+              <div className="p-4 bg-[#FAF8F5] border border-[#E7E2D6] rounded-2xl text-left space-y-3 shadow-xs">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-[#7A5133] text-white flex items-center justify-center text-xs font-black flex-shrink-0 mt-0.5">
+                    1
+                  </div>
+                  <p className="text-xs text-[#44403C] leading-relaxed">
+                    Ouvrez votre boîte mail sur votre <strong>téléphone</strong> ou sur cet ordinateur.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-[#7A5133] text-white flex items-center justify-center text-xs font-black flex-shrink-0 mt-0.5">
+                    2
+                  </div>
+                  <p className="text-xs text-[#44403C] leading-relaxed">
+                    Cliquez sur le lien <strong>« Se connecter à NovaSen »</strong>.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-black flex-shrink-0 mt-0.5">
+                    ⚡
+                  </div>
+                  <p className="text-xs font-semibold text-emerald-800 leading-relaxed">
+                    Cet écran se connectera et redirigera <strong>instantanément et automatiquement</strong> sans rien toucher !
+                  </p>
+                </div>
+              </div>
+
+              {/* Statut d'écoute en direct */}
+              <div className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-white border border-stone-200 text-xs text-stone-600 shadow-xs">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+                <span className="font-medium">En attente de votre clic sur mobile...</span>
+              </div>
+
+              {/* Alertes d'état */}
               {errorMsg && (
-                <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm rounded-xl flex items-start gap-2.5">
+                <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm rounded-xl flex items-start gap-2.5 text-left">
                   <span className="font-bold text-base leading-none">⚠️</span>
                   <span>{errorMsg}</span>
                 </div>
               )}
               {successMsg && (
-                <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm rounded-xl flex items-start gap-2.5">
+                <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm rounded-xl flex items-start gap-2.5 text-left">
                   <span className="font-bold text-base leading-none">✓</span>
                   <span>{successMsg}</span>
                 </div>
               )}
 
-              {/* 6 Cases de saisie */}
-              <div className="flex justify-center gap-2 sm:gap-3">
-                {otpCode.map((digit, idx) => (
-                  <input
-                    key={`otp-box-${idx}`}
-                    ref={(el) => {
-                      otpInputRefs.current[idx] = el;
-                    }}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleOtpChange(idx, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                    className="w-11 h-13 sm:w-12 sm:h-14 text-center text-xl font-black bg-[#FAF8F5] border-2 border-[#DDCDB6] rounded-xl text-[#573721] focus:bg-white focus:outline-none focus:border-[#7A5133] focus:ring-2 focus:ring-[#7A5133]/20 transition"
-                  />
-                ))}
-              </div>
-
-              {/* Bouton de validation OTP */}
-              <button
-                type="submit"
-                disabled={loading || otpCode.join('').length < 6}
-                className="w-full py-3.5 bg-[#7A5133] hover:bg-[#573721] text-white font-bold rounded-xl transition shadow-md disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer text-sm sm:text-base"
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Certification en cours...</span>
-                  </>
-                ) : (
-                  'Valider mon code et Activer mon compte ✓'
-                )}
-              </button>
-
-              {/* Actions en bas */}
+              {/* Actions de renvoi et retour */}
               <div className="flex items-center justify-between text-xs text-[#78716C] pt-2">
                 <button
                   type="button"
                   onClick={() => {
                     setOtpStep('form');
-                    setOtpCode(['', '', '', '', '', '']);
                     setErrorMsg(null);
                   }}
                   className="hover:text-[#573721] hover:underline cursor-pointer"
                 >
-                  ← Modifier le numéro / email
+                  ← Modifier l&apos;adresse
                 </button>
 
                 <button
@@ -651,10 +586,10 @@ function ConnexionContent() {
                   onClick={handleSubmit}
                   className="font-bold text-[#7A5133] hover:text-[#573721] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
-                  {countdown > 0 ? `Renvoyer le code (${countdown}s)` : 'Renvoyer un nouveau code'}
+                  {countdown > 0 ? `Renvoyer le lien (${countdown}s)` : 'Renvoyer un nouveau lien'}
                 </button>
               </div>
-            </form>
+            </div>
           )}
         </div>
 
