@@ -153,7 +153,7 @@ function ConnexionContent() {
 
     setLoading(true);
     try {
-      const { error } = await verifyOtpCode(identifier.trim(), token, fullName);
+      const { error } = await verifyOtpCode(identifier.trim(), token, fullName, password);
       if (error) {
         setErrorMsg(error.message || 'Code de vérification incorrect ou expiré.');
       } else {
@@ -188,11 +188,11 @@ function ConnexionContent() {
       const fullToken = [...newOtp.slice(0, 5), cleanVal.slice(-1)].join('');
       if (fullToken.length === 6) {
         setTimeout(() => {
-          verifyOtpCode(identifier.trim(), fullToken, fullName).then(({ error }) => {
+          verifyOtpCode(identifier.trim(), fullToken, fullName, password).then(({ error }) => {
             if (error) {
               setErrorMsg(error.message || 'Code de vérification incorrect.');
             } else {
-              setSuccessMsg('Code vérifié avec succès !');
+              setSuccessMsg('Compte certifié et connecté avec succès !');
               setTimeout(() => router.push(redirectPath), 500);
             }
           });
@@ -247,6 +247,7 @@ function ConnexionContent() {
 
     try {
       if (mode === 'signin') {
+        // Direct classic login with password
         const { error } = await signInWithIdentifier(cleanIdentifier, password);
         if (error) {
           if (
@@ -264,25 +265,26 @@ function ConnexionContent() {
           }, 500);
         }
       } else {
-        // Sign Up
+        // Sign Up : Send 6-digit confirmation code to verify that the phone/email really belongs to the user
         if (!fullName.trim()) {
           setErrorMsg('Veuillez entrer votre nom complet.');
           setLoading(false);
           return;
         }
 
-        const { error } = await signUpWithPhoneOrEmail(cleanIdentifier, password, fullName.trim());
+        const { error, isEmail, destination } = await sendOtpCode(cleanIdentifier);
         if (error) {
-          if (error.message?.includes('already registered')) {
-            setErrorMsg('Ce numéro ou cet email est déjà inscrit. Veuillez vous connecter.');
-          } else {
-            setErrorMsg(error.message || "Erreur lors de l'enregistrement du compte.");
-          }
+          setErrorMsg(error.message || "Erreur lors de l'envoi du code de vérification.");
         } else {
-          setSuccessMsg('Compte créé avec succès ! Bienvenue sur NovaSen.');
-          setTimeout(() => {
-            router.push(redirectPath);
-          }, 600);
+          setOtpDestination(destination || cleanIdentifier);
+          setOtpStep('verify');
+          setAuthMethod('otp');
+          setCountdown(60);
+          setSuccessMsg(
+            isEmail
+              ? `🔒 Un code de confirmation a été envoyé à ${destination || cleanIdentifier}. Saisissez les 6 chiffres pour certifier votre email et activer votre compte.`
+              : `🔒 Un code de confirmation a été envoyé au ${destination || cleanIdentifier}. Saisissez les 6 chiffres pour certifier votre numéro et activer votre compte.`
+          );
         }
       }
     } catch (err: any) {
@@ -603,6 +605,13 @@ function ConnexionContent() {
               )}
             </div>
 
+            {mode === 'signup' && (
+              <p className="text-[11px] text-[#7A6A5C] bg-[#FAF7F2] p-2.5 rounded-lg border border-[#E8DBC8] flex items-center gap-1.5">
+                <span>🔒</span>
+                <span>Un code de confirmation vous sera envoyé pour certifier que ce numéro/email vous appartient bien.</span>
+              </p>
+            )}
+
             {/* Submit Button */}
             <button
               type="submit"
@@ -612,12 +621,12 @@ function ConnexionContent() {
               {loading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Vérification sécurisée...</span>
+                  <span>Traitement sécurisé...</span>
                 </>
               ) : mode === 'signin' ? (
-                'Se connecter et entrer'
+                'Se connecter 🚀'
               ) : (
-                'Créer mon compte et entrer'
+                'Créer mon compte (Certifier par code) 🔒'
               )}
             </button>
           </form>

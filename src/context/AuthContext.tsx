@@ -35,7 +35,7 @@ interface AuthContextType {
     fullName: string
   ) => Promise<{ error: any }>;
   sendOtpCode: (identifier: string) => Promise<{ error: any; isEmail: boolean; destination: string }>;
-  verifyOtpCode: (identifier: string, token: string, fullName?: string) => Promise<{ error: any }>;
+  verifyOtpCode: (identifier: string, token: string, fullName?: string, password?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -225,7 +225,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error, isEmail: true, destination: authEmail };
   };
 
-  const verifyOtpCode = async (identifier: string, token: string, fullName?: string) => {
+  const verifyOtpCode = async (identifier: string, token: string, fullName?: string, password?: string) => {
     const { isPhone, formattedPhone, authEmail } = normalizeIdentifier(identifier);
 
     let verifyResult: any = null;
@@ -267,6 +267,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (verifyResult?.data?.user && !verifyResult.error) {
       const userId = verifyResult.data.user.id;
+      
+      // If a password was provided upon signup, save it for direct subsequent logins
+      if (password && password.trim().length >= 6) {
+        try {
+          await supabase.auth.updateUser({ password: password.trim() });
+        } catch (pwErr) {
+          console.warn('Password update post-OTP warning:', pwErr);
+        }
+      }
+
       // Ensure profile exists
       await supabase.from('profiles').upsert({
         id: userId,
