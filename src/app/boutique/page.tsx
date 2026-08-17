@@ -53,7 +53,7 @@ export default function MyBoutiquePage() {
     return isCustom || isMatchingSeller;
   });
 
-  const displayListings = myCustomListings.length > 0 ? myCustomListings : listings.slice(0, 3);
+  const displayListings = myCustomListings;
 
   const handleDelete = async (id: string) => {
     setDeletingId(id);

@@ -43,9 +43,7 @@ export default function SellerShopPage() {
     decodedSellerName.toLowerCase().includes(l.sellerName.toLowerCase())
   );
 
-  const displayListings = sellerListings.length > 0
-    ? sellerListings
-    : listings.filter((l) => l.isVerifiedShop).slice(0, 6);
+  const displayListings = sellerListings;
 
   const shopName = isCurrentUserProfile
     ? sellerProfile.shopName
@@ -268,11 +266,23 @@ export default function SellerShopPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {displayListings.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} />
-          ))}
-        </div>
+        {displayListings.length === 0 ? (
+          <div className="py-16 text-center border-2 border-dashed border-[#DDCDB6] rounded-[16px] flex flex-col items-center justify-center gap-3">
+            <div className="w-14 h-14 rounded-full bg-[#E8DBC8] text-2xl flex items-center justify-center">
+              📦
+            </div>
+            <h3 className="text-base font-bold font-heading text-[#573721]">Aucun article disponible actuellement</h3>
+            <p className="text-xs text-[#7A6A5C] max-w-sm">
+              Cette boutique n&apos;a pas d&apos;annonces actives en ligne pour le moment.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {displayListings.map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}

@@ -89,6 +89,14 @@ export default function AccountPage() {
   const currentSellerPlan = SELLER_PLANS.find((p) => p.id === userPlan) || SELLER_PLANS[0];
   const currentDriverPlan = DRIVER_PLANS.find((p) => p.id === driverPlan) || DRIVER_PLANS[0];
 
+  const mySellerListings = listings.filter((l) => {
+    const isCustom = String(l.id).startsWith('cust-') || String(l.id).length > 10;
+    const isMatchingSeller =
+      (sellerProfile.shopName && l.sellerName.toLowerCase().includes(sellerProfile.shopName.toLowerCase())) ||
+      (sellerProfile.name && l.sellerName.toLowerCase().includes(sellerProfile.name.toLowerCase()));
+    return isCustom || isMatchingSeller;
+  });
+
   const handleSaveSeller = (e: React.FormEvent) => {
     e.preventDefault();
     updateSellerProfile({
@@ -520,52 +528,58 @@ export default function AccountPage() {
               </div>
 
               {/* Listings Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {listings.slice(0, 6).map((item) => (
-                  <div
-                    key={item.id}
-                    className="bg-[#FAF8F5] rounded-[12px] border border-[#DDCDB6] p-3.5 flex flex-col justify-between gap-3 shadow-xs hover:border-[#7A5133] transition-all"
-                  >
-                    <div className="flex gap-3">
-                      <img
-                        src={item.imageUrl || (item.images && item.images[0]) || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&auto=format&fit=crop&q=80'}
-                        alt={item.title}
-                        className="w-16 h-16 rounded-[8px] object-cover shrink-0 bg-[#E8DBC8]"
-                      />
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-[10px] font-bold uppercase text-[#7A5133] tracking-wider truncate">
-                          {item.category}
-                        </span>
-                        <h4 className="font-bold text-[#573721] text-xs line-clamp-1">
-                          {item.title}
-                        </h4>
-                        <span className="text-xs font-bold text-[#1C3049] mt-1">
-                          {formatCFA(item.price)}
-                        </span>
+              {mySellerListings.length === 0 ? (
+                <div className="p-8 text-center bg-[#FAF8F5] border border-[#DDCDB6] rounded-[12px]">
+                  <p className="text-xs text-[#7A6A5C]">Vous n&apos;avez aucune annonce active actuellement.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {mySellerListings.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-[#FAF8F5] rounded-[12px] border border-[#DDCDB6] p-3.5 flex flex-col justify-between gap-3 shadow-xs hover:border-[#7A5133] transition-all"
+                    >
+                      <div className="flex gap-3">
+                        <img
+                          src={item.imageUrl || (item.images && item.images[0]) || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&auto=format&fit=crop&q=80'}
+                          alt={item.title}
+                          className="w-16 h-16 rounded-[8px] object-cover shrink-0 bg-[#E8DBC8]"
+                        />
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[10px] font-bold uppercase text-[#7A5133] tracking-wider truncate">
+                            {item.category}
+                          </span>
+                          <h4 className="font-bold text-[#573721] text-xs line-clamp-1">
+                            {item.title}
+                          </h4>
+                          <span className="text-xs font-bold text-[#1C3049] mt-1">
+                            {formatCFA(item.price)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-[#DDCDB6]/60 text-xs">
+                        <Link
+                          href={`/annonce/${item.id}`}
+                          target="_blank"
+                          className="text-[#1C3049] hover:underline font-bold"
+                        >
+                          👁️ Voir
+                        </Link>
+
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteListingId(item.id)}
+                          className="text-red-600 hover:text-red-800 font-bold flex items-center gap-1 cursor-pointer"
+                        >
+                          <IconTrash className="w-3.5 h-3.5" />
+                          <span>Supprimer</span>
+                        </button>
                       </div>
                     </div>
-
-                    <div className="flex items-center justify-between pt-2 border-t border-[#DDCDB6]/60 text-xs">
-                      <Link
-                        href={`/annonce/${item.id}`}
-                        target="_blank"
-                        className="text-[#1C3049] hover:underline font-bold"
-                      >
-                        👁️ Voir
-                      </Link>
-
-                      <button
-                        type="button"
-                        onClick={() => setConfirmDeleteListingId(item.id)}
-                        className="text-red-600 hover:text-red-800 font-bold flex items-center gap-1 cursor-pointer"
-                      >
-                        <IconTrash className="w-3.5 h-3.5" />
-                        <span>Supprimer</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end pt-2">

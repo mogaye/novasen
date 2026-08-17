@@ -206,13 +206,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
+        let deletedTripIds: string[] = [];
+        const savedDeleted = localStorage.getItem('novasen_deleted_trip_ids');
+        if (savedDeleted) deletedTripIds = JSON.parse(savedDeleted);
+
         const savedTrips = localStorage.getItem('novasen_driver_trips');
+        let tripsToLoad = INITIAL_DRIVER_TRIPS;
         if (savedTrips) {
           const parsed = JSON.parse(savedTrips);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            setDriverTrips(parsed);
+            tripsToLoad = parsed;
           }
         }
+        setDriverTrips(tripsToLoad.filter((t) => !deletedTripIds.includes(String(t.id))));
       } catch (e) {}
     }
   }, []);
@@ -278,17 +284,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const fetchListings = async () => {
     try {
       let localCustom: Listing[] = [];
+      let deletedIds: string[] = [];
+
       if (typeof window !== 'undefined') {
         try {
-          const saved = localStorage.getItem('novasen_custom_listings');
-          if (saved) localCustom = JSON.parse(saved);
+          const savedCustom = localStorage.getItem('novasen_custom_listings');
+          if (savedCustom) localCustom = JSON.parse(savedCustom);
+
+          const savedDeleted = localStorage.getItem('novasen_deleted_listing_ids');
+          if (savedDeleted) deletedIds = JSON.parse(savedDeleted);
         } catch (e) {}
       }
+
+      const isNotDeleted = (id: string | number) => !deletedIds.includes(String(id));
 
       const { data, error } = await supabase
         .from('listings')
         .select('*')
         .order('created_at', { ascending: false });
+
+      let combined: Listing[] = [];
 
       if (data && !error) {
         const mapped: Listing[] = data.map((d: any) => ({
@@ -310,7 +325,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           images: d.images && d.images.length > 0 ? d.images : (d.imageUrl ? [d.imageUrl] : []),
         }));
 
-        const combined = [...mapped];
+        combined = [...mapped];
         for (const item of localCustom) {
           if (!combined.some((c) => String(c.id) === String(item.id))) {
             combined.push(item);
@@ -321,18 +336,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             combined.push(init);
           }
         }
-        setListings(combined);
-        setUserListingsCount(localCustom.length);
       } else {
-        const combined = [...localCustom];
+        combined = [...localCustom];
         for (const init of INITIAL_LISTINGS) {
           if (!combined.some((c) => String(c.id) === String(init.id))) {
             combined.push(init);
           }
         }
-        setListings(combined);
-        setUserListingsCount(localCustom.length);
       }
+
+      // Filter out all deleted listings permanently
+      const finalFiltered = combined.filter((item) => isNotDeleted(item.id));
+      const activeCustomCount = localCustom.filter((item) => isNotDeleted(item.id)).length;
+
+      setListings(finalFiltered);
+      setUserListingsCount(activeCustomCount);
     } catch (err) {
       console.error('Error fetching listings from Supabase:', err);
     }
@@ -465,9 +483,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         console.warn('Could not delete from Supabase, removing locally', err);
       }
 
-      // 2. Remove from local custom listings storage
+      // 2. Add to deleted IDs blacklist & remove from custom listings
       if (typeof window !== 'undefined') {
         try {
+          const savedDeleted = localStorage.getItem('novasen_deleted_listing_ids');
+          const deletedList: string[] = savedDeleted ? JSON.parse(savedDeleted) : [];
+          if (!deletedList.includes(String(listingId))) {
+            deletedList.push(String(listingId));
+            localStorage.setItem('novasen_deleted_listing_ids', JSON.stringify(deletedList));
+          }
+
           const saved = localStorage.getItem('novasen_custom_listings');
           if (saved) {
             const list: Listing[] = JSON.parse(saved);
@@ -539,6 +564,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       if (typeof window !== 'undefined') {
         try {
+          const savedDeleted = localStorage.getItem('novasen_deleted_trip_ids');
+          const deletedList: string[] = savedDeleted ? JSON.parse(savedDeleted) : [];
+          if (!deletedList.includes(String(tripId))) {
+            deletedList.push(String(tripId));
+            localStorage.setItem('novasen_deleted_trip_ids', JSON.stringify(deletedList));
+          }
+
           const saved = localStorage.getItem('novasen_driver_trips');
           if (saved) {
             const list: DriverTrip[] = JSON.parse(saved);
