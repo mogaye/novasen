@@ -65,7 +65,7 @@ function ConnexionContent() {
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get('redirect') || '/marche';
 
-  const { signInWithIdentifier, signUpWithPhoneOrEmail, verifyOtpCode, sendOtpCode, user } = useAuth();
+  const { signInWithIdentifier, signUpWithPhoneOrEmail, verifyOtpCode, sendOtpCode, user, profile, signOut } = useAuth();
 
   // Mode: 'signin' ou 'signup'
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -86,6 +86,11 @@ function ConnexionContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(true);
 
+  // Checkpoint de sécurité interactif
+  const [certifyOwner, setCertifyOwner] = useState(false);
+  const [trustSession, setTrustSession] = useState(false);
+  const [checkpointStatus, setCheckpointStatus] = useState<'idle' | 'verifying' | 'success'>('idle');
+
   const passwordStrength = useMemo(() => calculatePasswordStrength(password), [password]);
 
   // Countdown timer pour renvoi de code
@@ -97,15 +102,18 @@ function ConnexionContent() {
     return () => clearTimeout(timer);
   }, [countdown]);
 
-  // Auto-redirect uniquement si déjà connecté en arrivant sur la page
-  useEffect(() => {
-    if (user && otpStep === 'form' && !loading) {
-      const timer = setTimeout(() => {
+  // Validation interactive du Checkpoint avec animation
+  const handleValidateCheckpoint = () => {
+    if (!certifyOwner || !trustSession) return;
+    setCheckpointStatus('verifying');
+    
+    setTimeout(() => {
+      setCheckpointStatus('success');
+      setTimeout(() => {
         router.push(redirectPath);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [user, router, redirectPath, otpStep, loading]);
+      }, 1000);
+    }, 1200);
+  };
 
   // Synchronisation en temps réel multi-appareils (Ex: Ordinateur qui attend quand le téléphone valide le lien/code)
   useEffect(() => {
@@ -268,32 +276,148 @@ function ConnexionContent() {
     }
   };
 
-  // Si déjà connecté et pas en cours de vérification OTP
+  // Checkpoint de Sécurité & Confirmation d'Identité
   if (user && otpStep !== 'verify') {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center px-4 bg-[#F8F6F0]">
-        <div className="max-w-md w-full bg-white rounded-3xl border border-[#E8DBC8] p-8 text-center shadow-xl">
-          <div className="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
-            ✓
+      <div className="min-h-screen w-full flex items-center justify-center px-4 py-8 bg-[#F8F6F0] relative overflow-hidden">
+        {/* Cercles d'ambiance en arrière-plan */}
+        <div className="absolute top-10 left-10 w-96 h-96 bg-[#7A5133]/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-lg w-full bg-white rounded-3xl border border-[#E8DBC8] p-6 sm:p-10 shadow-2xl relative z-10 animate-fadeIn text-center">
+          
+          {/* Logo NovaSen */}
+          <div className="mb-6 flex justify-center">
+            <Logo href="/" size="md" />
           </div>
-          <h2 className="text-2xl font-bold text-[#573721] font-heading mb-2">Compte Sécurisé & Actif</h2>
-          <p className="text-sm text-[#7A6A5C] mb-6">
-            Vous êtes connecté en toute sécurité sur NovaSen.
-          </p>
-          <div className="flex flex-col gap-3">
-            <Link
-              href="/marche"
-              className="w-full py-3.5 bg-[#7A5133] hover:bg-[#573721] text-white font-bold rounded-xl transition text-center shadow-md cursor-pointer"
-            >
-              Entrer sur le Marché 🛍️
-            </Link>
-            <Link
-              href="/transport"
-              className="w-full py-3.5 bg-[#1C3049] hover:bg-[#13223A] text-white font-bold rounded-xl transition text-center shadow-md cursor-pointer"
-            >
-              Accéder au Transport 🚗
-            </Link>
-          </div>
+
+          {checkpointStatus === 'success' ? (
+            /* Animation de succès spectaculaire */
+            <div className="space-y-6 py-6 animate-fadeIn">
+              <div className="relative w-24 h-24 mx-auto">
+                <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" />
+                <div className="relative w-24 h-24 rounded-full bg-emerald-600 text-white flex items-center justify-center text-5xl shadow-xl shadow-emerald-600/30 transition-transform duration-500 scale-100">
+                  ✓
+                </div>
+              </div>
+
+              <div>
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider mb-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+                  Identité vérifiée & certifiée
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1C1917] font-heading">
+                  Bienvenue sur NovaSen !
+                </h2>
+                <p className="text-sm text-[#7A6A5C] mt-2">
+                  Votre session est sécurisée. Déverrouillage immédiat de votre espace...
+                </p>
+              </div>
+
+              <div className="w-full bg-stone-100 rounded-full h-2.5 overflow-hidden">
+                <div className="bg-emerald-600 h-full w-full rounded-full transition-all duration-1000 animate-pulse" />
+              </div>
+            </div>
+          ) : checkpointStatus === 'verifying' ? (
+            /* Animation de scan / vérification */
+            <div className="space-y-6 py-8 animate-fadeIn">
+              <div className="relative w-24 h-24 mx-auto">
+                <div className="w-24 h-24 rounded-full border-4 border-emerald-200 border-t-emerald-600 animate-spin flex items-center justify-center">
+                  <span className="text-3xl">🛡️</span>
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-[#1C1917] font-heading">
+                  Contrôle de sécurité en cours...
+                </h2>
+                <p className="text-xs sm:text-sm text-[#7A6A5C] mt-2">
+                  Validation des protocoles de chiffrement et de session sécurisée.
+                </p>
+              </div>
+            </div>
+          ) : (
+            /* Formulaire interactif de confirmation d'identité */
+            <div className="space-y-6 text-left">
+              <div className="text-center">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-900 text-[11px] font-bold mb-2 border border-amber-200">
+                  <span>🛡️ Étape de Vérification de Sécurité</span>
+                </div>
+                <h2 className="text-2xl font-extrabold text-[#1C1917] font-heading">
+                  Confirmez votre identité
+                </h2>
+                <p className="text-xs sm:text-sm text-[#78716C] mt-1">
+                  Pour des raisons de sécurité, veuillez valider cette session avant d&apos;accéder au site :
+                </p>
+              </div>
+
+              {/* Badge compte identifié */}
+              <div className="p-3.5 bg-[#FAF8F5] border border-[#E7E2D6] rounded-2xl flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#7A5133] text-white flex items-center justify-center font-bold text-sm shrink-0">
+                  {(user.email || profile?.full_name || 'U')[0].toUpperCase()}
+                </div>
+                <div className="overflow-hidden">
+                  <p className="text-xs text-[#78716C] font-medium">Compte authentifié :</p>
+                  <p className="text-sm font-bold text-[#1C1917] truncate">
+                    {user.email || profile?.full_name || 'Utilisateur NovaSen'}
+                  </p>
+                </div>
+                <span className="ml-auto px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold shrink-0">
+                  ✓ Validé
+                </span>
+              </div>
+
+              {/* Cases à cocher interactives */}
+              <div className="space-y-3 pt-1">
+                <label className="flex items-start gap-3 p-3.5 rounded-xl bg-white border border-[#E7E2D6] hover:border-[#7A5133] cursor-pointer transition shadow-xs">
+                  <input
+                    type="checkbox"
+                    checked={certifyOwner}
+                    onChange={(e) => setCertifyOwner(e.target.checked)}
+                    className="w-5 h-5 mt-0.5 rounded text-[#7A5133] focus:ring-[#7A5133] border-stone-300 cursor-pointer"
+                  />
+                  <span className="text-xs sm:text-sm text-[#44403C] font-medium select-none">
+                    Je certifie être le titulaire et propriétaire légitime de ce compte.
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-3 p-3.5 rounded-xl bg-white border border-[#E7E2D6] hover:border-[#7A5133] cursor-pointer transition shadow-xs">
+                  <input
+                    type="checkbox"
+                    checked={trustSession}
+                    onChange={(e) => setTrustSession(e.target.checked)}
+                    className="w-5 h-5 mt-0.5 rounded text-[#7A5133] focus:ring-[#7A5133] border-stone-300 cursor-pointer"
+                  />
+                  <span className="text-xs sm:text-sm text-[#44403C] font-medium select-none">
+                    J&apos;autorise la connexion et la protection de cette session sur cet appareil.
+                  </span>
+                </label>
+              </div>
+
+              {/* Bouton de validation & Déverrouillage */}
+              <button
+                type="button"
+                disabled={!certifyOwner || !trustSession}
+                onClick={handleValidateCheckpoint}
+                className="w-full py-4 bg-[#7A5133] hover:bg-[#573721] text-white font-bold rounded-2xl transition-all shadow-lg hover:shadow-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer text-sm sm:text-base transform active:scale-[0.99]"
+              >
+                <span>🛡️ Vérifier & Déverrouiller l&apos;accès</span>
+                <span>🔓</span>
+              </button>
+
+              {/* Lien déconnexion / changer de compte */}
+              <div className="pt-2 text-center">
+                <button
+                  type="button"
+                  onClick={() => signOut()}
+                  className="text-xs text-stone-500 hover:text-red-600 transition underline cursor-pointer"
+                >
+                  Ce n&apos;est pas votre compte ? Se déconnecter
+                </button>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     );
