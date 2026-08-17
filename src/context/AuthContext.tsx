@@ -149,10 +149,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   ) => {
     const { isPhone, formattedPhone, authEmail } = normalizeIdentifier(identifier);
 
+    const redirectUrl = typeof window !== 'undefined' ? `${window.location.origin}/connexion` : undefined;
+
     const { data, error } = await supabase.auth.signUp({
       email: authEmail,
       password,
       options: {
+        emailRedirectTo: redirectUrl,
         data: {
           full_name: fullName.trim(),
           phone: isPhone ? formattedPhone : '',
@@ -181,6 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const sendOtpCode = async (identifier: string) => {
     const { isPhone, formattedPhone, authEmail } = normalizeIdentifier(identifier);
+    const redirectUrl = typeof window !== 'undefined' ? `${window.location.origin}/connexion` : undefined;
 
     if (isPhone) {
       // First try native SMS OTP if provider is configured in Supabase
@@ -203,6 +207,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: authEmail,
         options: {
           shouldCreateUser: true,
+          emailRedirectTo: redirectUrl,
         },
       });
       return { error, isEmail: true, destination: authEmail };
@@ -213,6 +218,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: authEmail,
       options: {
         shouldCreateUser: true,
+        emailRedirectTo: redirectUrl,
       },
     });
 
