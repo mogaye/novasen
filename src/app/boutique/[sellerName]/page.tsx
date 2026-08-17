@@ -127,36 +127,38 @@ export default function SellerShopPage() {
           </div>
         </div>
 
-        {/* Shop Info Row */}
-        <div className="p-6 sm:p-8 relative">
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 -mt-16 sm:-mt-20">
-            {/* Avatar & Title */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-5">
-              <div className="relative shrink-0">
+        {/* Shop Info Card */}
+        <div className="p-6 sm:p-8 relative bg-white">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            {/* Left: Avatar & Shop Identity */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+              {/* Avatar protruding neatly over cover */}
+              <div className="relative shrink-0 -mt-16 sm:-mt-20">
                 <img
                   src={avatarUrl}
                   alt={shopName}
-                  className="w-24 h-24 sm:w-32 sm:h-32 rounded-[20px] object-cover border-4 border-white shadow-xl bg-white"
+                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-[20px] object-cover border-4 border-white shadow-xl bg-white"
                 />
-                <span className="absolute -bottom-1 -right-1 bg-emerald-500 text-white p-1 rounded-full text-xs shadow-md">
+                <span className="absolute bottom-1 right-1 bg-emerald-500 text-white p-1 rounded-full text-xs shadow-md" title="Vendeur certifié">
                   ✓
                 </span>
               </div>
 
-              <div className="flex flex-col gap-2 pt-2">
+              {/* Title & Metadata */}
+              <div className="flex flex-col gap-2">
                 <div className="flex items-center flex-wrap gap-2.5">
                   <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[#573721]">
                     {shopName}
                   </h1>
                   {isVerified && (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1C3049] text-white text-xs font-bold shadow-xs">
-                      <IconShieldCheck className="w-4 h-4 text-[#C9A882]" />
+                      <IconShieldCheck className="w-3.5 h-3.5 text-[#C9A882]" />
                       <span>Vendeur Vérifié KYC</span>
                     </span>
                   )}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-4 text-xs text-[#7A6A5C]">
+                <div className="flex flex-wrap items-center gap-3.5 text-xs text-[#7A6A5C]">
                   <span className="flex items-center gap-1 font-semibold text-[#573721]">
                     <IconMapPin className="w-4 h-4 text-[#7A5133]" />
                     <span>{shopZone}, Dakar</span>
@@ -174,39 +176,39 @@ export default function SellerShopPage() {
               </div>
             </div>
 
-            {/* Action Buttons: WhatsApp direct & Chat */}
-            <div className="flex flex-wrap items-center gap-3">
+            {/* Right: Action Buttons (WhatsApp, Appeler, Messagerie) */}
+            <div className="flex flex-wrap items-center gap-2.5 pt-2 lg:pt-0">
               <a
                 href={`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent(`Bonjour ${shopName}, j'ai vu votre vitrine sur NovaSen !`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2.5 rounded-[10px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all"
+                className="h-10 px-4 rounded-[10px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all cursor-pointer"
               >
                 <span>💬 WhatsApp direct</span>
-                <span className="text-[11px] opacity-80">({whatsapp})</span>
+                <span className="text-[11px] opacity-85">({whatsapp})</span>
               </a>
 
               <a
                 href={`tel:${phone.replace(/\s+/g, '')}`}
-                className="px-4 py-2.5 rounded-[10px] bg-[#1C3049] hover:bg-[#13223A] text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all"
+                className="h-10 px-4 rounded-[10px] bg-[#1C3049] hover:bg-[#13223A] text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all cursor-pointer"
               >
                 <IconPhone className="w-4 h-4 text-[#C9A882]" />
                 <span>Appeler</span>
               </a>
 
-              <Button
-                variant="primary"
+              <button
+                type="button"
                 onClick={() => setChatOpen(true)}
-                className="text-xs min-h-[42px]"
+                className="h-10 px-4 rounded-[10px] bg-[#FAF8F5] hover:bg-[#E8DBC8] text-[#573721] border border-[#DDCDB6] font-bold text-xs flex items-center gap-2 transition-all cursor-pointer"
               >
-                <span>Messagerie interne</span>
-              </Button>
+                <span>💬 Messagerie interne</span>
+              </button>
             </div>
           </div>
 
           {/* Trust Badges Bar */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-[#DDCDB6]/60">
-            <div className="p-3 rounded-[10px] bg-[#F2E9DC]/70 border border-[#DDCDB6] flex items-center gap-2.5">
+            <div className="p-3 rounded-[10px] bg-[#FAF8F5] border border-[#DDCDB6] flex items-center gap-2.5 shadow-xs">
               <span className="text-lg">🪪</span>
               <div>
                 <span className="text-[11px] font-bold text-[#573721] block">Identité CNI</span>
@@ -216,7 +218,7 @@ export default function SellerShopPage() {
               </div>
             </div>
 
-            <div className="p-3 rounded-[10px] bg-[#F2E9DC]/70 border border-[#DDCDB6] flex items-center gap-2.5">
+            <div className="p-3 rounded-[10px] bg-[#FAF8F5] border border-[#DDCDB6] flex items-center gap-2.5 shadow-xs">
               <span className="text-lg">📄</span>
               <div>
                 <span className="text-[11px] font-bold text-[#573721] block">NINEA / RCCM</span>
@@ -226,7 +228,7 @@ export default function SellerShopPage() {
               </div>
             </div>
 
-            <div className="p-3 rounded-[10px] bg-[#F2E9DC]/70 border border-[#DDCDB6] flex items-center gap-2.5">
+            <div className="p-3 rounded-[10px] bg-[#FAF8F5] border border-[#DDCDB6] flex items-center gap-2.5 shadow-xs">
               <span className="text-lg">🌊</span>
               <div>
                 <span className="text-[11px] font-bold text-[#573721] block">Reversement Wave</span>
@@ -236,7 +238,7 @@ export default function SellerShopPage() {
               </div>
             </div>
 
-            <div className="p-3 rounded-[10px] bg-[#F2E9DC]/70 border border-[#DDCDB6] flex items-center gap-2.5">
+            <div className="p-3 rounded-[10px] bg-[#FAF8F5] border border-[#DDCDB6] flex items-center gap-2.5 shadow-xs">
               <span className="text-lg">📦</span>
               <div>
                 <span className="text-[11px] font-bold text-[#573721] block">Paiement livraison</span>

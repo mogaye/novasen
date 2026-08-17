@@ -106,20 +106,20 @@ export default function MyBoutiquePage() {
         </div>
 
         {/* Shop Info Card */}
-        <div className="bg-white p-6 sm:p-8 flex flex-col md:flex-row md:items-end justify-between gap-6 border-t border-[#DDCDB6]">
-          <div className="flex items-start sm:items-end gap-5 -mt-16 sm:-mt-20">
-            <div className="relative shrink-0">
+        <div className="bg-white p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-t border-[#DDCDB6]">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+            <div className="relative shrink-0 -mt-14 sm:-mt-20">
               <img
                 src={sellerProfile.avatarUrl || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80'}
                 alt="Logo Boutique"
                 className="w-20 h-20 sm:w-28 sm:h-28 rounded-[18px] object-cover border-4 border-white shadow-xl bg-white"
               />
-              <span className="absolute -bottom-1 -right-1 bg-emerald-500 text-white p-1 rounded-full text-xs shadow-md">
+              <span className="absolute bottom-1 right-1 bg-emerald-500 text-white p-1 rounded-full text-xs shadow-md">
                 ✓
               </span>
             </div>
 
-            <div className="flex flex-col gap-1 pt-2 sm:pt-0">
+            <div className="flex flex-col gap-1.5">
               <div className="flex items-center flex-wrap gap-2">
                 <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[#573721]">
                   {sellerProfile.shopName || 'Ma Boutique NovaSen'}
@@ -135,11 +135,11 @@ export default function MyBoutiquePage() {
             </div>
           </div>
 
-          <div className="flex items-center flex-wrap gap-3">
+          <div className="flex items-center flex-wrap gap-3 pt-2 lg:pt-0">
             <Link
               href={`/boutique/${encodeURIComponent(sellerProfile.shopName || 'ma-boutique')}`}
               target="_blank"
-              className="px-4 py-2.5 rounded-[10px] bg-[#FAF8F5] hover:bg-[#E8DBC8] text-[#573721] font-bold text-xs border border-[#DDCDB6] transition-all flex items-center gap-2"
+              className="h-10 px-4 rounded-[10px] bg-[#FAF8F5] hover:bg-[#E8DBC8] text-[#573721] font-bold text-xs border border-[#DDCDB6] transition-all flex items-center gap-2 cursor-pointer"
             >
               <span>👁️ Voir ma vitrine publique</span>
               <IconArrowRight className="w-3.5 h-3.5" />
@@ -149,7 +149,7 @@ export default function MyBoutiquePage() {
               <Button
                 variant="primary"
                 onClick={() => setPaymentModalOpen(true)}
-                className="bg-[#7A5133] hover:bg-[#573721]"
+                className="bg-[#7A5133] hover:bg-[#573721] h-10 text-xs"
               >
                 <IconStar className="w-4 h-4 text-[#E8DBC8]" />
                 <span>Débloquer 30 annonces (6 500 F)</span>
