@@ -129,15 +129,14 @@ function ConnexionContent() {
     channel
       .on('broadcast', { event: 'device_authenticated' }, async ({ payload }) => {
         if (payload?.access_token && payload?.refresh_token) {
-          setSuccessMsg('✓ Confirmation validée depuis votre téléphone ! Connexion instantanée...');
+          setSuccessMsg('✓ Confirmation reçue ! Veuillez valider le contrôle de sécurité ci-dessous pour déverrouiller.');
           try {
             await supabase.auth.setSession({
               access_token: payload.access_token,
               refresh_token: payload.refresh_token,
             });
-            setTimeout(() => {
-              router.push(redirectPath);
-            }, 400);
+            // Basculer vers l'écran de Checkpoint avec les 2 questions obligatoires
+            setOtpStep('form');
           } catch (err) {
             console.error('Cross-device session error:', err);
           }

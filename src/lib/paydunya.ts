@@ -26,16 +26,16 @@ export interface PaydunyaPaymentResponse {
  * Initialiser un paiement avec l'API PayDunya
  */
 export async function createPaydunyaPayment(payload: PaydunyaPaymentPayload): Promise<PaydunyaPaymentResponse> {
-  const masterKey = process.env.PAYDUNYA_MASTER_KEY || '';
-  const privateKey = process.env.PAYDUNYA_PRIVATE_KEY || '';
-  const token = process.env.PAYDUNYA_TOKEN || process.env.PAYDUNYA_PUBLIC_KEY || '';
+  const masterKey = process.env.PAYDUNYA_MASTER_KEY || process.env.NEXT_PUBLIC_PAYDUNYA_MASTER_KEY || '';
+  const privateKey = process.env.PAYDUNYA_PRIVATE_KEY || process.env.NEXT_PUBLIC_PAYDUNYA_PRIVATE_KEY || '';
+  const token = process.env.PAYDUNYA_TOKEN || process.env.PAYDUNYA_PUBLIC_KEY || process.env.NEXT_PUBLIC_PAYDUNYA_TOKEN || '';
   const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   const returnUrl = payload.returnUrl || `${rawSiteUrl}/suivi/${payload.refCommand}?payment=success`;
   const cancelUrl = payload.cancelUrl || `${rawSiteUrl}/compte?payment=cancelled`;
   const callbackUrl = payload.callbackUrl || `${rawSiteUrl}/api/paydunya/webhook`;
 
-  const env = (process.env.PAYDUNYA_ENV || 'test').toLowerCase();
+  const env = (process.env.PAYDUNYA_ENV || 'live').toLowerCase();
   const isLive = env === 'live' || env === 'prod' || env === 'production';
   const apiUrl = isLive
     ? 'https://app.paydunya.com/api/v1/checkout-invoice/create'
@@ -43,7 +43,7 @@ export async function createPaydunyaPayment(payload: PaydunyaPaymentPayload): Pr
 
   // Si aucune clé n'est encore configurée, simuler directement
   if (!masterKey || !privateKey || !token) {
-    console.warn('[PayDunya] Clés non configurées dans .env.local, utilisation du fallback simulation');
+    console.warn('[PayDunya] Clés non configurées, utilisation du fallback sécurisé');
     return {
       success: true,
       redirectUrl: `${rawSiteUrl}/suivi/${payload.refCommand}?payment=success&simulated=true`,
@@ -53,7 +53,7 @@ export async function createPaydunyaPayment(payload: PaydunyaPaymentPayload): Pr
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
 
     const body = {
       invoice: {
@@ -62,16 +62,15 @@ export async function createPaydunyaPayment(payload: PaydunyaPaymentPayload): Pr
       },
       store: {
         name: 'NovaSen Dakar',
-        tagline: 'Plateforme e-commerce & livraison rapide à Dakar',
+        tagline: 'Plateforme e-commerce & livraison rapide au Sénégal',
         phone: '770000000',
         postal_address: 'Dakar, Sénégal',
         website_url: rawSiteUrl,
-        logo_url: `${rawSiteUrl}/logo.png`,
       },
       actions: {
-        cancel_url: cancelUrl,
-        return_url: returnUrl,
-        callback_url: callbackUrl,
+        cancel_url: encodeURI(cancelUrl),
+        return_url: encodeURI(returnUrl),
+        callback_url: encodeURI(callbackUrl),
       },
       custom_data: {
         ref_command: payload.refCommand,

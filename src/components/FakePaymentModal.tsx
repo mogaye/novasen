@@ -33,6 +33,7 @@ export function FakePaymentModal({
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
   const [paydunyaError, setPaydunyaError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,8 +63,13 @@ export function FakePaymentModal({
 
       if (data.redirectUrl) {
         setRedirecting(true);
-        // Redirection vers le checkout PayDunya
-        window.location.href = data.redirectUrl;
+        setRedirectUrl(data.redirectUrl);
+        // Redirection instantanée vers le checkout PayDunya officiel
+        try {
+          window.location.assign(data.redirectUrl);
+        } catch {
+          window.location.href = data.redirectUrl;
+        }
         return;
       }
 
@@ -73,7 +79,7 @@ export function FakePaymentModal({
         return;
       }
 
-      // Simulation de succès
+      // Simulation de succès si pas d'URL
       setProcessing(false);
       setSuccess(true);
       setTimeout(() => {
@@ -115,14 +121,36 @@ export function FakePaymentModal({
               Passerelle Sécurisée Dakar
             </span>
             <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
-              SSL 256-bit
+              PayDunya • SSL 256-bit
             </span>
           </div>
           <h3 className="text-xl sm:text-2xl font-bold font-heading text-[#573721]">{title}</h3>
           <p className="text-xs text-[#7A6A5C]">{description}</p>
         </div>
 
-        {success ? (
+        {redirecting ? (
+          <div className="bg-[#E8DBC8]/40 p-6 rounded-[16px] border border-[#DDCDB6] flex flex-col items-center gap-4 text-center animate-fadeIn">
+            <div className="w-12 h-12 rounded-full border-4 border-[#7A5133] border-t-transparent animate-spin" />
+            <div className="flex flex-col gap-1">
+              <h4 className="text-base sm:text-lg font-bold font-heading text-[#1C3049]">
+                Ouverture de la page sécurisée PayDunya...
+              </h4>
+              <p className="text-xs text-[#7A6A5C]">
+                Paiement direct Wave (App & QR), Orange Money, Free Money & Carte Bancaire.
+              </p>
+            </div>
+            {redirectUrl && (
+              <a
+                href={redirectUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 bg-[#7A5133] hover:bg-[#573721] text-white text-xs font-bold rounded-xl transition shadow-md"
+              >
+                <span>👉 Cliquez ici si la page ne s&apos;ouvre pas</span>
+              </a>
+            )}
+          </div>
+        ) : success ? (
           <div className="bg-[#E8DBC8]/60 p-6 rounded-[16px] border border-[#DDCDB6] flex flex-col items-center gap-3 text-center animate-fadeIn">
             <div className="w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-lg text-2xl">
               ✓
