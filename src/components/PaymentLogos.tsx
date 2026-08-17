@@ -73,3 +73,33 @@ export function LogoCard({ className = 'h-6' }: { className?: string }) {
     </div>
   );
 }
+
+export function PaymentLogos({ className = '' }: { className?: string }) {
+  return (
+    <div className={`bg-white rounded-2xl border border-[#DDCDB6] p-6 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6 ${className}`}>
+      <div className="flex flex-col text-center md:text-left gap-1">
+        <span className="text-xs font-bold uppercase tracking-wider text-[#7A5133]">
+          Transactions 100% Sécurisées au Sénégal
+        </span>
+        <h4 className="text-base font-bold font-heading text-[#2A211A]">
+          Payez à la livraison ou par Mobile Money instantané
+        </h4>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+        <div className="bg-[#FAF6F0] px-3.5 py-2 rounded-xl border border-[#DDCDB6] flex items-center shadow-2xs">
+          <LogoWave className="h-6" />
+        </div>
+        <div className="bg-[#FAF6F0] px-3.5 py-2 rounded-xl border border-[#DDCDB6] flex items-center shadow-2xs">
+          <LogoOrangeMoney className="h-6" />
+        </div>
+        <div className="bg-[#FAF6F0] px-3.5 py-2 rounded-xl border border-[#DDCDB6] flex items-center shadow-2xs">
+          <LogoCard className="h-6" />
+        </div>
+        <div className="bg-[#FAF6F0] px-3.5 py-2 rounded-xl border border-[#DDCDB6] flex items-center gap-2 text-xs font-bold text-[#1C3049] shadow-2xs">
+          <span>💵 Espèces à la livraison (COD)</span>
+        </div>
+      </div>
+    </div>
+  );
+}

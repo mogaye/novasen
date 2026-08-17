@@ -348,26 +348,26 @@ export function DoorSplit() {
                 {/* Location Search Inputs */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <LocationSearchInput
-                    label="Départ à Dakar"
+                    label="Point de départ"
                     value={originId}
                     customText={originName}
                     onChange={(id, name) => {
                       setOriginId(id);
                       setOriginName(name);
                     }}
-                    placeholder="Quartier de départ..."
+                    placeholder="Ville, quartier ou rue de départ..."
                     accentColor="transport"
                   />
 
                   <LocationSearchInput
-                    label="Destination"
+                    label="Destination finale"
                     value={destinationId}
                     customText={destinationName}
                     onChange={(id, name) => {
                       setDestinationId(id);
                       setDestinationName(name);
                     }}
-                    placeholder="Quartier d'arrivée..."
+                    placeholder="Ville, quartier ou rue d'arrivée..."
                     accentColor="transport"
                   />
                 </div>
