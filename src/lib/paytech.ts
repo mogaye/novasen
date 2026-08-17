@@ -59,7 +59,7 @@ export async function createPaytechPayment(payload: PaytechPaymentPayload): Prom
     : `${siteUrl.includes('localhost') ? 'https://novasen.sn' : siteUrl}/transport?payment=cancelled`;
 
   const requestedEnv = process.env.PAYTECH_ENV || 'test';
-  const paytechEnv = (requestedEnv === 'prod' || requestedEnv === 'production') ? 'prod' : 'test';
+  const paytechEnv = (requestedEnv === 'prod' || requestedEnv === 'production' || requestedEnv === 'live') ? 'prod' : 'test';
 
   try {
     const response = await fetch('https://paytech.sn/api/payment/request-payment', {

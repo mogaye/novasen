@@ -16,7 +16,7 @@ export function WhatsAppSupport() {
 
   const handleSend = (text: string) => {
     const message = encodeURIComponent(text || userMsg || 'Bonjour NovaSen, j’aimerais avoir une information.');
-    window.open(`https://wa.me/221705908725?text=${message}`, '_blank');
+    window.open(`https://wa.me/221789139036?text=${message}`, '_blank');
     setIsOpen(false);
   };
 

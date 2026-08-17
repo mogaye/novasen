@@ -102,7 +102,7 @@ export function LiveChatWidget() {
             </div>
             <div className="flex items-center gap-1">
               <a
-                href="https://wa.me/221705908725"
+                href="https://wa.me/221789139036"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-1.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white text-xs transition-colors"

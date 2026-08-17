@@ -22,7 +22,7 @@ export function FakePaymentModal({
   onClose,
 }: FakePaymentModalProps) {
   const [provider, setProvider] = useState<'wave' | 'orange_money' | 'card'>('wave');
-  const [phone, setPhone] = useState('77 000 12 34');
+  const [phone, setPhone] = useState('78 913 90 36');
   
   // Card details state
   const [cardNumber, setCardNumber] = useState('4532 •••• •••• 8921');
