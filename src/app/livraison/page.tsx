@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
@@ -28,9 +28,34 @@ function LivraisonContent() {
   const annonceId = searchParams.get('annonceId') || 'tel-1';
   const { listings } = useApp();
 
-  const listing = listings.find((l) => l.id === annonceId) || INITIAL_LISTINGS[0];
+  const [activeListing, setActiveListing] = useState<any>(null);
 
-  const originId: ZoneId = listing.zoneId;
+  useEffect(() => {
+    const found = listings.find((l) => String(l.id) === String(annonceId)) ||
+      INITIAL_LISTINGS.find((l) => String(l.id) === String(annonceId));
+    if (found) {
+      setActiveListing(found);
+    } else {
+      if (typeof window !== 'undefined') {
+        try {
+          const cached = localStorage.getItem('novasen_custom_listings');
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            const fromCache = parsed.find((l: any) => String(l.id) === String(annonceId));
+            if (fromCache) {
+              setActiveListing(fromCache);
+              return;
+            }
+          }
+        } catch (e) {}
+      }
+      setActiveListing(INITIAL_LISTINGS[0]);
+    }
+  }, [annonceId, listings]);
+
+  const listing = activeListing || listings.find((l) => String(l.id) === String(annonceId)) || INITIAL_LISTINGS[0];
+
+  const originId: ZoneId = (listing.zoneId as ZoneId) || 'plateau';
   const [destinationId, setDestinationId] = useState<ZoneId>('pointe');
   const [destinationName, setDestinationName] = useState(ZONES_BY_ID['pointe']?.name || 'Point E');
 
@@ -54,7 +79,7 @@ function LivraisonContent() {
   const fares = calculateFares(originId, destinationId);
   const tripMetrics = calculateTripMetrics(originId, destinationId);
   const deliveryFare = fares.parcelFares[parcelClass];
-  const totalAmount = enableCod ? listing.price + deliveryFare : deliveryFare;
+  const totalAmount = enableCod ? (listing.price || 0) + deliveryFare : deliveryFare;
 
   const handleOrderDelivery = (e: React.FormEvent) => {
     e.preventDefault();

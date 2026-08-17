@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, use } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { ListingCard } from '@/components/ListingCard';
 import { Button } from '@/components/ui/Button';
@@ -19,8 +20,11 @@ import {
 import { ChatModal } from '@/components/ChatModal';
 import { ReviewsSection } from '@/components/ReviewsSection';
 
-export default function SellerShopPage({ params }: { params: Promise<{ sellerName: string }> }) {
-  const { sellerName: rawSellerParam } = use(params);
+export default function SellerShopPage() {
+  const params = useParams();
+  const rawSellerParam = Array.isArray(params?.sellerName)
+    ? params.sellerName[0]
+    : (params?.sellerName as string) || 'Vendeur';
   const decodedSellerName = decodeURIComponent(rawSellerParam).replace(/-/g, ' ');
 
   const { listings, sellerProfile } = useApp();

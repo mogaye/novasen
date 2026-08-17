@@ -93,7 +93,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/#simulateur" className="hover:text-white transition-colors">
+                <Link href="/accueil#simulateur" className="hover:text-white transition-colors">
                   Simulateur d’amortissement
                 </Link>
               </li>

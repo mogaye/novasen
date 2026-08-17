@@ -1,8 +1,8 @@
 'use client';
 
-import React, { use, useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { useParams, notFound } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { INITIAL_DRIVERS } from '@/lib/drivers';
 import { formatCFA, formatNumber } from '@/lib/format';
@@ -21,17 +21,14 @@ import {
 } from '@/components/ui/Icons';
 import { ReviewsSection } from '@/components/ReviewsSection';
 
-export default function DriverPublicProfilePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const resolvedParams = use(params);
+export default function DriverPublicProfilePage() {
+  const params = useParams();
+  const driverId = Array.isArray(params?.id) ? params.id[0] : (params?.id as string);
   const { drivers, driverProfile } = useApp();
 
   // Find driver by id, or match current user driver profile
   const allDrivers = [driverProfile, ...drivers];
-  const driver = allDrivers.find((d) => d.id === resolvedParams.id) || drivers[0];
+  const driver = allDrivers.find((d) => String(d.id) === String(driverId)) || drivers[0];
 
   const [contactSuccess, setContactSuccess] = useState<string | null>(null);
 

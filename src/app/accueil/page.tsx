@@ -19,7 +19,7 @@ export default function AccueilPage() {
       </div>
 
       {/* 3. Simulateur de Rentabilité Chauffeur & Livreur */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full animate-stagger-2">
+      <div id="simulateur" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full animate-stagger-2">
         <EarningsSimulator />
       </div>
 

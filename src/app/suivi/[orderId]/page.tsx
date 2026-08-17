@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { ZONES } from '@/lib/zones';
 import { formatCFA } from '@/lib/format';
@@ -17,8 +18,9 @@ import {
   IconMapPin,
 } from '@/components/ui/Icons';
 
-export default function OrderTrackingPage({ params }: { params: Promise<{ orderId: string }> }) {
-  const { orderId } = use(params);
+export default function OrderTrackingPage() {
+  const params = useParams();
+  const orderId = Array.isArray(params?.orderId) ? params.orderId[0] : (params?.orderId as string) || 'CMD-001';
   const { activeOrder } = useApp();
 
   const [currentStep, setCurrentStep] = useState<number>(3);
