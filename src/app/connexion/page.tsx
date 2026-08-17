@@ -64,7 +64,7 @@ function ConnexionContent() {
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get('redirect') || '/marche';
 
-  const { signInWithIdentifier, sendOtpCode, user } = useAuth();
+  const { signInWithIdentifier, signUpWithPhoneOrEmail, verifyOtpCode, sendOtpCode, user } = useAuth();
 
   // Mode: 'signin' ou 'signup'
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -188,7 +188,7 @@ function ConnexionContent() {
           return;
         }
 
-        const { error } = await useAuth().signUpWithPhoneOrEmail(cleanIdentifier, password, fullName);
+        const { error } = await signUpWithPhoneOrEmail(cleanIdentifier, password, fullName);
         if (error) {
           setErrorMsg(error.message || "Erreur lors de la création de compte.");
         } else {
@@ -216,7 +216,7 @@ function ConnexionContent() {
     setLoading(true);
     setErrorMsg(null);
     try {
-      const { error } = await useAuth().verifyOtpCode(identifier.trim(), otpToken.trim(), fullName, password);
+      const { error } = await verifyOtpCode(identifier.trim(), otpToken.trim(), fullName, password);
       if (error) {
         setErrorMsg('Code de sécurité incorrect ou expiré. Veuillez vérifier ou demander un nouveau code.');
       } else {
