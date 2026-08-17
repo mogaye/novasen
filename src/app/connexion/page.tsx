@@ -27,8 +27,8 @@ function ConnexionContent() {
 
   const { signInWithIdentifier, signUpWithPhoneOrEmail, sendOtpCode, verifyOtpCode, user } = useAuth();
 
-  // Auth Methods & Modes
-  const [authMethod, setAuthMethod] = useState<'otp' | 'password'>('otp');
+  // Auth Methods & Modes (Password is the default classic method)
+  const [authMethod, setAuthMethod] = useState<'password' | 'otp'>('password');
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   
   // OTP flow states
@@ -347,8 +347,22 @@ function ConnexionContent() {
           </button>
         </div>
 
-        {/* Method Toggle: OTP Code vs Password */}
+        {/* Method Toggle: Password (Default) vs OTP */}
         <div className="flex items-center justify-center gap-2 mb-5 p-1 bg-[#FAF6F0] rounded-xl border border-[#E8DBC8] text-[11px] font-semibold text-[#7A6A5C]">
+          <button
+            type="button"
+            onClick={() => {
+              setAuthMethod('password');
+              setErrorMsg(null);
+            }}
+            className={`flex-1 py-1.5 px-2 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              authMethod === 'password'
+                ? 'bg-[#7A5133] text-white font-bold shadow-xs'
+                : 'hover:text-[#573721]'
+            }`}
+          >
+            <span>🔑 Mot de passe (Classique)</span>
+          </button>
           <button
             type="button"
             onClick={() => {
@@ -362,21 +376,7 @@ function ConnexionContent() {
                 : 'hover:text-[#573721]'
             }`}
           >
-            <span>💬 Code de vérification (OTP)</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setAuthMethod('password');
-              setErrorMsg(null);
-            }}
-            className={`flex-1 py-1.5 px-2 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              authMethod === 'password'
-                ? 'bg-[#7A5133] text-white font-bold shadow-xs'
-                : 'hover:text-[#573721]'
-            }`}
-          >
-            <span>🔑 Mot de passe</span>
+            <span>💬 Code sans mot de passe (OTP)</span>
           </button>
         </div>
 
