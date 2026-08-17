@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createPaytechPayment } from '@/lib/paytech';
+import { createPaydunyaPayment } from '@/lib/paydunya';
 
 export async function POST(req: Request) {
   try {
@@ -8,9 +8,9 @@ export async function POST(req: Request) {
       itemName,
       itemPrice,
       refCommand,
-      commandName,
-      customField,
-      successUrl,
+      description,
+      customData,
+      returnUrl,
       cancelUrl,
     } = body;
 
@@ -21,18 +21,18 @@ export async function POST(req: Request) {
       );
     }
 
-    const result = await createPaytechPayment({
+    const result = await createPaydunyaPayment({
       itemName,
       itemPrice: Number(itemPrice),
       refCommand: String(refCommand),
-      commandName: commandName || `Paiement NovaSen #${refCommand}`,
-      customField,
-      successUrl,
+      description: description || `Paiement ${itemName} #${refCommand}`,
+      customData,
+      returnUrl,
       cancelUrl,
     });
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 500 });
+    if (!result.success && result.error) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
     return NextResponse.json({
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       token: result.token,
     });
   } catch (error: any) {
-    console.error('[API PayTech Error]', error);
+    console.error('[API PayDunya Error]', error);
     return NextResponse.json({ error: error.message || 'Erreur serveur' }, { status: 500 });
   }
 }

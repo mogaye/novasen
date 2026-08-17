@@ -69,7 +69,7 @@ export default function OrderTrackingPage() {
                 Paiement {paymentTitle} validé avec succès !
               </span>
               <span className="text-xs text-emerald-700">
-                Votre transaction PayTech SN a bien été enregistrée et votre commande est prise en charge.
+                Votre transaction PayDunya a bien été enregistrée et votre commande est prise en charge.
               </span>
             </div>
           </div>

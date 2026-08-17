@@ -33,27 +33,27 @@ export function FakePaymentModal({
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
-  const [paytechError, setPaytechError] = useState<string | null>(null);
+  const [paydunyaError, setPaydunyaError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setProcessing(true);
-    setPaytechError(null);
+    setPaydunyaError(null);
 
     try {
       const origin = typeof window !== 'undefined' ? window.location.origin : '';
       const orderRef = `NOVA-${Date.now()}`;
       
-      // Call PayTech endpoint with dynamic itemPrice and current origin
-      const res = await fetch('/api/paytech', {
+      // Appel de l'endpoint PayDunya
+      const res = await fetch('/api/paydunya', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           itemName: title,
           itemPrice: Math.round(amount),
           refCommand: orderRef,
-          commandName: description || `Paiement ${title}`,
-          successUrl: `${origin}/suivi/${orderRef}?payment=success&title=${encodeURIComponent(title)}`,
+          description: description || `Paiement ${title}`,
+          returnUrl: `${origin}/suivi/${orderRef}?payment=success&title=${encodeURIComponent(title)}`,
           cancelUrl: `${origin}/compte?payment=cancelled`,
         }),
       });
@@ -62,26 +62,26 @@ export function FakePaymentModal({
 
       if (data.redirectUrl) {
         setRedirecting(true);
-        // Redirect to PayTech checkout
+        // Redirection vers le checkout PayDunya
         window.location.href = data.redirectUrl;
         return;
       }
 
       if (data.error) {
-        setPaytechError(data.error);
+        setPaydunyaError(data.error);
         setProcessing(false);
         return;
       }
 
-      // Simulated local success
+      // Simulation de succès
       setProcessing(false);
       setSuccess(true);
       setTimeout(() => {
         onSuccess();
       }, 1500);
     } catch (err: any) {
-      console.error('Erreur PayTech:', err);
-      // Fallback to local simulation
+      console.error('Erreur PayDunya:', err);
+      // Fallback local
       setProcessing(false);
       setSuccess(true);
       setTimeout(() => {
@@ -281,9 +281,9 @@ export function FakePaymentModal({
               </div>
             )}
 
-            {paytechError && (
+            {paydunyaError && (
               <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl text-center font-semibold">
-                {paytechError}
+                {paydunyaError}
               </div>
             )}
 
@@ -296,7 +296,7 @@ export function FakePaymentModal({
               className="mt-1 font-bold text-sm"
             >
               {redirecting
-                ? '🚀 Redirection vers PayTech (Wave / OM)...'
+                ? '🚀 Redirection vers PayDunya (Wave / OM)...'
                 : processing
                 ? 'Connexion sécurisée en cours...'
                 : `Payer ${formatCFA(amount)} en direct`}

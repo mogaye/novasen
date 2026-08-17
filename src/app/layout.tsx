@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     'Transport Sénégal',
     'Wave',
     'Orange Money',
-    'PayTech Sénégal',
+    'PayDunya Sénégal',
     'Commerce Dakar',
   ],
   authors: [{ name: 'NovaSen Technologies SN' }],

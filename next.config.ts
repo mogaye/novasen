@@ -44,8 +44,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "api.dicebear.com" },
-      { protocol: "https", hostname: "viivxxtheyguacovzizk.supabase.co" },
-      { protocol: "https", hostname: "paytech.sn" },
+      { protocol: "https", hostname: "app.paydunya.com" },
+      { protocol: "https", hostname: "paydunya.com" },
     ],
   },
 };
