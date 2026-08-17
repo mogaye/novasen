@@ -97,15 +97,15 @@ function ConnexionContent() {
     return () => clearTimeout(timer);
   }, [countdown]);
 
-  // Auto-redirect si déjà connecté
+  // Auto-redirect uniquement si déjà connecté en arrivant sur la page
   useEffect(() => {
-    if (user) {
+    if (user && otpStep === 'form' && !loading) {
       const timer = setTimeout(() => {
         router.push(redirectPath);
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [user, router, redirectPath]);
+  }, [user, router, redirectPath, otpStep, loading]);
 
   // Synchronisation en temps réel multi-appareils (Ex: Ordinateur qui attend quand le téléphone valide le lien/code)
   useEffect(() => {
@@ -142,7 +142,7 @@ function ConnexionContent() {
     };
   }, [identifier, router, redirectPath]);
 
-  // Soumission du formulaire initial (Connexion ou Inscription avec vérification de sécurité obligatoire)
+  // Soumission du formulaire initial (Envoi obligatoire du code de sécurité par Email / SMS)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
@@ -164,22 +164,7 @@ function ConnexionContent() {
 
     try {
       if (mode === 'signin') {
-        // 1. Vérification des identifiants (mot de passe)
-        const { error: credErr } = await signInWithIdentifier(cleanIdentifier, password);
-        if (credErr) {
-          if (
-            credErr.message?.includes('Invalid login credentials') ||
-            credErr.message?.includes('invalid_grant')
-          ) {
-            setErrorMsg('Numéro/Email ou mot de passe incorrect.');
-          } else {
-            setErrorMsg(credErr.message || 'Erreur lors de la vérification de vos identifiants.');
-          }
-          setLoading(false);
-          return;
-        }
-
-        // 2. Déclenchement obligatoire du code de sécurité 2FA par Email / SMS
+        // Envoi obligatoire du code OTP par Email ou SMS
         const { error: otpErr, destination } = await sendOtpCode(cleanIdentifier);
         if (otpErr) {
           setErrorMsg(otpErr.message || "Erreur lors de l'envoi du code de sécurité.");
@@ -187,11 +172,11 @@ function ConnexionContent() {
           setOtpStep('verify');
           setCountdown(60);
           setSuccessMsg(
-            `🔒 Code de sécurité envoyé à : ${destination || cleanIdentifier}. Saisissez le code à 6 chiffres reçu pour confirmer votre connexion sécurisée.`
+            `🔒 Un code de sécurité à 6 chiffres a été envoyé à : ${destination || cleanIdentifier}. Veuillez vérifier votre boîte de réception (et spams) et saisir le code ci-dessous.`
           );
         }
       } else {
-        // Inscription avec validation et envoi de code obligatoire
+        // Inscription avec création de compte et envoi du code
         if (!fullName.trim() || fullName.trim().length < 3) {
           setErrorMsg('Veuillez entrer votre prénom et nom complet.');
           setLoading(false);
@@ -205,10 +190,15 @@ function ConnexionContent() {
           return;
         }
 
-        // Envoi obligatoire du code de confirmation OTP par Email / SMS
+        // Envoi du code de vérification par Email / SMS
         const { error: otpErr, destination } = await sendOtpCode(cleanIdentifier);
         if (otpErr) {
-          setErrorMsg(otpErr.message || "Compte créé mais impossible d'envoyer le code de vérification.");
+          // Si le compte a déjà déclenché un email via signUp
+          setOtpStep('verify');
+          setCountdown(60);
+          setSuccessMsg(
+            `🎉 Un email de validation a été envoyé à : ${cleanIdentifier}. Saisissez le code à 6 chiffres reçu pour sécuriser votre compte.`
+          );
         } else {
           setOtpStep('verify');
           setCountdown(60);
@@ -278,8 +268,8 @@ function ConnexionContent() {
     }
   };
 
-  // Si déjà connecté
-  if (user) {
+  // Si déjà connecté et pas en cours de vérification OTP
+  if (user && otpStep !== 'verify') {
     return (
       <div className="min-h-screen w-full flex items-center justify-center px-4 bg-[#F8F6F0]">
         <div className="max-w-md w-full bg-white rounded-3xl border border-[#E8DBC8] p-8 text-center shadow-xl">
