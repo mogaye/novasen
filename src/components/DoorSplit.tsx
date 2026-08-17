@@ -68,7 +68,7 @@ export function DoorSplit() {
   const isMarket = activeTab === 'market';
 
   return (
-    <section className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 overflow-hidden">
+    <section className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* 1. TOP HEADER & PILL BADGE (Style Elux Space / Dribbble) */}
       {/* ─────────────────────────────────────────────────────────────────── */}
@@ -132,7 +132,7 @@ export function DoorSplit() {
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* 2. LE CONSOLE DASHBOARD CARD (Style Elux Space / Dribbble) */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="relative bg-white rounded-[24px] border border-[#DDCDB6] shadow-xl overflow-hidden p-4 sm:p-8 lg:p-10 transition-all">
+      <div className="relative bg-white rounded-[24px] border border-[#DDCDB6] shadow-xl p-4 sm:p-8 lg:p-10 transition-all z-10">
         {/* Top Control Tabs */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-[#DDCDB6]/70">
           <div className="flex p-1.5 rounded-[12px] bg-[#F2E9DC] border border-[#DDCDB6] w-full sm:w-auto">
@@ -303,7 +303,7 @@ export function DoorSplit() {
           /* ─────────────────────────────────────────────────────────────── */
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8 items-center animate-fade-in">
             {/* Left Calculator & Route Form */}
-            <div className="lg:col-span-7 flex flex-col gap-6">
+            <div className="lg:col-span-7 flex flex-col gap-6 relative z-30">
               <div className="flex flex-col gap-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#1C3049]">
                   Logistique & Déplacements en direct

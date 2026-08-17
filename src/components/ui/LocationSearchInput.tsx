@@ -190,22 +190,27 @@ export function LocationSearchInput({
 
       {/* Autocomplete Dropdown List with 14 Regions */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1.5 z-50 bg-white rounded-xl border border-[#DDCDB6] shadow-2xl overflow-hidden max-h-80 flex flex-col animate-fade-in divide-y divide-[#DDCDB6]/40">
-          
+        <div
+          className="absolute top-full left-0 right-0 mt-2 z-[100] bg-white rounded-2xl border-2 border-[#DDCDB6] shadow-[0_20px_60px_-15px_rgba(28,48,73,0.3)] flex flex-col animate-fade-in divide-y divide-[#DDCDB6]/40 overflow-hidden"
+          style={{ minWidth: '100%' }}
+        >
           {/* Header with Search & Regions Filter Chips */}
-          <div className="p-2.5 bg-[#FAF6F0] flex flex-col gap-2 border-b border-[#DDCDB6]">
-            <div className="flex items-center justify-between text-[0.72rem] font-bold uppercase tracking-wider text-[#7A6A5C]">
-              <span className="flex items-center gap-1">
-                <IconSearch className="w-3 h-3 text-[#1C3049]" />
+          <div className="p-3 bg-[#FAF6F0] flex flex-col gap-2.5 border-b border-[#DDCDB6]">
+            <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[#7A6A5C]">
+              <span className="flex items-center gap-1.5 text-[#1C3049]">
+                <IconSearch className="w-3.5 h-3.5 text-[#1C3049]" />
                 {trimmedQuery ? `Résultats pour « ${query} »` : 'Lieux & Villes du Sénégal'}
               </span>
-              <span className="bg-[#E8DBC8] text-[#1C3049] px-2 py-0.5 rounded-full text-[10px]">
+              <span className="bg-[#E8DBC8] text-[#1C3049] font-bold px-2.5 py-0.5 rounded-full text-[11px] border border-[#DDCDB6]">
                 {filteredZones.length} résultat(s)
               </span>
             </div>
 
-            {/* Quick region filter chips */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+            {/* Quick region filter chips (clean, no ugly scrollbar) */}
+            <div
+              className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar text-xs"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
               {REGION_SHORTCUTS.map((reg) => {
                 const isActive = selectedRegionFilter === reg.id;
                 return (
@@ -213,9 +218,9 @@ export function LocationSearchInput({
                     key={reg.id}
                     type="button"
                     onClick={() => setSelectedRegionFilter(reg.id)}
-                    className={`px-2.5 py-1 rounded-md whitespace-nowrap text-[11px] font-semibold transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-lg whitespace-nowrap text-xs font-bold transition-all cursor-pointer ${
                       isActive
-                        ? 'bg-[#1C3049] text-white shadow-xs'
+                        ? 'bg-[#1C3049] text-white shadow-xs scale-102'
                         : 'bg-white text-[#573721] border border-[#DDCDB6] hover:bg-[#F2E9DC]'
                     }`}
                   >
@@ -226,29 +231,35 @@ export function LocationSearchInput({
             </div>
           </div>
 
-          {/* Custom Address Direct Validation Option */}
+          {/* Custom Address Direct Validation Option (if user typed text) */}
           {query.trim() && (
-            <div className="p-2 bg-[#F2E9DC]/60 border-b border-[#DDCDB6]">
+            <div className="p-2.5 bg-[#F2E9DC]/70 border-b border-[#DDCDB6]">
               <button
                 type="button"
                 onClick={handleCustomValidate}
-                className="w-full text-left px-3 py-2 rounded-lg bg-white border border-[#DDCDB6] hover:border-[#1C3049] flex items-center justify-between gap-2 text-xs font-semibold text-[#1C3049] hover:shadow-xs transition-all cursor-pointer"
+                className="w-full text-left p-3 rounded-xl bg-white border-2 border-[#1C3049]/30 hover:border-[#1C3049] flex items-center justify-between gap-3 text-xs font-bold text-[#1C3049] hover:shadow-md transition-all cursor-pointer group"
               >
-                <div className="flex items-center gap-2 truncate">
-                  <span className="text-base">📍</span>
-                  <span className="truncate">
-                    Utiliser l'adresse exacte : <strong className="text-[#7A5133]">« {query.trim()} »</strong>
-                  </span>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="text-lg">📍</span>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[10px] text-[#7A6A5C] uppercase tracking-wider font-semibold">
+                      Utiliser cette adresse précise
+                    </span>
+                    <span className="truncate text-sm font-extrabold text-[#1C3049] group-hover:text-[#7A5133]">
+                      « {query.trim()} »
+                    </span>
+                  </div>
                 </div>
-                <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider bg-[#1C3049] text-white px-2 py-1 rounded">
-                  Valider ↵
+                <span className="shrink-0 text-xs font-extrabold uppercase tracking-wider bg-[#1C3049] group-hover:bg-[#13223A] text-white px-3.5 py-1.5 rounded-lg shadow-xs flex items-center gap-1">
+                  <span>Valider</span>
+                  <span>↵</span>
                 </span>
               </button>
             </div>
           )}
 
-          {/* Scrollable list of locations */}
-          <div className="overflow-y-auto max-h-60 divide-y divide-[#DDCDB6]/30">
+          {/* Scrollable list of locations (Expanded height & spacious) */}
+          <div className="overflow-y-auto max-h-72 divide-y divide-[#DDCDB6]/40">
             {filteredZones.length > 0 ? (
               filteredZones.map((zone) => {
                 const isSelected = zone.id === value;
@@ -257,50 +268,66 @@ export function LocationSearchInput({
                     key={`suggest-${zone.id}`}
                     type="button"
                     onClick={() => handleSelect(zone.id, zone.name)}
-                    className={`w-full text-left px-4 py-3 flex items-center justify-between gap-3 text-sm transition-colors cursor-pointer ${
+                    className={`w-full text-left px-4 py-3 flex items-center justify-between gap-3 text-sm transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-[#E8DBC8] text-[#1C3049] font-bold'
                         : 'hover:bg-[#FAF6F0] text-[#2A211A]'
                     }`}
                   >
-                    <div className="flex flex-col gap-0.5">
+                    <div className="flex flex-col gap-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-sm text-[#2A211A]">{zone.name}</span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider bg-[#E8DBC8] px-1.5 py-0.5 rounded text-[#1C3049] border border-[#DDCDB6]">
+                        <span className="font-bold text-sm text-[#2A211A]">{zone.name}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider bg-[#E8DBC8] px-2 py-0.5 rounded text-[#1C3049] border border-[#DDCDB6]">
                           {zone.region}
                         </span>
+                        {zone.department && zone.department !== zone.region && (
+                          <span className="text-[10px] text-[#7A6A5C] font-semibold">
+                            ({zone.department})
+                          </span>
+                        )}
                         {zone.popular && (
-                          <span className="text-[10px] bg-amber-50 px-1.5 py-0.5 rounded text-amber-800 border border-amber-200 font-medium">
-                            Populaire ⭐
+                          <span className="text-[10px] bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded font-bold border border-amber-200">
+                            ⭐ Hub
                           </span>
                         )}
                       </div>
                       {zone.description && (
-                        <span className="text-xs text-[#7A6A5C] line-clamp-1">{zone.description}</span>
+                        <span className="text-xs text-[#7A6A5C] truncate">{zone.description}</span>
                       )}
                     </div>
 
-                    {isSelected && <IconCheck className="w-4 h-4 text-[#1C3049] shrink-0" />}
+                    {isSelected ? (
+                      <span className="w-6 h-6 rounded-full bg-[#1C3049] text-white flex items-center justify-center shrink-0">
+                        <IconCheck className="w-3.5 h-3.5" />
+                      </span>
+                    ) : (
+                      <span className="text-xs text-[#7A6A5C] opacity-0 group-hover:opacity-100 transition-opacity">
+                        Choisir →
+                      </span>
+                    )}
                   </button>
                 );
               })
             ) : (
-              <div className="p-4 text-center text-xs text-[#7A6A5C] flex flex-col gap-2">
-                <span>Aucune ville ou quartier pré-enregistré pour "{query}".</span>
+              <div className="p-6 text-center text-xs text-[#7A6A5C] flex flex-col items-center gap-3">
+                <span className="text-base">📍</span>
+                <span className="font-medium">
+                  Aucune localité trouvée avec le mot « {query} ».
+                </span>
                 <button
                   type="button"
                   onClick={handleCustomValidate}
-                  className="self-center px-3 py-1.5 bg-[#1C3049] text-white rounded-lg text-xs font-bold hover:bg-[#13223A] transition-all cursor-pointer shadow-xs"
+                  className="px-4 py-2 bg-[#1C3049] text-white rounded-xl text-xs font-bold hover:bg-[#13223A] transition-all cursor-pointer shadow-md"
                 >
-                  Valider « {query} » comme adresse personnalisée
+                  Valider « {query} » comme adresse personnalisée ↵
                 </button>
               </div>
             )}
           </div>
 
           {/* Footer Helper */}
-          <div className="p-2 bg-[#F2E9DC]/40 text-[11px] text-[#7A6A5C] text-center">
-            💡 Vous pouvez taper n’importe quelle adresse, rue ou repère précis et appuyer sur <strong>Entrée</strong> ou <strong>Valider</strong>.
+          <div className="p-2.5 bg-[#FAF6F0] text-[11px] text-[#7A6A5C] text-center font-medium border-t border-[#DDCDB6]">
+            🇸🇳 Tapez n’importe quelle adresse libre et cliquez sur <strong>Valider</strong> ou appuyez sur <strong>Entrée</strong>.
           </div>
         </div>
       )}
