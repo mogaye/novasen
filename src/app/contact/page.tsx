@@ -23,6 +23,8 @@ export default function ContactPage() {
   const [phone, setPhone] = useState('');
   const [subject, setSubject] = useState('livraison');
   const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSent, setIsSent] = useState(false);
   const [lastWhatsAppUrl, setLastWhatsAppUrl] = useState('');
 
   const PROFILE_LABELS: Record<string, string> = {
