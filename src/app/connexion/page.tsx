@@ -492,7 +492,7 @@ function ConnexionContent() {
                   </label>
                 )}
 
-                {/* Bouton de Soumission */}
+                {/* Bouton de Soumission Direct */}
                 <button
                   type="submit"
                   disabled={loading || (mode === 'signup' && !agreeTerms)}
@@ -504,20 +504,26 @@ function ConnexionContent() {
                       <span>{mode === 'signin' ? 'Connexion en cours...' : 'Création en cours...'}</span>
                     </>
                   ) : mode === 'signin' ? (
-                    'Se connecter'
+                    'Se connecter avec mot de passe'
                   ) : (
                     'Créer mon compte certifié 🔒'
                   )}
                 </button>
 
-                {/* Option alternative code OTP */}
-                <div className="pt-2 text-center">
+                {/* Option claire pour recevoir l'email/code sur son téléphone */}
+                <div className="pt-2">
+                  <div className="relative flex py-2 items-center">
+                    <div className="flex-grow border-t border-[#E7E2D6]"></div>
+                    <span className="flex-shrink mx-3 text-[11px] text-[#A8A29E] font-bold uppercase tracking-wider">OU</span>
+                    <div className="flex-grow border-t border-[#E7E2D6]"></div>
+                  </div>
                   <button
                     type="button"
                     onClick={handleRequestOtp}
-                    className="text-xs text-[#7A5133] hover:text-[#573721] font-semibold hover:underline cursor-pointer"
+                    disabled={loading}
+                    className="w-full py-3 bg-[#FAF8F5] hover:bg-[#F3EFEA] border-2 border-[#E7E2D6] text-[#573721] font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs sm:text-sm shadow-xs hover:border-[#7A5133]/40"
                   >
-                    💬 Vous préférez recevoir un code de sécurité par SMS / WhatsApp ?
+                    <span>✉️ Recevoir un code & lien sur mon téléphone</span>
                   </button>
                 </div>
               </form>
