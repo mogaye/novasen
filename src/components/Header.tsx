@@ -72,6 +72,22 @@ export function Header() {
       isActive: pathname === '/boutique',
     },
     {
+      href: '/dashboard',
+      label: 'Tableau de Bord',
+      badge: 'Stats Pro',
+      icon: '📊',
+      desc: 'Performances boutique, quota & véhicule',
+      isActive: pathname === '/dashboard',
+    },
+    {
+      href: '/admin',
+      label: 'Administration & Gains',
+      badge: 'Superviseur',
+      icon: '🛡️',
+      desc: 'Utilisateurs, revenus, KYC et commandes',
+      isActive: pathname === '/admin',
+    },
+    {
       href: '/tarifs',
       label: 'Grille Tarifaire',
       badge: '0% Commission',
@@ -540,6 +556,34 @@ export function Header() {
                 </div>
                 <span className="text-[11px] bg-[#1C3049]/10 text-[#1C3049] px-2 py-0.5 rounded font-bold">
                   1 500 F/j • 25 000 F/m
+                </span>
+              </Link>
+
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-3 text-sm sm:text-base font-medium text-[#2A211A] flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">📊</span>
+                  <span>Tableau de Bord Pro (Stats & Quotas)</span>
+                </div>
+                <span className="text-[11px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">
+                  Dashboard
+                </span>
+              </Link>
+
+              <Link
+                href="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-3 text-sm sm:text-base font-medium text-[#573721] flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🛡️</span>
+                  <span>Administration & Gains Plateforme</span>
+                </div>
+                <span className="text-[11px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-bold">
+                  Superviseur
                 </span>
               </Link>
 
