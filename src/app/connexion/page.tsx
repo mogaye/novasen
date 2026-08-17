@@ -142,7 +142,7 @@ function ConnexionContent() {
     };
   }, [identifier, router, redirectPath]);
 
-  // Soumission du formulaire initial (Connexion ou Inscription instantanée)
+  // Soumission du formulaire initial (Connexion ou Inscription avec vérification de sécurité obligatoire)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
@@ -164,39 +164,57 @@ function ConnexionContent() {
 
     try {
       if (mode === 'signin') {
-        // Connexion sécurisée existante
-        const { error } = await signInWithIdentifier(cleanIdentifier, password);
-        if (error) {
+        // 1. Vérification des identifiants (mot de passe)
+        const { error: credErr } = await signInWithIdentifier(cleanIdentifier, password);
+        if (credErr) {
           if (
-            error.message?.includes('Invalid login credentials') ||
-            error.message?.includes('invalid_grant')
+            credErr.message?.includes('Invalid login credentials') ||
+            credErr.message?.includes('invalid_grant')
           ) {
-            setErrorMsg('Numéro/Email ou mot de passe incorrect. Vous pouvez aussi créer votre compte en 1 clic.');
+            setErrorMsg('Numéro/Email ou mot de passe incorrect.');
           } else {
-            setErrorMsg(error.message || 'Erreur lors de la connexion.');
+            setErrorMsg(credErr.message || 'Erreur lors de la vérification de vos identifiants.');
           }
+          setLoading(false);
+          return;
+        }
+
+        // 2. Déclenchement obligatoire du code de sécurité 2FA par Email / SMS
+        const { error: otpErr, destination } = await sendOtpCode(cleanIdentifier);
+        if (otpErr) {
+          setErrorMsg(otpErr.message || "Erreur lors de l'envoi du code de sécurité.");
         } else {
-          setSuccessMsg('Connexion réussie ! Redirection en cours...');
-          setTimeout(() => {
-            router.push(redirectPath);
-          }, 400);
+          setOtpStep('verify');
+          setCountdown(60);
+          setSuccessMsg(
+            `🔒 Code de sécurité envoyé à : ${destination || cleanIdentifier}. Saisissez le code à 6 chiffres reçu pour confirmer votre connexion sécurisée.`
+          );
         }
       } else {
-        // Inscription directe et instantanée avec sécurisation du compte
+        // Inscription avec validation et envoi de code obligatoire
         if (!fullName.trim() || fullName.trim().length < 3) {
           setErrorMsg('Veuillez entrer votre prénom et nom complet.');
           setLoading(false);
           return;
         }
 
-        const { error } = await signUpWithPhoneOrEmail(cleanIdentifier, password, fullName);
-        if (error) {
-          setErrorMsg(error.message || "Erreur lors de la création de compte.");
+        const { error: signupErr } = await signUpWithPhoneOrEmail(cleanIdentifier, password, fullName);
+        if (signupErr && !signupErr.message?.toLowerCase().includes('already registered')) {
+          setErrorMsg(signupErr.message || "Erreur lors de la création de compte.");
+          setLoading(false);
+          return;
+        }
+
+        // Envoi obligatoire du code de confirmation OTP par Email / SMS
+        const { error: otpErr, destination } = await sendOtpCode(cleanIdentifier);
+        if (otpErr) {
+          setErrorMsg(otpErr.message || "Compte créé mais impossible d'envoyer le code de vérification.");
         } else {
-          setSuccessMsg('🎉 Compte certifié créé avec succès ! Connexion immédiate...');
-          setTimeout(() => {
-            router.push(redirectPath);
-          }, 400);
+          setOtpStep('verify');
+          setCountdown(60);
+          setSuccessMsg(
+            `🎉 Code de sécurité envoyé à : ${destination || cleanIdentifier}. Saisissez le code à 6 chiffres ci-dessous pour certifier et sécuriser votre compte.`
+          );
         }
       }
     } catch (err: any) {
@@ -206,7 +224,7 @@ function ConnexionContent() {
     }
   };
 
-  // Validation manuelle par code OTP 6 chiffres (Optionnelle)
+  // Validation manuelle par code OTP 6 chiffres (Obligatoire pour finaliser l'accès)
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otpToken.trim() || otpToken.trim().length < 6) {
@@ -219,12 +237,12 @@ function ConnexionContent() {
     try {
       const { error } = await verifyOtpCode(identifier.trim(), otpToken.trim(), fullName, password);
       if (error) {
-        setErrorMsg('Code de sécurité incorrect ou expiré. Veuillez vérifier ou demander un nouveau code.');
+        setErrorMsg('Code de sécurité incorrect ou expiré. Veuillez vérifier votre boîte de réception (ou spams) ou demander un nouveau code.');
       } else {
-        setSuccessMsg('✓ Code validé avec succès ! Connexion immédiate...');
+        setSuccessMsg('✓ Identité confirmée et session sécurisée ! Redirection en cours...');
         setTimeout(() => {
           router.push(redirectPath);
-        }, 400);
+        }, 500);
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Erreur lors de la validation du code.');
@@ -233,7 +251,7 @@ function ConnexionContent() {
     }
   };
 
-  // Déclencher l'envoi d'un code OTP
+  // Déclencher l'envoi d'un code OTP direct
   const handleRequestOtp = async () => {
     const validation = validateSenegalIdentifier(identifier);
     if (!validation.isValid) {
@@ -243,7 +261,7 @@ function ConnexionContent() {
     setLoading(true);
     setErrorMsg(null);
     try {
-      const { error, destination, isEmail } = await sendOtpCode(identifier.trim());
+      const { error, destination } = await sendOtpCode(identifier.trim());
       if (error) {
         setErrorMsg(error.message || "Impossible d'envoyer le code.");
       } else {
@@ -493,9 +511,9 @@ function ConnexionContent() {
                       <span>{mode === 'signin' ? 'Connexion en cours...' : 'Création en cours...'}</span>
                     </>
                   ) : mode === 'signin' ? (
-                    'Se connecter avec mot de passe'
+                    'Vérifier & M’envoyer le code de sécurité ✉️'
                   ) : (
-                    'Créer mon compte certifié 🔒'
+                    'Créer mon compte & Recevoir le code 🔒'
                   )}
                 </button>
 

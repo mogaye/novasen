@@ -169,7 +169,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     identifier: string,
     password: string,
     fullName: string
-  ) => {
+  ): Promise<{ error: any; needsVerification?: boolean }> => {
     const { isPhone, formattedPhone, authEmail } = normalizeIdentifier(identifier);
 
     const redirectUrl = typeof window !== 'undefined' ? `${window.location.origin}/connexion` : undefined;
@@ -188,40 +188,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     if (error) {
-      // If user is already registered, attempt to sign in with the password
-      if (error.message?.toLowerCase().includes('already registered')) {
-        const signRes = await supabase.auth.signInWithPassword({
-          email: authEmail,
-          password,
-        });
-        if (!signRes.error && signRes.data.user) {
-          await fetchProfile(signRes.data.user.id);
-          return { error: null };
-        }
-      }
       return { error };
     }
 
     if (data.user) {
-      // If auto-confirm is on or session not yet set, ensure session is logged in
-      if (!data.session) {
-        try {
-          const signRes = await supabase.auth.signInWithPassword({
-            email: authEmail,
-            password,
-          });
-          if (signRes.data.session) {
-            setSession(signRes.data.session);
-            setUser(signRes.data.user);
-          }
-        } catch (e) {
-          // ignore
-        }
-      } else {
-        setSession(data.session);
-        setUser(data.user);
-      }
-
       // Upsert profile in Supabase table
       try {
         await supabase.from('profiles').upsert({
@@ -238,10 +208,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn('Profiles upsert warning:', err);
       }
 
-      await fetchProfile(data.user.id);
+      if (data.session) {
+        setSession(data.session);
+        setUser(data.user);
+        await fetchProfile(data.user.id);
+        return { error: null, needsVerification: false };
+      }
+
+      return { error: null, needsVerification: true };
     }
 
-    return { error: null };
+    return { error: null, needsVerification: true };
   };
 
   const sendOtpCode = async (identifier: string) => {
