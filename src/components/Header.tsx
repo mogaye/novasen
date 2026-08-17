@@ -14,7 +14,82 @@ export function Header() {
   const { activeService, setActiveService, userListingsCount, userPlan } = useApp();
   const { user, profile } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [navDropdownOpen, setNavDropdownOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+
+  // Close dropdown on route change
+  useEffect(() => {
+    setNavDropdownOpen(false);
+  }, [pathname]);
+
+  // Click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('#nav-dropdown-container')) {
+        setNavDropdownOpen(false);
+      }
+    };
+    if (navDropdownOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [navDropdownOpen]);
+
+  const NAV_ITEMS = [
+    {
+      href: '/accueil',
+      label: 'Accueil',
+      badge: 'Portail',
+      icon: '🏠',
+      desc: 'Page d’accueil et vue d’ensemble',
+      isActive: pathname === '/accueil',
+    },
+    {
+      href: '/marche',
+      label: 'Le Marché',
+      badge: 'Boutiques & Ventes',
+      icon: '🛍️',
+      desc: 'Petites annonces et commerçants de Dakar',
+      isActive: pathname.startsWith('/marche') || pathname.startsWith('/annonce'),
+      onClick: () => setActiveService('market'),
+    },
+    {
+      href: '/transport',
+      label: 'Passagers & Colis',
+      badge: 'VTC & Livraisons',
+      icon: '🚗',
+      desc: 'Courses rapides et logistique express',
+      isActive: pathname.startsWith('/transport'),
+      onClick: () => setActiveService('transport'),
+    },
+    {
+      href: '/boutique',
+      label: 'Ma Boutique',
+      badge: 'Espace Vendeur',
+      icon: '🏬',
+      desc: 'Gestion des annonces, quotas et vitrine',
+      isActive: pathname === '/boutique',
+    },
+    {
+      href: '/tarifs',
+      label: 'Grille Tarifaire',
+      badge: '0% Commission',
+      icon: '💳',
+      desc: 'Abonnements et forfaits chauffeurs',
+      isActive: pathname === '/tarifs',
+    },
+    {
+      href: '/',
+      label: 'Présentation',
+      badge: 'À propos',
+      icon: '📄',
+      desc: 'Découvrir la plateforme NovaSen',
+      isActive: pathname === '/',
+    },
+  ];
+
+  const currentNav = NAV_ITEMS.find((item) => item.isActive) || NAV_ITEMS[0];
 
   // Close menu on route change or ESC key
   useEffect(() => {
@@ -100,66 +175,84 @@ export function Header() {
           </div>
         </div>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-5 xl:gap-7 text-xs sm:text-sm font-semibold text-[#2A211A] shrink-0">
-          <Link
-            href="/accueil"
-            className={`hover:text-[#573721] transition-colors py-1 whitespace-nowrap ${
-              pathname === '/accueil'
-                ? 'text-[#573721] font-bold border-b-2 border-[#573721]'
-                : ''
+        {/* Desktop Navigation Dropdown */}
+        <div id="nav-dropdown-container" className="hidden lg:block relative shrink-0">
+          <button
+            type="button"
+            onClick={() => setNavDropdownOpen((prev) => !prev)}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-xs sm:text-sm border transition-all duration-200 cursor-pointer shadow-xs ${
+              navDropdownOpen
+                ? 'bg-[#573721] text-white border-[#573721] shadow-md ring-2 ring-[#7A5133]/20'
+                : 'bg-white/80 hover:bg-white text-[#573721] border-[#DDCDB6]'
             }`}
+            aria-expanded={navDropdownOpen}
+            aria-haspopup="true"
           >
-            Accueil
-          </Link>
-          <Link
-            href="/marche"
-            onClick={() => setActiveService('market')}
-            className={`hover:text-[#7A5133] transition-colors py-1 whitespace-nowrap ${
-              pathname.startsWith('/marche') || pathname.startsWith('/annonce')
-                ? 'text-[#7A5133] font-bold border-b-2 border-[#7A5133]'
-                : ''
-            }`}
-          >
-            Le Marché
-          </Link>
-          <Link
-            href="/transport"
-            onClick={() => setActiveService('transport')}
-            className={`hover:text-[#1C3049] transition-colors py-1 whitespace-nowrap ${
-              pathname.startsWith('/transport')
-                ? 'text-[#1C3049] font-bold border-b-2 border-[#1C3049]'
-                : ''
-            }`}
-          >
-            Passagers & Colis
-          </Link>
-          <Link
-            href="/boutique"
-            className={`hover:text-[#7A5133] transition-colors py-1 whitespace-nowrap ${
-              pathname === '/boutique' ? 'text-[#7A5133] font-bold border-b-2 border-[#7A5133]' : ''
-            }`}
-          >
-            Ma Boutique
-          </Link>
-          <Link
-            href="/tarifs"
-            className={`hover:text-[#573721] transition-colors py-1 whitespace-nowrap ${
-              pathname === '/tarifs' ? 'text-[#573721] font-bold border-b-2 border-[#573721]' : ''
-            }`}
-          >
-            Grille Tarifaire
-          </Link>
-          <Link
-            href="/"
-            className={`hover:text-[#7A6A5C] transition-colors py-1 whitespace-nowrap text-xs text-[#7A6A5C] ${
-              pathname === '/' ? 'text-[#573721] font-bold' : ''
-            }`}
-            title="Revoir la page de présentation"
-          >
-            Présentation
-          </Link>
-        </nav>
+            <span className="text-base">{currentNav.icon}</span>
+            <span>{currentNav.label}</span>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${
+              navDropdownOpen ? 'bg-white/20 text-white' : 'text-[#7A6A5C] bg-[#E8DBC8]/60'
+            }`}>
+              Menu
+            </span>
+            <svg
+              className={`w-4 h-4 transition-transform duration-200 ${
+                navDropdownOpen ? 'rotate-180 text-white' : 'text-[#7A5133]'
+              }`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {/* Dropdown Menu Panel */}
+          {navDropdownOpen && (
+            <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-[18px] border border-[#DDCDB6] shadow-2xl p-2.5 z-50 flex flex-col gap-1 animate-scale-up backdrop-blur-md">
+              <div className="px-3 py-2 border-b border-[#DDCDB6]/60 mb-1">
+                <span className="text-[10px] uppercase tracking-wider font-bold text-[#7A6A5C]">
+                  Navigation NovaSen
+                </span>
+              </div>
+              {NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => {
+                    if (item.onClick) item.onClick();
+                    setNavDropdownOpen(false);
+                  }}
+                  className={`flex items-start gap-3 p-2.5 rounded-[12px] transition-all ${
+                    item.isActive
+                      ? 'bg-[#E8DBC8]/70 text-[#573721] font-bold border border-[#DDCDB6]'
+                      : 'hover:bg-[#FAF8F5] text-[#2A211A]'
+                  }`}
+                >
+                  <span className="text-xl shrink-0 mt-0.5 p-1 bg-white rounded-lg border border-[#DDCDB6]/50 shadow-2xs">
+                    {item.icon}
+                  </span>
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-xs font-bold leading-tight truncate">
+                        {item.label}
+                      </span>
+                      {item.badge && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#FAF8F5] text-[#7A5133] border border-[#DDCDB6] font-semibold">
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[11px] text-[#7A6A5C] font-normal leading-tight mt-0.5 line-clamp-1">
+                      {item.desc}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Action Buttons */}
         <div className="hidden sm:flex items-center gap-2.5 lg:gap-3 shrink-0">
@@ -167,7 +260,7 @@ export function Header() {
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            className="inline-flex items-center gap-2 min-h-[42px] px-3.5 py-1.5 rounded-full bg-white hover:bg-[#F2E9DC] text-[#573721] text-xs font-bold border border-[#DDCDB6] transition-all shadow-xs"
+            className="inline-flex items-center gap-2 min-h-[42px] px-3.5 py-1.5 rounded-full bg-white hover:bg-[#F2E9DC] text-[#573721] text-xs font-bold border border-[#DDCDB6] transition-all shadow-xs cursor-pointer"
             title="Recherche globale (Ctrl+K)"
           >
             <span>🔍</span>
@@ -176,19 +269,6 @@ export function Header() {
               ⌘K
             </kbd>
           </button>
-
-          {/* Favorites Wishlist Link */}
-          <Link
-            href="/marche?favorites=true"
-            className="inline-flex items-center gap-1.5 min-h-[42px] px-3 py-1.5 rounded-full bg-white hover:bg-[#F2E9DC] text-[#573721] text-xs font-bold border border-[#DDCDB6] transition-colors shadow-xs whitespace-nowrap"
-            title="Mes annonces favorites"
-          >
-            <span>❤️</span>
-            <span className="hidden md:inline whitespace-nowrap">Favoris</span>
-            <span className="px-1.5 py-0.5 rounded-full bg-[#7A5133] text-white text-[10px] font-bold">
-              {useApp().favorites.length}
-            </span>
-          </Link>
 
           <GlowButton
             href="/publier"
